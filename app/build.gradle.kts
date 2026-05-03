@@ -25,34 +25,63 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // 🔒 SECURE: Load API keys from local.properties
         val localProperties = Properties().apply {
             val file = rootProject.file("local.properties")
             if (file.exists()) {
                 file.inputStream().use { load(it) }
             }
         }
-        val geminiApiKey = (localProperties.getProperty("GEMINI_API_KEY") ?: "").replace("\"", "\\\"")
-        val newsDataApiKey = (localProperties.getProperty("NEWSDATA_API_KEY") ?: "").replace("\"", "\\\"")
+        
+        // Backend configuration
         val apiBaseUrl = (localProperties.getProperty("API_BASE_URL") ?: "http://10.0.2.2:8000/api/").replace("\"", "\\\"")
-        val apiCertPin = (localProperties.getProperty("API_CERT_PIN") ?: "").replace("\"", "\\\"")
-        val anthropicApiKey = (localProperties.getProperty("ANTHROPIC_API_KEY") ?: "").replace("\"", "\\\"")
         val reverbBaseUrl = (localProperties.getProperty("REVERB_BASE_URL") ?: "ws://10.0.2.2:8080").replace("\"", "\\\"")
         val reverbAppKey = (localProperties.getProperty("REVERB_APP_KEY") ?: "").replace("\"", "\\\"")
-        val unsplashApiKey = (localProperties.getProperty("UNSPLASH_API_KEY") ?: "").replace("\"", "\\\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
-        buildConfigField("String", "NEWSDATA_API_KEY", "\"$newsDataApiKey\"")
+        val apiCertPin = (localProperties.getProperty("API_CERT_PIN") ?: "").replace("\"", "\\\"")
+        val googleClientId = (localProperties.getProperty("GOOGLE_CLIENT_ID") ?: "").replace("\"", "\\\"")
+        val facebookAppId = (localProperties.getProperty("FACEBOOK_APP_ID") ?: "").replace("\"", "\\\"")
+        
+        // BuildConfig fields
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         buildConfigField("String", "API_CERT_PIN", "\"$apiCertPin\"")
-        buildConfigField("String", "ANTHROPIC_API_KEY", "\"$anthropicApiKey\"")
         buildConfigField("String", "REVERB_BASE_URL", "\"$reverbBaseUrl\"")
         buildConfigField("String", "REVERB_APP_KEY", "\"$reverbAppKey\"")
-        buildConfigField("String", "UNSPLASH_API_KEY", "\"$unsplashApiKey\"")
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
+        buildConfigField("String", "FACEBOOK_APP_ID", "\"$facebookAppId\"")
+        
+        // Default values (will be overridden in buildTypes)
+        buildConfigField("String", "GEMINI_API_KEY", "\"YOUR_DEV_KEY\"")
+        buildConfigField("String", "NEWSDATA_API_KEY", "\"YOUR_DEV_KEY\"")
+        buildConfigField("String", "ANTHROPIC_API_KEY", "\"YOUR_DEV_KEY\"")
+        buildConfigField("String", "UNSPLASH_API_KEY", "\"YOUR_DEV_KEY\"")
+        buildConfigField("boolean", "DEBUG_BUILD", "true")
     }
 
     buildTypes {
         debug {
             isMinifyEnabled = false
             isShrinkResources = false
+            
+            // 🔒 Load API keys for debug builds
+            val localProperties = Properties().apply {
+                val file = rootProject.file("local.properties")
+                if (file.exists()) {
+                    file.inputStream().use { load(it) }
+                }
+            }
+            
+            // Development API keys
+            val geminiApiKey = (localProperties.getProperty("GEMINI_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
+            val newsDataApiKey = (localProperties.getProperty("NEWSDATA_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
+            val anthropicApiKey = (localProperties.getProperty("ANTHROPIC_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
+            val unsplashApiKey = (localProperties.getProperty("UNSPLASH_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
+            
+            // Override build config fields for debug
+            buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+            buildConfigField("String", "NEWSDATA_API_KEY", "\"$newsDataApiKey\"")
+            buildConfigField("String", "ANTHROPIC_API_KEY", "\"$anthropicApiKey\"")
+            buildConfigField("String", "UNSPLASH_API_KEY", "\"$unsplashApiKey\"")
+            buildConfigField("boolean", "DEBUG_BUILD", "true")
         }
         release {
             isMinifyEnabled = true
@@ -61,6 +90,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            
+            // Production: Empty API keys (fetch from backend)
+            buildConfigField("String", "GEMINI_API_KEY", "\"\"")
+            buildConfigField("String", "NEWSDATA_API_KEY", "\"\"")
+            buildConfigField("String", "ANTHROPIC_API_KEY", "\"\"")
+            buildConfigField("String", "UNSPLASH_API_KEY", "\"\"")
+            buildConfigField("boolean", "DEBUG_BUILD", "false")
         }
     }
 
