@@ -73,5 +73,33 @@ data class LoginModel(
         val bio: String?,                // Biografi user
         val gender: String?              // Jenis kelamin user
 
-    )
+    ) {
+        fun toUser(): User {
+            return User(
+                idUser = this.id_user,
+                username = this.username,
+                fullName = this.full_name,
+                email = this.email,
+                phone = this.phone,
+                bloodType = this.blood_type ?: "-",
+                allergy = this.allergy,
+                medicalHistory = this.medical_history,
+                role = this.role,
+                active = this.active,
+                image = this.image,
+                goal = this.goal,
+                dietPreference = this.diet_preference ?: "None",
+                activityLevel = this.activity_level ?: "medium",
+                address = this.address,
+                language = this.language ?: "id",
+                age = this.age ?: 0,
+                height = this.height?.toDouble() ?: 0.0,
+                weight = this.weight?.toDouble() ?: 0.0,
+                bmi = this.bmi?.toDouble() ?: 0.0,
+                notifEnabled = this.notif_enabled ?: true,
+                darkMode = this.dark_mode ?: false,
+                bio = this.bio
+            )
+        }
+    }
 }

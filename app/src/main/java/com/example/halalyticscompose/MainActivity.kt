@@ -164,7 +164,7 @@ private fun MedicalRouteGuard(
 }
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -202,7 +202,7 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     val context = LocalContext.current
-                    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
                 LaunchedEffect(appLanguage) {
                     LanguageManager.applyLanguageIfNeeded(this@MainActivity, appLanguage)
@@ -374,7 +374,7 @@ class MainActivity : ComponentActivity() {
                         val regUser = backStackEntry.arguments?.getString("reg_user") ?: ""
                         val regPass = backStackEntry.arguments?.getString("reg_pass") ?: ""
                         val regSuccess = backStackEntry.arguments?.getString("reg_success") == "1"
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             LoginScreen(
                                 navController = navController,
                                 prefillUsername = regUser,
@@ -386,7 +386,7 @@ class MainActivity : ComponentActivity() {
                     
                     // Register Screen
                     composable("register") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             SimpleRegisterScreen(
                                 navController = navController
                             )
@@ -394,7 +394,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("basic_profile") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             BasicProfileScreen(
                                 navController = navController
                             )
@@ -403,33 +403,28 @@ class MainActivity : ComponentActivity() {
                     
                     // Home Screen
                     composable("home") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
-                            HomeScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
-                            )
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
+                            if (isAdmin) {
+                                AdminPanelScreen(navController = navController)
+                            } else {
+                                HomeScreen(
+                                    navController = navController,
+                                    paddingValues = paddingValues
+                                )
+                            }
                         }
                     }
 
-                    // Search Hub Screen
-                    composable("search_hub") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
-                            SearchHubScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
-                            )
-                        }
-                    }
 
                     composable("cosmetic_detail") {
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             CosmeticDetailScreen(navController = navController)
                         }
                     }
 
                     composable("cosmetic_detail/{productId}") { backStackEntry ->
                         val productId = backStackEntry.arguments?.getString("productId")
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             CosmeticDetailScreen(
                                 navController = navController,
                                 productId = productId
@@ -438,14 +433,14 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("health_articles") {
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             HealthArticleListScreen(navController = navController)
                         }
                     }
 
                     composable("health_article_detail/{articleId}") { backStackEntry ->
                         val articleId = backStackEntry.arguments?.getString("articleId") ?: ""
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             HealthArticleDetailScreen(
                                 navController = navController,
                                 articleId = articleId
@@ -453,19 +448,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // Scan Hub Screen
-                    composable("scan_hub") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
-                            ScanHubScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
-                            )
-                        }
-                    }
-                    
                     // Scan Screen
                     composable("scan") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ScanScreen(
                                 navController = navController,
                                 paddingValues = paddingValues
@@ -475,14 +460,14 @@ class MainActivity : ComponentActivity() {
                     
                     // Settings Screen
                     composable("settings") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             SettingsScreen(navController = navController, viewModel = mainViewModel)
                         }
                     }
 
                     // Profile Screen (BottomNav route)
                     composable("profile") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
                             ProfileScreen(
                                 navController = navController,
                                 paddingValues = paddingValues
@@ -491,7 +476,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("profile_status") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ProfileStatusScreen(
                                 navController = navController
                             )
@@ -500,39 +485,32 @@ class MainActivity : ComponentActivity() {
                     
                     // Account Management Screen
                     composable("account_management") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AccountManagementScreen(navController = navController)
                         }
                     }
                     
                     // Privacy Policy Screen
                     composable("privacy_policy") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             PrivacyPolicyScreen(navController = navController)
                         }
                     }
 
                     // Enhanced OCR Screen
                     composable("enhanced_ocr") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             EnhancedOCRScreen(
                                 navController = navController
                             )
                         }
                     }
                     
-                    // OCR Analysis Screen
-                    composable("ocr_analysis") {
-                        MainLayout(navController = navController) { paddingValues ->
-                            EnhancedOCRScreen(
-                                navController = navController
-                            )
-                        }
-                    }
+
                     
                     // AI Analysis Screen
                     composable("ai_analysis") { backStackEntry ->
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AiAnalysisScreen(
                                 navController = navController
                             )
@@ -540,7 +518,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("ai_report") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AiReportScreen(navController = navController)
                         }
                     }
@@ -550,39 +528,14 @@ class MainActivity : ComponentActivity() {
                         AllFeaturesScreen(navController = navController)
                     }
 
-                    composable("halocode") {
-                        MainLayout(navController = navController) {
-                            com.example.halalyticscompose.feature.expansion.ui.HalocodeScreen(
-                                navController = navController
-                            )
+                    composable("local_ai_chat") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
+                            LocalAIChatScreen(navController = navController)
                         }
                     }
-
-                    composable(
-                        route = "halocode_chat/{consultationId}",
-                        arguments = listOf(navArgument("consultationId") { type = NavType.IntType })
-                    ) { backStackEntry ->
-                        val consultationId = backStackEntry.arguments?.getInt("consultationId") ?: 0
-                        MainLayout(navController = navController) {
-                            com.example.halalyticscompose.feature.expansion.ui.HalocodeChatScreen(
-                                consultationId = consultationId,
-                                navController = navController
-                            )
-                        }
-                    }
-
-                    composable("expert_dashboard") {
-                        MainLayout(navController = navController) {
-                            com.example.halalyticscompose.feature.expansion.ui.ExpertDashboardScreen(
-                                navController = navController
-                            )
-                        }
-                    }
-
-
 
                     composable("community") {
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.feature.expansion.ui.CommunityScreen(
                                 navController = navController
                             )
@@ -594,7 +547,7 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument("postId") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val postId = backStackEntry.arguments?.getInt("postId") ?: 0
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.feature.expansion.ui.CommunityPostDetailScreen(
                                 postId = postId,
                                 navController = navController
@@ -603,17 +556,27 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     // Manual Input Screen
-                    composable("manual_input") {
-                        MainLayout(navController = navController) { paddingValues ->
+                    composable(
+                        "manual_input?category={category}",
+                        arguments = listOf(
+                            navArgument("category") {
+                                type = NavType.StringType
+                                defaultValue = ""
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val category = backStackEntry.arguments?.getString("category") ?: ""
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ManualInputScreen(
-                                navController = navController
+                                navController = navController,
+                                initialCategory = category
                             )
                         }
                     }
                     
                     // History Screen (New Realtime)
                     composable("history") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
                             ScanHistoryScreen(
                                 navController = navController,
                                 paddingValues = paddingValues
@@ -621,19 +584,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // Backward-compatible alias for old route usage
-                    composable("scan_history") {
-                        MainLayout(navController = navController, showBottomNav = true) { paddingValues ->
-                            ScanHistoryScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
-                            )
-                        }
-                    }
+
 
                     // Scan history detail
                     composable("scan_history_detail/{id}") { backStackEntry ->
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val historyId = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
                             ScanHistoryDetailScreen(
                                 navController = navController,
@@ -644,7 +599,7 @@ class MainActivity : ComponentActivity() {
 
                     // Notification Screen (New)
                     composable("notifications") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             NotificationScreen(
                                 navController = navController,
                                 viewModel = notificationViewModel
@@ -654,7 +609,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("admin_notifications_app") {
                         if (isAdmin) {
-                            MainLayout(navController = navController) { paddingValues ->
+                            MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
                                 AdminNotificationScreen(
                                     navController = navController
                                 )
@@ -668,7 +623,7 @@ class MainActivity : ComponentActivity() {
 
                     // Favorites Screen (New)
                     composable("favorites") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             FavoritesScreen(
                                 navController = navController
                             )
@@ -679,7 +634,7 @@ class MainActivity : ComponentActivity() {
                     composable("donor_home") {
                         val token = sessionManager.getAuthToken() ?: ""
                         val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.ui.screens.donor.DonorHomeScreen(
                                 navController = navController,
                                 viewModel = donorViewModel,
@@ -690,7 +645,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("donor_events") {
                         val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.ui.screens.donor.DonorEventsScreen(
                                 navController = navController,
                                 viewModel = donorViewModel
@@ -700,7 +655,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("donor_event_detail/{eventId}") { backStackEntry ->
                         val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.ui.screens.donor.DonorEventDetailScreen(
                                 navController = navController,
                                 eventId = eventId
@@ -712,7 +667,7 @@ class MainActivity : ComponentActivity() {
                         val token = sessionManager.getAuthToken() ?: ""
                         val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
                         val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.ui.screens.donor.SelfScreeningScreen(
                                 navController = navController,
                                 viewModel = donorViewModel,
@@ -725,7 +680,7 @@ class MainActivity : ComponentActivity() {
                     composable("donor_history") {
                         val token = sessionManager.getAuthToken() ?: ""
                         val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController) {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
                             com.example.halalyticscompose.ui.screens.donor.DonorHistoryScreen(
                                 navController = navController,
                                 viewModel = donorViewModel,
@@ -736,7 +691,7 @@ class MainActivity : ComponentActivity() {
                     
                     // Edit Profile Screen
                     composable("edit_profile") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             EditProfileScreen(
                                 navController = navController
                             )
@@ -745,7 +700,7 @@ class MainActivity : ComponentActivity() {
 
                     // Family Box Screen
                     composable("family_box") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             FamilyBoxScreen(
                                 navController = navController
                             )
@@ -755,7 +710,7 @@ class MainActivity : ComponentActivity() {
                                         
                     // Product Detail Screen
                     composable("product_detail/{barcode}") { backStackEntry ->
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val barcode = backStackEntry.arguments?.getString("barcode")
                             ProductDetailScreen(
                                 navController = navController,
@@ -766,17 +721,27 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     // Search External Screen
-                    composable("search_external") {
-                        MainLayout(navController = navController) { paddingValues ->
+                    composable(
+                        "search_external?q={q}",
+                        arguments = listOf(
+                            navArgument("q") {
+                                type = NavType.StringType
+                                defaultValue = ""
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val query = backStackEntry.arguments?.getString("q") ?: ""
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             SearchExternalScreen(
-                                navController = navController
+                                navController = navController,
+                                initialQuery = query
                             )
                         }
                     }
                     
                     // Product External Detail Screen
                     composable("product_external_detail/{barcode}") { backStackEntry ->
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val barcode = backStackEntry.arguments?.getString("barcode")
                             ProductExternalDetailScreen(
                                 navController = navController,
@@ -787,7 +752,7 @@ class MainActivity : ComponentActivity() {
                     
                     // Ingredient Detail Screen
                     composable("ingredient_detail/{ingredientId}") { backStackEntry ->
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val ingredientId = backStackEntry.arguments?.getString("ingredientId")?.toIntOrNull() ?: 0
                             IngredientDetailScreen(
                                 navController = navController,
@@ -798,7 +763,7 @@ class MainActivity : ComponentActivity() {
                     
                     // Forgot Password Screen
                     composable("forgot_password") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ForgotPasswordScreen(
                                 navController = navController
                             )
@@ -817,7 +782,7 @@ class MainActivity : ComponentActivity() {
                         )
                     ) { backStackEntry ->
                         val symptom = backStackEntry.arguments?.getString("symptom")
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 HealthAssistantScreen(
                                     navController = navController,
@@ -827,7 +792,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("medicine_reminders") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 MedicineRemindersScreen(
                                     navController = navController
@@ -837,7 +802,7 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     composable("health_scanner") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             HealthScannerScreen(
                                 navController = navController,
                                 viewModel = healthScannerViewModel
@@ -846,7 +811,7 @@ class MainActivity : ComponentActivity() {
                     }
                     
                     composable("health_analysis") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AnalysisResultScreen(
                                 navController = navController,
                                 viewModel = healthScannerViewModel
@@ -857,7 +822,7 @@ class MainActivity : ComponentActivity() {
                     // Food Scan & Recognition Screen
                     // Food Scan & Recognition Screen (AI Meal Scanner) - PHASE 6 UPGRADE
                     composable("food_scan") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             FoodCameraScreen(
                                 navController = navController
                             )
@@ -870,7 +835,7 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(androidx.navigation.navArgument("imagePath") { type = androidx.navigation.NavType.StringType })
                     ) { backStackEntry ->
                         val imagePath = backStackEntry.arguments?.getString("imagePath") ?: ""
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             FoodAnalysisResultScreen(
                                 navController = navController,
                                 imagePath = imagePath,
@@ -883,7 +848,7 @@ class MainActivity : ComponentActivity() {
 
                     // ⚠️ ADDED: AI Weekly Report Screen
                     composable("weekly_report") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AiReportScreen(
                                 navController = navController
                             )
@@ -892,7 +857,7 @@ class MainActivity : ComponentActivity() {
 
                     // ⚠️ ADDED: Encyclopedia Screen
                     composable("encyclopedia") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             EncyclopediaScreen(
                                 navController = navController,
                                 paddingValues = paddingValues
@@ -953,7 +918,7 @@ class MainActivity : ComponentActivity() {
                     ) { backStackEntry ->
                         val initialBarcode = backStackEntry.arguments?.getString("barcode")
                         val initialName = backStackEntry.arguments?.getString("name")
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ContributionScreen(
                                 navController = navController,
                                 initialBarcode = initialBarcode,
@@ -964,7 +929,7 @@ class MainActivity : ComponentActivity() {
 
                     // Emergency QR Screen
                     composable("emergency_qr") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 EmergencyQRScreen(
                                     navController = navController
@@ -975,7 +940,7 @@ class MainActivity : ComponentActivity() {
 
                     // Health Profile Screen
                     composable("health_profile") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             HealthProfileScreen(
                                 navController = navController
                             )
@@ -984,7 +949,7 @@ class MainActivity : ComponentActivity() {
 
                     // Body Monitor Screen
                     composable("health_monitor") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 HealthMonitorScreen(
                                     navController = navController
@@ -994,13 +959,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("health_diary") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             HealthDiaryScreen(navController = navController)
                         }
                     }
 
                     composable("medical_resume") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 MedicalResumeScreen(navController = navController)
                             }
@@ -1008,7 +973,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("health_pass") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 HealthPassScreen(navController = navController)
                             }
@@ -1017,7 +982,7 @@ class MainActivity : ComponentActivity() {
 
                     // International Medicine Search Screen
                     composable("international_medicine") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             InternationalMedicineScreen(
                                 navController = navController
                             )
@@ -1027,7 +992,7 @@ class MainActivity : ComponentActivity() {
                     // Medicine Detail Screen
                     composable("medicine_detail/{medicineId}") { backStackEntry ->
                         val medicineId = backStackEntry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicineDetailScreen(
                                 navController = navController,
                                 medicineId = medicineId
@@ -1037,13 +1002,13 @@ class MainActivity : ComponentActivity() {
 
                     // ==================== ADVANCED AI HEALTH SUITE ====================
                     composable("health_suite_hub") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             HealthSuiteHubScreen(navController = navController)
                         }
                     }
 
                     composable("drug_interaction") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 DrugInteractionScreen(navController = navController)
                             }
@@ -1051,7 +1016,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("pill_scanner") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             PillScannerScreen(navController = navController)
                         }
                     }
@@ -1059,7 +1024,7 @@ class MainActivity : ComponentActivity() {
 
 
                     composable("health_journey") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 HealthJourneyScreen(navController = navController)
                             }
@@ -1067,7 +1032,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("nutrition_scanner") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 NutritionScannerScreen(navController = navController)
                             }
@@ -1075,7 +1040,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("meal_scan") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MealScanScreen(
                                 navController = navController
                             )
@@ -1091,7 +1056,7 @@ class MainActivity : ComponentActivity() {
                         )
                     ) { backStackEntry ->
                         val foodId = backStackEntry.arguments?.getInt("foodId") ?: 0
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             FoodAnalysisScreen(
                                 navController = navController,
                                 foodId = foodId
@@ -1100,7 +1065,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("medical_records") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 MedicalRecordsScreen(navController = navController)
                             }
@@ -1108,19 +1073,19 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("watchlist_editor") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             WatchlistEditorScreen(navController = navController)
                         }
                     }
 
                     composable("emergency_p3k") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             EmergencyP3KScreen(navController = navController)
                         }
                     }
 
                     composable("halal_specialist") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             MedicalRouteGuard(enabled = biometricLockEnabled) {
                                 HalalSpecialistScreen(navController = navController)
                             }
@@ -1128,7 +1093,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("bpom_scanner") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             BpomScannerScreen(
                                 navController = navController
                             )
@@ -1136,7 +1101,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("skincare_scanner") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             SkincareScannerScreen(
                                 navController = navController,
                                 mainViewModel = mainViewModel
@@ -1147,7 +1112,7 @@ class MainActivity : ComponentActivity() {
                     // Product Request Screen (Crowdsourcing)
                     composable("product_request/{barcode}") { backStackEntry ->
                         val barcode = backStackEntry.arguments?.getString("barcode") ?: ""
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ProductRequestScreen(
                                 navController = navController,
                                 barcode = barcode
@@ -1156,7 +1121,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("compare_products") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             CompareScreen(
                                 navController = navController,
                                 mainViewModel = mainViewModel,
@@ -1167,7 +1132,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("admin_panel_app") {
                         if (isAdmin) {
-                            MainLayout(navController = navController) { paddingValues ->
+                            MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
                                 AdminPanelScreen(
                                     navController = navController
                                 )
@@ -1179,8 +1144,35 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    composable("admin_users") {
+                        if (isAdmin) {
+                            MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
+                                AdminUsersListScreen(
+                                    navController = navController
+                                )
+                            }
+                        } else {
+                            LaunchedEffect(Unit) {
+                                navController.popBackStack()
+                            }
+                        }
+                    }
+                    composable("admin_system_health") {
+                        if (isAdmin) {
+                            MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
+                                AdminSystemHealthScreen(
+                                    navController = navController
+                                )
+                            }
+                        } else {
+                            LaunchedEffect(Unit) {
+                                navController.popBackStack()
+                            }
+                        }
+                    }
+
                     composable("comparison_result") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ComparisonResultScreen(
                                 navController = navController,
                                 viewModel = compareViewModel
@@ -1191,7 +1183,7 @@ class MainActivity : ComponentActivity() {
                     composable("report_issue/{productId}/{productName}") { backStackEntry ->
                         val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull() ?: 0
                         val productName = backStackEntry.arguments?.getString("productName") ?: ""
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ReportIssueScreen(
                                 navController = navController,
                                 productId = productId,
@@ -1205,33 +1197,31 @@ class MainActivity : ComponentActivity() {
                     // ==========================================================
 
                     composable("ocr_scan") {
-                        OcrScanScreen(
-                            onNavigateBack = { navController.popBackStack() }
-                        )
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            OcrScanScreen(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
                     }
 
                     composable("nutrition_dashboard") {
-                        NutritionScreen(
-                            onNavigateBack = { navController.popBackStack() }
-                        )
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            NutritionScreen(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
                     }
 
-                    composable("daily_mission_dashboard") {
-                        DailyMissionDashboardScreen(
-                            onNavigateBack = { navController.popBackStack() },
-                            onGoToScan = { navController.navigate("ocr_scan") },
-                            onGoToNutrition = { navController.navigate("nutrition_dashboard") },
 
-                            onGoToCommunity = { navController.navigate("community") },
-                            onGoToHalocode = { navController.navigate("halocode") }
-                        )
-                    }
+
 
                     composable("recipes") {
-                        RecipeListScreen(
-                            onNavigateBack = { navController.popBackStack() },
-                            onRecipeClick = { recipeId -> navController.navigate("recipe_detail/$recipeId") }
-                        )
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            RecipeListScreen(
+                                onNavigateBack = { navController.popBackStack() },
+                                onRecipeClick = { recipeId -> navController.navigate("recipe_detail/$recipeId") }
+                            )
+                        }
                     }
 
                     composable(
@@ -1239,10 +1229,12 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument("id") { type = NavType.IntType })
                     ) { backStackEntry ->
                         val id = backStackEntry.arguments?.getInt("id") ?: 0
-                        RecipeDetailScreen(
-                            recipeId = id,
-                            onNavigateBack = { navController.popBackStack() }
-                        )
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            RecipeDetailScreen(
+                                recipeId = id,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
                     }
 
                     // ═══════════════════════════════════════
@@ -1260,26 +1252,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("points_rewards") {
-                        MainLayout(navController = navController) { paddingValues ->
-                            PointsRewardsScreen(navController = navController)
-                        }
-                    }
 
-                    composable("leaderboard") {
-                        MainLayout(navController = navController) { paddingValues ->
-                            LeaderboardScreen(navController = navController)
-                        }
-                    }
 
                     composable("notification_settings") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             NotificationSettingsScreen(navController = navController)
                         }
                     }
 
                     composable("barcode_gallery") {
-                        MainLayout(navController = navController) { paddingValues ->
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             BarcodeGalleryScreen(navController = navController)
                         }
                     }
@@ -1287,13 +1269,17 @@ class MainActivity : ComponentActivity() {
                     // ═══ HEALTH EXPANSION ROUTES ═══
 
                     composable("medical_info") {
-                        MedicalRouteGuard(enabled = biometricLockEnabled) {
-                            MedicalInfoScreen(navController = navController)
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            MedicalRouteGuard(enabled = biometricLockEnabled) {
+                                MedicalInfoScreen(navController = navController)
+                            }
                         }
                     }
 
                     composable("bmi_calculator") {
-                        BMICalculatorScreen(navController = navController)
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            BMICalculatorScreen(navController = navController)
+                        }
                     }
 
                     composable("medicine_search") {
@@ -1320,6 +1306,10 @@ class MainActivity : ComponentActivity() {
                         MedicalRouteGuard(enabled = biometricLockEnabled) {
                             MentalHealthQuizScreen(navController = navController, quizType = quizType)
                         }
+                    }
+
+                    composable("daily_mission_dashboard") {
+                        DailyMissionDashboardScreen(navController = navController)
                     }
 
                     composable("help_center") {

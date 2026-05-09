@@ -152,7 +152,7 @@ fun CompareScreen(
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(
-                            onClick = { navController.navigate("search_hub") },
+                            onClick = { navController.navigate("manual_input") },
                             colors = ButtonDefaults.buttonColors(containerColor = HalalGreen)
                         ) {
                             Text("Cari Produk")

@@ -210,26 +210,13 @@ fun CosmeticDetailScreen(
                     .clip(RoundedCornerShape(20.dp))
                     .background(colorScheme.surfaceVariant)
             ) {
-                if (!product.imageUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = product.imageUrl,
-                        contentDescription = product.productName,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.ShoppingBag,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                        )
-                    }
-                }
+                val fallbackUrl = "https://ui-avatars.com/api/?name=${product.productName ?: "Kosmetik"}&background=EC4899&color=fff&size=400"
+                AsyncImage(
+                    model = if (!product.imageUrl.isNullOrBlank()) product.imageUrl else fallbackUrl,
+                    contentDescription = product.productName,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
 
                 // Gradient overlay bawah
                 Box(

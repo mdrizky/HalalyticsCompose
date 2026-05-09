@@ -13,25 +13,25 @@ import java.util.Properties
 
 // Java & Kotlin compatibility
 android {
-    namespace = "com.halalytics.app"
+    namespace = "com.example.halalyticscompose"
     compileSdk = 36
 
+    // 🔒 SECURE: Load API keys from local.properties
+    val localProperties = Properties().apply {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) {
+            file.inputStream().use { load(it) }
+        }
+    }
+
     defaultConfig {
-        applicationId = "com.halalytics.app"
+        applicationId = "com.example.halalyticscompose"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // 🔒 SECURE: Load API keys from local.properties
-        val localProperties = Properties().apply {
-            val file = rootProject.file("local.properties")
-            if (file.exists()) {
-                file.inputStream().use { load(it) }
-            }
-        }
         
         // Backend configuration
         val apiBaseUrl = (localProperties.getProperty("API_BASE_URL") ?: "http://10.0.2.2:8000/api/").replace("\"", "\\\"")
@@ -49,7 +49,7 @@ android {
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
         buildConfigField("String", "FACEBOOK_APP_ID", "\"$facebookAppId\"")
         
-        // Default values (will be overridden in buildTypes)
+        // Default AI Keys (will be overridden in buildTypes)
         buildConfigField("String", "GEMINI_API_KEY", "\"YOUR_DEV_KEY\"")
         buildConfigField("String", "NEWSDATA_API_KEY", "\"YOUR_DEV_KEY\"")
         buildConfigField("String", "ANTHROPIC_API_KEY", "\"YOUR_DEV_KEY\"")
@@ -62,15 +62,7 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             
-            // 🔒 Load API keys for debug builds
-            val localProperties = Properties().apply {
-                val file = rootProject.file("local.properties")
-                if (file.exists()) {
-                    file.inputStream().use { load(it) }
-                }
-            }
-            
-            // Development API keys
+            // Development API keys from localProperties
             val geminiApiKey = (localProperties.getProperty("GEMINI_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             val newsDataApiKey = (localProperties.getProperty("NEWSDATA_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             val anthropicApiKey = (localProperties.getProperty("ANTHROPIC_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
@@ -237,8 +229,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.37.2")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // 🔹 Compose Material Icons Extended
-    implementation("androidx.compose.material:material-icons-extended")
     // 🔹 QR Code Generation (Zxing)
     implementation("com.google.zxing:core:3.5.3")
 }

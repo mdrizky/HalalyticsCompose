@@ -34,6 +34,9 @@ class AdminViewModel @Inject constructor(
     private val _actionResult = MutableStateFlow<String?>(null)
     val actionResult: StateFlow<String?> = _actionResult.asStateFlow()
 
+    private val _users = MutableStateFlow<List<com.example.halalyticscompose.data.model.User>>(emptyList())
+    val users: StateFlow<List<com.example.halalyticscompose.data.model.User>> = _users.asStateFlow()
+
     fun loadDashboardData() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -64,6 +67,43 @@ class AdminViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     _errorMessage.value = "Failed to load products: ${e.message}"
+                }
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val token = sessionManager.getAuthToken()
+            if (token != null) {
+                try {
+                    val response = apiService.getAllUsers("Bearer $token")
+                    if (response.success) {
+                        _users.value = response.data
+                    }
+                } catch (e: Exception) {
+                    _errorMessage.value = "Failed to load users: ${e.message}"
+                }
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun updateUser(id: Int, data: Map<String, Any?>) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val token = sessionManager.getAuthToken()
+            if (token != null) {
+                try {
+                    val response = apiService.updateUserByAdmin("Bearer $token", id, data)
+                    if (response.success) {
+                        _actionResult.value = "User Updated!"
+                        loadUsers()
+                    }
+                } catch (e: Exception) {
+                    _errorMessage.value = "Update failed: ${e.message}"
                 }
             }
             _isLoading.value = false

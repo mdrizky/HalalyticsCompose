@@ -7,74 +7,122 @@ data class User(
     val idUser: Int,
     
     @SerializedName("username")
-    val username: String,
+    val username: String = "",
     
     @SerializedName("full_name")
-    val fullName: String?,
+    val fullName: String? = "",
     
     @SerializedName("email")
-    val email: String,
+    val email: String = "",
     
-    @SerializedName("phone")
-    val phone: String?,
+    @SerializedName("google_id")
+    val googleId: String? = null,
     
-    @SerializedName("blood_type")
-    val bloodType: String?,
+    @SerializedName("facebook_id")
+    val facebookId: String? = null,
     
-    @SerializedName("allergy")
-    val allergy: String?,
+    @SerializedName("social_provider")
+    val socialProvider: String? = null,
     
-    @SerializedName("medical_history")
-    val medicalHistory: String?,
+    @SerializedName("onboarding_level")
+    val onboardingLevel: String = "Newcomer",
     
-    @SerializedName("role")
-    val role: String,
+    @SerializedName("login_streak")
+    val loginStreak: Int = 0,
     
-    @SerializedName("active")
-    val active: Boolean,
+    @SerializedName("total_articles_read")
+    val totalArticlesRead: Int = 0,
     
-    @SerializedName("image")
-    val image: String?,
+    @SerializedName("total_categories_explored")
+    val totalCategoriesExplored: Int = 0,
     
-    @SerializedName("goal")
-    val goal: String?,
+    @SerializedName("avatar_url")
+    val avatarUrl: String? = null,
     
-    @SerializedName("diet_preference")
-    val dietPreference: String?,
-    
-    @SerializedName("activity_level")
-    val activityLevel: String?,
-    
-    @SerializedName("address")
-    val address: String?,
-    
-    @SerializedName("language")
-    val language: String?,
-    
-    @SerializedName("age")
-    val age: Int?,
-    
-    @SerializedName("height")
-    val height: Double?,
-    
-    @SerializedName("weight")
-    val weight: Double?,
-    
-    @SerializedName("bmi")
-    val bmi: Double?,
-    
-    @SerializedName("notif_enabled")
-    val notifEnabled: Boolean?,
-    
-    @SerializedName("dark_mode")
-    val darkMode: Boolean?,
-    
-    @SerializedName("bio")
-    val bio: String?,
+    @SerializedName("birth_date")
+    val birthDate: String? = null,
     
     @SerializedName("gender")
     val gender: String? = null,
     
-    @SerializedName("avatar_url")
-    val avatarUrl: String? = null
+    @SerializedName("current_streak")
+    val currentStreak: Int = 0,
+    
+    @SerializedName("longest_streak")
+    val longestStreak: Int = 0,
+    
+    @SerializedName("phone")
+    val phone: String? = "",
+    
+    @SerializedName("bio")
+    val bio: String? = "",
+    
+    @SerializedName("allergies")
+    val allergies: String? = "",
+    
+    @SerializedName("allergy")
+    val allergy: String? = "",
+    
+    @SerializedName("medical_history")
+    val medicalHistory: String? = "",
+    
+    @SerializedName("blood_type")
+    val bloodType: String? = "-",
+    
+    @SerializedName("has_diabetes")
+    val hasDiabetes: Boolean = false,
+    
+    @SerializedName("total_scans")
+    val totalScans: Int = 0,
+    
+    @SerializedName("halal_products_count")
+    val halalProductsCount: Int = 0,
+    
+    @SerializedName("role")
+    val role: String = "user",
+    
+    @SerializedName("active")
+    val active: Boolean = true,
+    
+    @SerializedName("image")
+    val image: String? = null,
+    
+    @SerializedName("goal")
+    val goal: String? = "",
+    
+    @SerializedName("diet_preference")
+    val dietPreference: String? = "None",
+    
+    @SerializedName("activity_level")
+    val activityLevel: String? = "medium",
+    
+    @SerializedName("address")
+    val address: String? = "",
+    
+    @SerializedName("language")
+    val language: String = "id",
+    
+    @SerializedName("age")
+    val age: Int? = 0,
+    
+    @SerializedName("height")
+    val height: Double? = 0.0,
+    
+    @SerializedName("weight")
+    val weight: Double? = 0.0,
+    
+    @SerializedName("bmi")
+    val bmi: Double? = 0.0,
+    
+    @SerializedName("notif_enabled")
+    val notifEnabled: Boolean = true,
+    
+    @SerializedName("dark_mode")
+    val darkMode: Boolean = false,
+    
+    @SerializedName("emergency_contact")
+    val emergencyContact: String? = "",
+    
+    @SerializedName("total_donor_points")
+    val totalDonorPoints: Int = 0
 )

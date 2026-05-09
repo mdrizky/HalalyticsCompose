@@ -47,6 +47,15 @@ interface ApiService {
         @Field("email") email: String
     ): GenericResponse
 
+    @FormUrlEncoded
+    @POST("user/change-password")
+    suspend fun changePassword(
+        @Header("Authorization") bearer: String,
+        @Field("current_password") current: String,
+        @Field("new_password") new: String,
+        @Field("new_password_confirmation") confirm: String
+    ): GenericResponse
+
     // ==================== ADMIN ====================
     @GET("admin/dashboard/stats")
     suspend fun getDashboardStats(
@@ -70,6 +79,18 @@ interface ApiService {
         @Path("id") id: Int,
         @Body reason: Map<String, String> // {"reason": "..."}
     ): ApprovalResponse
+
+    @GET("admin/users")
+    suspend fun getAllUsers(
+        @Header("Authorization") bearer: String
+    ): UserListResponse
+
+    @PUT("admin/users/{id}")
+    suspend fun updateUserByAdmin(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: Int,
+        @Body data: Map<String, @JvmSuppressWildcards Any?>
+    ): GenericResponse
 
     // ==================== USER ====================
     @GET("user/stats")
@@ -95,6 +116,9 @@ interface ApiService {
         @Field("activity_level") activityLevel: String? = null,
         @Field("gender") gender: String? = null,
         @Field("bio") bio: String? = null,
+        @Field("address") address: String? = null,
+        @Field("emergency_contact") emergencyContact: String? = null,
+        @Field("birth_date") birthDate: String? = null,
         @Field("language") language: String? = null
     ): LoginModel
 
@@ -117,6 +141,9 @@ interface ApiService {
         @Part("activity_level") activityLevel: okhttp3.RequestBody? = null,
         @Part("gender") gender: okhttp3.RequestBody? = null,
         @Part("bio") bio: okhttp3.RequestBody? = null,
+        @Part("address") address: okhttp3.RequestBody? = null,
+        @Part("emergency_contact") emergencyContact: okhttp3.RequestBody? = null,
+        @Part("birth_date") birthDate: okhttp3.RequestBody? = null,
         @Part("language") language: okhttp3.RequestBody? = null
     ): LoginModel
 
@@ -326,7 +353,7 @@ interface ApiService {
     suspend fun addFavorite(
         @Header("Authorization") token: String,
         @Body request: AddFavoriteRequest
-    ): Response<Unit>
+    ): Response<ApiResponse<FavoriteItem>>
 
     @DELETE("favorites/{id}")
     suspend fun deleteFavorite(@Header("Authorization") token: String, @Path("id") id: Int): Response<Unit>
@@ -538,6 +565,9 @@ interface ApiService {
 
     @GET("banners")
     suspend fun getBanners(): Response<BannerResponse>
+
+    @GET("categories")
+    suspend fun getCategories(): Response<CategoryResponse>
 
     @GET("articles")
     suspend fun getHealthArticles(
@@ -889,43 +919,10 @@ interface ApiService {
     ): Response<com.example.halalyticscompose.data.model.ApiResponse<List<com.example.halalyticscompose.data.model.Consultation>>>
 
 
+
     // AR FINDER endpoint removed
 
-    @GET("dashboard/daily-mission")
-    suspend fun getDailyMission(
-        @Header("Authorization") bearer: String
-    ): Response<com.example.halalyticscompose.data.model.ApiResponse<DailyMissionData>>
 
-    @POST("dashboard/complete-mission")
-    suspend fun completeMission(
-        @Header("Authorization") bearer: String,
-        @Body body: Map<String, String>
-    ): Response<GenericResponse>
-
-    // ==================== GAMIFICATION — Points & Leaderboard ====================
-    @GET("user/points")
-    suspend fun getMyPoints(
-        @Header("Authorization") bearer: String
-    ): GenericResponse
-
-    @GET("user/points/history")
-    suspend fun getPointsHistory(
-        @Header("Authorization") bearer: String,
-        @Query("per_page") perPage: Int = 20,
-        @Query("page") page: Int = 1
-    ): GenericResponse
-
-    @GET("leaderboard")
-    suspend fun getLeaderboard(
-        @Query("period") period: String = "monthly",
-        @Query("limit") limit: Int = 10
-    ): LeaderboardResponse
-
-    @GET("user/rank")
-    suspend fun getMyRank(
-        @Header("Authorization") bearer: String,
-        @Query("period") period: String = "monthly"
-    ): MyRankResponse
 
     // ==================== NOTIFICATION PREFERENCES ====================
     @GET("user/notification-preferences")

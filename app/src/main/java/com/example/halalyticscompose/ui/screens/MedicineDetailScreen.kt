@@ -522,27 +522,15 @@ private fun MedicineHeroCard(med: com.example.halalyticscompose.data.model.Medic
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (!med.imageUrl.isNullOrBlank()) {
-            AsyncImage(
-                model = med.imageUrl,
-                contentDescription = med.name,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(24.dp)),
-                contentScale = ContentScale.Fit
-            )
-        } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Default.Medication,
-                    contentDescription = null,
-                    modifier = Modifier.size(72.dp),
-                    tint = Color.White.copy(alpha = 0.3f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Tidak ada gambar", color = Color.White.copy(alpha = 0.4f), fontSize = 12.sp)
-            }
-        }
+        val fallbackUrl = "https://ui-avatars.com/api/?name=${med.name}&background=1E293B&color=3B82F6&size=400"
+        AsyncImage(
+            model = if (!med.imageUrl.isNullOrBlank()) med.imageUrl else fallbackUrl,
+            contentDescription = med.name,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(24.dp)),
+            contentScale = ContentScale.Fit
+        )
     }
 }
 

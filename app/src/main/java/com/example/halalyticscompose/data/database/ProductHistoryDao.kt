@@ -27,6 +27,9 @@ interface ProductHistoryDao {
     
     @Query("UPDATE product_history SET isFavorite = :isFavorite WHERE barcode = :barcode")
     suspend fun updateFavoriteStatus(barcode: String, isFavorite: Boolean)
+
+    @Query("UPDATE product_history SET favoriteServerId = :serverId, isFavorite = 1 WHERE barcode = :barcode")
+    suspend fun updateFavoriteServerId(barcode: String, serverId: Int?)
     
     @Query("SELECT * FROM product_history WHERE barcode = :barcode")
     suspend fun getProductByBarcode(barcode: String): ProductHistoryEntity?

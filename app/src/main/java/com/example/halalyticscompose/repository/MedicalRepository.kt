@@ -63,7 +63,13 @@ class MedicalRepository @Inject constructor() {
         allergies: String? = null,
         medicalHistory: String? = null,
         isGlutenFree: Boolean = false,
-        hasNutAllergy: Boolean = false
+        hasNutAllergy: Boolean = false,
+        bloodType: String? = null,
+        activityLevel: String? = null,
+        dietPreference: String? = null,
+        address: String? = null,
+        city: String? = null,
+        province: String? = null
     ): SymptomsAnalysis {
         return withContext(Dispatchers.IO) {
             val geminiKey = BuildConfig.GEMINI_API_KEY
@@ -77,7 +83,13 @@ class MedicalRepository @Inject constructor() {
                 "allergies" to allergies,
                 "medicalHistory" to medicalHistory,
                 "isGlutenFree" to isGlutenFree,
-                "hasNutAllergy" to hasNutAllergy
+                "hasNutAllergy" to hasNutAllergy,
+                "bloodType" to bloodType,
+                "activityLevel" to activityLevel,
+                "dietPreference" to dietPreference,
+                "address" to address,
+                "city" to city,
+                "province" to province
             )
 
             // Try Gemini first (key is already configured in the project)
@@ -123,7 +135,13 @@ class MedicalRepository @Inject constructor() {
             allergies = profile["allergies"] as? String,
             medicalHistory = profile["medicalHistory"] as? String,
             isGlutenFree = profile["isGlutenFree"] as? Boolean ?: false,
-            hasNutAllergy = profile["hasNutAllergy"] as? Boolean ?: false
+            hasNutAllergy = profile["hasNutAllergy"] as? Boolean ?: false,
+            bloodType = profile["bloodType"] as? String,
+            activityLevel = profile["activityLevel"] as? String,
+            dietPreference = profile["dietPreference"] as? String,
+            address = profile["address"] as? String,
+            city = profile["city"] as? String,
+            province = profile["province"] as? String
         )
 
         val requestBody = JSONObject().apply {
@@ -190,7 +208,13 @@ class MedicalRepository @Inject constructor() {
             allergies = profile["allergies"] as? String,
             medicalHistory = profile["medicalHistory"] as? String,
             isGlutenFree = profile["isGlutenFree"] as? Boolean ?: false,
-            hasNutAllergy = profile["hasNutAllergy"] as? Boolean ?: false
+            hasNutAllergy = profile["hasNutAllergy"] as? Boolean ?: false,
+            bloodType = profile["bloodType"] as? String,
+            activityLevel = profile["activityLevel"] as? String,
+            dietPreference = profile["dietPreference"] as? String,
+            address = profile["address"] as? String,
+            city = profile["city"] as? String,
+            province = profile["province"] as? String
         )
 
         val requestBody = JSONObject().apply {
@@ -254,6 +278,8 @@ class MedicalRepository @Inject constructor() {
             val medicineDetails = parseRecommendedMedicineDetails(json)
 
             SymptomsAnalysis(
+                profil_pasien_dibaca = json.optString("profil_pasien_dibaca").ifBlank { null },
+                catatan_lokasi = json.optString("catatan_lokasi").ifBlank { null },
                 ringkasan_keluhan = json.optString("ringkasan_keluhan").ifBlank {
                     json.optString("summary").ifBlank {
                         json.optString("description", "")
@@ -304,6 +330,7 @@ class MedicalRepository @Inject constructor() {
                 recommended_medicine_details = medicineDetails,
                 alternative_medicines = jsonArrayToList(json.optJSONArray("alternative_medicines"))
                     .ifEmpty { jsonArrayToList(json.optJSONArray("jalur_alternatif")) },
+                herbal_remedies = parseHerbalRemedies(json),
                 usage_instructions = json.optString("usage_instructions").ifBlank {
                     buildUsageInstructions(json)
                 },
@@ -493,6 +520,32 @@ class MedicalRepository @Inject constructor() {
         if (direct.isNotEmpty()) return direct
 
         return medicineDetails.flatMap { it.side_effects }.distinct()
+    }
+
+    private fun parseHerbalRemedies(json: JSONObject): List<com.example.halalyticscompose.data.model.HerbalRemedy> {
+        val array = json.optJSONArray("herbal_remedies") ?: return emptyList()
+        return (0 until array.length()).mapNotNull { index ->
+            val item = array.optJSONObject(index) ?: return@mapNotNull null
+            com.example.halalyticscompose.data.model.HerbalRemedy(
+                name = item.optString("name").ifBlank { "Obat herbal" },
+                description = item.optString("description").ifBlank { null },
+                how_to_prepare = item.optString("how_to_prepare").ifBlank {
+                    item.optString("cara_menyiapkan").ifBlank { null }
+                },
+                how_to_use = item.optString("how_to_use").ifBlank {
+                    item.optString("cara_menggunakan").ifBlank { null }
+                },
+                frequency = item.optString("frequency").ifBlank {
+                    item.optString("frekuensi").ifBlank { null }
+                },
+                duration = item.optString("duration").ifBlank {
+                    item.optString("durasi").ifBlank { null }
+                },
+                precautions = item.optString("precautions").ifBlank {
+                    item.optString("peringatan").ifBlank { null }
+                }
+            )
+        }
     }
 
     private fun buildUsageInstructions(json: JSONObject): String? {

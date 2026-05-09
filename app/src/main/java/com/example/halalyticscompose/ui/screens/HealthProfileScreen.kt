@@ -351,7 +351,7 @@ fun HealthCard(
 }
 
 @Composable
-fun StatItem(label: String, value: String) {
+private fun StatItem(label: String, value: String) {
     val color = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally

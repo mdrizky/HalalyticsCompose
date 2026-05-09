@@ -16,6 +16,12 @@ import com.example.halalyticscompose.ui.components.getHalalColor
 import com.example.halalyticscompose.ui.components.getHalalColorDark
 import com.example.halalyticscompose.ui.components.HalalColorIndicator
 import com.example.halalyticscompose.data.model.ScanHistoryItem
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun RecentProductsSection(
@@ -87,18 +93,44 @@ fun CompactHistoryCard(
     Card(
         onClick = onCardClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Status Indicator
-            HalalColorIndicator(
-                status = status,
-                modifier = Modifier.size(16.dp)
+            // Status Indicator (Small Bar style to match full history)
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(backgroundColor)
             )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Product Image Thumbnail
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!product.productImage.isNullOrBlank()) {
+                    AsyncImage(
+                        model = product.productImage,
+                        contentDescription = product.productName,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text("📦", fontSize = 20.sp)
+                }
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -107,8 +139,8 @@ fun CompactHistoryCard(
                 Text(
                     text = product.productName ?: "Produk Tidak Diketahui",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = getHalalColorDark(status),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1
                 )
 
@@ -116,10 +148,25 @@ fun CompactHistoryCard(
                     Text(
                         text = "Barcode: $barcode",
                         style = MaterialTheme.typography.bodySmall,
-                        color = getHalalColorDark(status).copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
                 }
+            }
+
+            // Status Badge
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(backgroundColor.copy(alpha = 0.12f))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    status.uppercase(),
+                    color = getHalalColorDark(status),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 10.sp
+                )
             }
         }
     }

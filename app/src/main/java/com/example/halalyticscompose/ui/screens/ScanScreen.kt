@@ -55,6 +55,7 @@ import com.example.halalyticscompose.utils.TextRecognitionAnalyzer
 fun ScanScreen(
     navController: NavController,
     viewModel: ScanViewModel = hiltViewModel(),
+    authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
     val context = LocalContext.current
@@ -132,12 +133,24 @@ fun ScanScreen(
                         )
                 }
                 
-                Text(
-                            text = stringResource(R.string.scan_title),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground
+                Column {
+                    Text(
+                        text = stringResource(R.string.scan_title),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    val userData by authViewModel.userData.collectAsState()
+                    val userName = userData?.fullName ?: userData?.username ?: ""
+                    if (userName.isNotEmpty()) {
+                        Text(
+                            text = userName,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
                         )
+                    }
+                }
                 
                 // Flash toggle
                 IconButton(
@@ -565,16 +578,20 @@ fun CameraPreview(
                     cameraProvider.unbindAll()
                     
                     // Attempt to bind
-                    val camera = cameraProvider.bindToLifecycle(
-                        lifecycleOwner,
-                        cameraSelector,
-                        preview,
-                        imageAnalysis
-                    )
-                    
-                    // Enable flash if requested (check if available first)
-                    if (camera.cameraInfo.hasFlashUnit()) {
-                        camera.cameraControl.enableTorch(showFlash)
+                    try {
+                        val camera = cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            cameraSelector,
+                            preview,
+                            imageAnalysis
+                        )
+                        
+                        // Enable flash if requested (check if available first)
+                        if (camera.cameraInfo.hasFlashUnit()) {
+                            camera.cameraControl.enableTorch(showFlash)
+                        }
+                    } catch (e: Exception) {
+                        println("Binding failed: ${e.message}")
                     }
                     
                 } catch (exc: Exception) {

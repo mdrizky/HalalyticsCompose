@@ -240,8 +240,9 @@ fun ProductDetailContentPremium(
         // Hero Image
         item {
             Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+                val fallbackUrl = "https://ui-avatars.com/api/?name=${product.name}&background=1E293B&color=3B82F6&size=400"
                 AsyncImage(
-                    model = product.imageFrontUrl,
+                    model = if (!product.imageFrontUrl.isNullOrBlank()) product.imageFrontUrl else fallbackUrl,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

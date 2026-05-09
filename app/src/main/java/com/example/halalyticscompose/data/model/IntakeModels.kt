@@ -18,7 +18,10 @@ data class DailyIntakeData(
     @SerializedName("total_caffeine_mg") val totalCaffeineMg: Int = 0,
     @SerializedName("total_sugar_g") val totalSugarG: Int = 0,
     @SerializedName("total_calories") val totalCalories: Int = 0,
-    @SerializedName("total_sodium_mg") val totalSodiumMg: Int = 0
+    @SerializedName("total_sodium_mg") val totalSodiumMg: Int = 0,
+    @SerializedName("total_carbs_g") val totalCarbsG: Int = 0,
+    @SerializedName("total_protein_g") val totalProteinG: Int = 0,
+    @SerializedName("total_fat_g") val totalFatG: Int = 0
 )
 
 data class IntakeTargets(
@@ -26,7 +29,10 @@ data class IntakeTargets(
     @SerializedName("caffeine_limit_mg") val caffeineLimitMg: Int = 400,
     @SerializedName("calorie_limit") val calorieLimit: Int = 2000,
     @SerializedName("sugar_limit_g") val sugarLimitG: Int = 50,
-    @SerializedName("sodium_limit_mg") val sodiumLimitMg: Int = 2300
+    @SerializedName("sodium_limit_mg") val sodiumLimitMg: Int = 2300,
+    @SerializedName("carbs_target_g") val carbsTargetG: Int = 275,
+    @SerializedName("protein_target_g") val proteinTargetG: Int = 50,
+    @SerializedName("fat_target_g") val fatTargetG: Int = 70
 )
 
 data class IntakeProgress(

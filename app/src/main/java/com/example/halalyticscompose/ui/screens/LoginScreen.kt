@@ -1,46 +1,18 @@
 package com.example.halalyticscompose.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -50,10 +22,21 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
 import com.example.halalyticscompose.data.model.LoginRequest
 import com.example.halalyticscompose.R
+import com.example.halalyticscompose.BuildConfig
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
+import android.util.Log
 
 @Composable
 fun LoginScreen(
@@ -71,11 +54,11 @@ fun LoginScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    val googleSignInLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
                 val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
                 val idToken = account?.idToken
@@ -87,7 +70,7 @@ fun LoginScreen(
                     }
                 }
             } catch (e: com.google.android.gms.common.api.ApiException) {
-                android.util.Log.e("LoginScreen", "Google sign in failed", e)
+                Log.e("LoginScreen", "Google sign in failed", e)
             }
         }
     }
@@ -108,33 +91,35 @@ fun LoginScreen(
 
             Box(
                 modifier = Modifier
-                    .size(72.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = CircleShape
-                    ),
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f))
+                    .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Filled.QrCodeScanner,
-                    contentDescription = "Halalytics",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(34.dp)
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(id = com.example.halalyticscompose.R.drawable.logo_halalytics),
+                    contentDescription = "Halalytics Logo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = "Halalytics",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-1).sp
             )
             Text(
-                text = "Masuk untuk lanjut scan dan analisis",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Premium Health & Halal Intelligence",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -272,18 +257,20 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val callbackManager = remember { CallbackManager.Factory.create() }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Google Button
                 SocialLoginButton(
                     onClick = {
-                        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
                             .requestEmail()
-                            .requestIdToken("YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com") // User must replace this
                             .build()
-                        val googleSignInClient = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(context, gso)
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
                         googleSignInLauncher.launch(googleSignInClient.signInIntent)
                     },
                     iconRes = R.drawable.ic_google,
@@ -295,10 +282,27 @@ fun LoginScreen(
                 // Facebook Button
                 SocialLoginButton(
                     onClick = {
-                        // Facebook Login Implementation
-                        android.widget.Toast.makeText(context, "Facebook login segera hadir!", android.widget.Toast.LENGTH_SHORT).show()
+                        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+                            override fun onSuccess(result: LoginResult) {
+                                viewModel.loginWithFacebook(result.accessToken.token) {
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                            }
+                            override fun onCancel() {
+                                Log.d("LoginScreen", "Facebook login cancelled")
+                            }
+                            override fun onError(error: FacebookException) {
+                                Log.e("LoginScreen", "Facebook login error", error)
+                            }
+                        })
+                        LoginManager.getInstance().logInWithReadPermissions(
+                            context as android.app.Activity,
+                            listOf("email", "public_profile")
+                        )
                     },
-                    icon = Icons.Filled.Person, // Use Person as placeholder for Facebook icon
+                    icon = Icons.Default.Facebook,
                     text = "Facebook",
                     modifier = Modifier.weight(1f),
                     isLoading = isLoading

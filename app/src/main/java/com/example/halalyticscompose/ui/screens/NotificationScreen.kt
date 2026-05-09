@@ -162,7 +162,7 @@ private fun resolveNotificationRoute(notification: NotificationItem): String {
 
     fun resolveProductRoute(raw: String): String {
         val value = raw.ifBlank { fallbackBarcode }
-        if (value.isBlank()) return "search_hub"
+        if (value.isBlank()) return "manual_input"
         return when {
             value.startsWith("ext:", ignoreCase = true) ->
                 "product_external_detail/${Uri.encode(value.substringAfter("ext:"))}"
@@ -182,7 +182,7 @@ private fun resolveNotificationRoute(notification: NotificationItem): String {
         }
         "open_bpom", "open_verification", "verification_result" -> "bpom_scanner"
         "open_health_suite" -> "health_suite_hub"
-        "open_search" -> "search_hub"
+        "open_search" -> "manual_input"
         "open_news", "open_article" ->
             if (actionValue.isNotBlank()) "health_article_detail/${Uri.encode(actionValue)}" else "health_articles"
         else -> {

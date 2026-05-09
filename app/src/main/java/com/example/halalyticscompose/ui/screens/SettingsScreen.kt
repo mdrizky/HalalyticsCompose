@@ -374,7 +374,7 @@ private fun SettingsSwitchRow(
 }
 
 @Composable
-fun SettingsSectionTitle(title: String) {
+private fun SettingsSectionTitle(title: String) {
     Text(
         text = title.uppercase(),
         fontSize = 12.sp,
@@ -386,7 +386,7 @@ fun SettingsSectionTitle(title: String) {
 }
 
 @Composable
-fun SettingsCard(content: @Composable () -> Unit) {
+private fun SettingsCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -398,7 +398,7 @@ fun SettingsCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun LanguageOption(
+private fun LanguageOption(
     code: String,
     name: String,
     flag: String,

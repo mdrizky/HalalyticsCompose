@@ -1,415 +1,337 @@
 package com.example.halalyticscompose.ui.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.LocalHospital
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.MonitorHeart
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Store
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.halalyticscompose.data.model.DailyMissionData
-import com.example.halalyticscompose.data.model.Mission
-import com.example.halalyticscompose.ui.viewmodel.DashboardViewModel
-import androidx.compose.ui.res.stringResource
-import com.example.halalyticscompose.R
-
-// Color Constants moved to theme-aware components
-private val MissionTeal = Color(0xFF004D40)
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DailyMissionDashboardScreen(
-    onNavigateBack: () -> Unit,
-    onGoToScan: () -> Unit,
-    onGoToNutrition: () -> Unit,
-    onGoToCommunity: () -> Unit,
-    onGoToHalocode: () -> Unit,
-    viewModel: DashboardViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadDashboard()
-    }
+fun DailyMissionDashboardScreen(navController: NavController) {
+    val primaryColor = Color(0xFF004D40)
+    val secondaryColor = Color(0xFF00796B)
+    val accentColor = Color(0xFFFFC107)
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.daily_mission_title), fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        "Daily Missions", 
+                        fontWeight = FontWeight.ExtraBold,
+                        color = primaryColor
+                    ) 
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
+                actions = {
+                    IconButton(onClick = { /* Help */ }) {
+                        Icon(Icons.Default.HelpOutline, contentDescription = "Help")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
-        },
-    ) { paddingValues ->
-        if (uiState.isLoading && uiState.missionData == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-            return@Scaffold
         }
-
-        LazyColumn(
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                Column {
-                    Text(
-                        text = stringResource(R.string.daily_mission_welcome, uiState.userName ?: stringResource(R.string.daily_mission_default_user)),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = stringResource(R.string.daily_mission_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            item {
-                DailyMissionSummaryCard(
-                    missionData = uiState.missionData,
-                    isCompletingMission = uiState.isCompletingMission,
-                    onMissionClick = { mission ->
-                        when (mission.id) {
-                            "scan" -> onGoToScan()
-                            "nutrition" -> onGoToNutrition()
-                        }
-                    },
-                )
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.daily_mission_quick_access),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            item {
-                MissionQuickAccessGrid(
-                    onGoToScan = onGoToScan,
-                    onGoToNutrition = onGoToNutrition,
-                    onGoToCommunity = onGoToCommunity,
-                    onGoToHalocode = onGoToHalocode,
-                )
-            }
-
-            uiState.error?.takeIf { it.isNotBlank() }?.let { message ->
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-                        Text(
-                            text = message,
-                            color = Color(0xFFC62828),
-                            modifier = Modifier.padding(16.dp),
+                .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFE0F2F1),
+                            Color.White
                         )
-                    }
+                    )
+                )
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                // Point Progress Header
+                item {
+                    MissionProgressCard(points = 1250, target = 2000)
                 }
-            }
 
-            item {
-                Spacer(modifier = Modifier.navigationBarsPadding())
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                // Category Tabs
+                item {
+                    Text(
+                        "Active Missions",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
+                // Daily Missions List
+                items(getMockMissions()) { mission ->
+                    MissionItem(mission)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                // Weekly Rewards Preview
+                item {
+                    WeeklyRewardsSection()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DailyMissionSummaryCard(
-    missionData: DailyMissionData?,
-    isCompletingMission: Boolean,
-    onMissionClick: (Mission) -> Unit,
-) {
+fun MissionProgressCard(points: Int, target: Int) {
+    val progress = points.toFloat() / target.toFloat()
+    
     Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(12.dp, RoundedCornerShape(24.dp)),
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF004D40))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
                     Text(
-                        text = stringResource(R.string.daily_mission_progress_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        "Your Points",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 14.sp
                     )
                     Text(
-                        text = stringResource(R.string.daily_mission_progress_count, missionData?.completedCount ?: 0, missionData?.totalCount ?: 0),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
+                        points.toString(),
+                        color = Color.White,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Black
                     )
                 }
-
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(14.dp),
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFFC107)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.daily_mission_points, missionData?.pointsEarnedToday ?: 0),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = "Points",
+                        tint = Color(0xFF004D40)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             LinearProgressIndicator(
-                progress = {
-                    if (missionData != null && missionData.totalCount > 0) {
-                        missionData.completedCount.toFloat() / missionData.totalCount.toFloat()
-                    } else {
-                        0f
-                    }
-                },
+                progress = progress,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(9.dp),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                    .height(8.dp)
+                    .clip(CircleShape),
+                color = Color(0xFFFFC107),
+                trackColor = Color.White.copy(alpha = 0.2f)
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            (missionData?.missions ?: emptyList()).forEachIndexed { index, mission ->
-                MissionItemRow(
-                    mission = mission,
-                    isCompletingMission = isCompletingMission && mission.id == "location",
-                    onClick = { onMissionClick(mission) },
-                )
-
-                if (index < (missionData?.missions?.lastIndex ?: -1)) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 10.dp),
-                        color = MissionTeal.copy(alpha = 0.12f),
-                    )
-                }
-            }
+            Text(
+                "Keep scanning to reach today's goal of $target points!",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
 
 @Composable
-private fun MissionItemRow(
-    mission: Mission,
-    isCompletingMission: Boolean,
-    onClick: () -> Unit,
-) {
-    val icon = when (mission.iconType) {
-        "scan" -> Icons.Default.QrCodeScanner
-        "nutrition" -> Icons.Default.Restaurant
-        else -> Icons.Default.Map
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
+fun MissionItem(mission: MissionData) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Surface(
-            color = if (mission.isCompleted) Color(0xFF2E7D32) else Color.White,
-            shape = CircleShape,
-            modifier = Modifier.size(42.dp),
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (mission.isCompleted) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(mission.color.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    mission.icon,
                     contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.padding(10.dp),
-                )
-            } else {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(10.dp),
+                    tint = mission.color
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = mission.title,
-                fontWeight = FontWeight.SemiBold,
-                textDecoration = if (mission.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-                color = MissionTeal,
-            )
-            Text(
-                text = mission.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        if (isCompletingMission) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
-        } else {
-            Surface(
-                color = Color.White,
-                shape = RoundedCornerShape(10.dp),
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "+${mission.pointsReward}",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    mission.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = Color.DarkGray
+                )
+                Text(
+                    mission.description,
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    LinearProgressIndicator(
+                        progress = mission.progress,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(4.dp)
+                            .clip(CircleShape),
+                        color = mission.color,
+                        trackColor = mission.color.copy(alpha = 0.1f)
                     )
-                    if (!mission.isCompleted) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "${(mission.progress * 100).toInt()}%",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = mission.color
+                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (mission.isCompleted) Color(0xFFE8F5E9) else Color(0xFFF5F5F5))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    "+${mission.reward}",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp,
+                    color = if (mission.isCompleted) Color(0xFF43A047) else Color.Gray
+                )
             }
         }
     }
 }
 
 @Composable
-private fun MissionQuickAccessGrid(
-    onGoToScan: () -> Unit,
-    onGoToNutrition: () -> Unit,
-    onGoToCommunity: () -> Unit,
-    onGoToHalocode: () -> Unit,
-) {
-    val features = listOf(
-        Triple("OCR Scan", Icons.Default.QrCodeScanner, onGoToScan) to Color(0xFFE53935),
-        Triple("Nutrisi", Icons.Default.MonitorHeart, onGoToNutrition) to Color(0xFF00897B),
-        Triple("Komunitas", Icons.Default.Groups, onGoToCommunity) to Color(0xFF1976D2),
-        Triple("Halocode", Icons.Default.LocalHospital, onGoToHalocode) to Color(0xFF6A1B9A),
-    )
-
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        userScrollEnabled = false,
-        modifier = Modifier.height(220.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(features) { (feature, color) ->
-            val (label, icon, action) = feature
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                onClick = action,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Surface(
-                        color = color.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.size(44.dp),
+fun WeeklyRewardsSection() {
+    Column {
+        Text(
+            "Weekly Streak Rewards",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val days = listOf("M", "T", "W", "T", "F", "S", "S")
+            val currentDay = 4 // Friday
+            
+            days.forEachIndexed { index, day ->
+                val isPast = index < currentDay
+                val isToday = index == currentDay
+                
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when {
+                                    isToday -> Color(0xFFFFC107)
+                                    isPast -> Color(0xFF004D40)
+                                    else -> Color.White
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = color,
-                            modifier = Modifier.padding(10.dp),
-                        )
+                        if (isPast) {
+                            Icon(Icons.Default.Check, "Done", tint = Color.White, modifier = Modifier.size(20.dp))
+                        } else if (isToday) {
+                            Icon(Icons.Default.Star, "Today", tint = Color(0xFF004D40), modifier = Modifier.size(20.dp))
+                        } else {
+                            Text(day, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.LightGray)
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                    )
                 }
             }
         }
     }
 }
+
+data class MissionData(
+    val title: String,
+    val description: String,
+    val icon: ImageVector,
+    val color: Color,
+    val progress: Float,
+    val reward: Int,
+    val isCompleted: Boolean = false
+)
+
+fun getMockMissions() = listOf(
+    MissionData("Halal Scanner", "Scan 5 food products today", Icons.Default.QrCodeScanner, Color(0xFF00695C), 0.6f, 500),
+    MissionData("Water Tracker", "Drink 8 glasses of water", Icons.Default.WaterDrop, Color(0xFF0277BD), 1.0f, 200, true),
+    MissionData("BPOM Check", "Verify 2 medicine barcodes", Icons.Default.HealthAndSafety, Color(0xFFD32F2F), 0.5f, 300),
+    MissionData("Community Active", "Post 1 healthy recipe", Icons.Default.Groups, Color(0xFF7B1FA2), 0.0f, 400),
+    MissionData("BMI Watch", "Update your weight profile", Icons.Default.Scale, Color(0xFFF57C00), 1.0f, 150, true)
+)

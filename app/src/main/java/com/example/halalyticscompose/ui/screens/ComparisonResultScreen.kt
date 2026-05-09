@@ -1,6 +1,7 @@
 package com.example.halalyticscompose.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -68,6 +69,32 @@ fun ComparisonResultScreen(
                     reason = result!!.reason,
                     summary = result!!.summary
                 )
+
+                if (!result!!.similarities.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Kesamaan Antar Produk",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            result!!.similarities!!.forEach { similarity ->
+                                Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(vertical = 4.dp)) {
+                                    Icon(Icons.Default.Compare, contentDescription = null, modifier = Modifier.size(16.dp), tint = HalalGreen)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = similarity, fontSize = 14.sp)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 

@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.MainViewModel
 import com.example.halalyticscompose.utils.LocalizationManager
 import com.example.halalyticscompose.utils.ThemeManager
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * ENHANCED SETTINGS SCREEN
@@ -146,24 +147,6 @@ fun EnhancedSettingsScreen(
                 )
             }
 
-            // ─────────────────────────────────────────────────────────
-            // Dark/Light Mode Toggle
-            SettingsCard {
-                SettingsToggleItem(
-                    icon = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.WbSunny,
-                    iconColor = if (isDarkMode) Color(0xFF607D8B) else Color(0xFFFFC107),
-                    title = if (appLanguage == "id") "Mode Gelap / Dark Mode" else "Dark Mode",
-                    subtitle = if (isDarkMode) 
-                        (if (appLanguage == "id") "Aktif ✓" else "On ✓")
-                    else 
-                        (if (appLanguage == "id") "Nonaktif" else "Off"),
-                    isActive = isDarkMode,
-                    onToggle = {
-                        viewModel.toggleDarkMode()
-                        themeManager.setTheme(if (!isDarkMode) "dark" else "light")
-                    }
-                )
-            }
 
             Divider(modifier = Modifier.padding(vertical = 16.dp))
 
@@ -198,7 +181,7 @@ fun EnhancedSettingsScreen(
                 SettingsToggleItem(
                     icon = Icons.Default.Email,
                     iconColor = Color(0xFFFF9800),
-                    title = if (appLanguage == "id") "Email Notifications" else "Email Notifications",
+                    title = if (appLanguage == "id") "Notifikasi Email" else "Email Notifications",
                     subtitle = if (emailNotifications)
                         (if (appLanguage == "id") "Aktif ✓" else "On ✓")
                     else
@@ -213,7 +196,7 @@ fun EnhancedSettingsScreen(
                 SettingsToggleItem(
                     icon = Icons.Default.Notifications,
                     iconColor = Color(0xFF9C27B0),
-                    title = if (appLanguage == "id") "Push Notifications" else "Push Notifications",
+                    title = if (appLanguage == "id") "Notifikasi Push" else "Push Notifications",
                     subtitle = if (pushNotifications)
                         (if (appLanguage == "id") "Aktif ✓" else "On ✓")
                     else
@@ -224,7 +207,7 @@ fun EnhancedSettingsScreen(
                 )
             }
 
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
             // ════════════════════════════════════════════════════════
             // SECTION 3: SECURITY SETTINGS
@@ -242,7 +225,7 @@ fun EnhancedSettingsScreen(
                 SettingsToggleItem(
                     icon = Icons.Default.Fingerprint,
                     iconColor = Color(0xFF1976D2),
-                    title = if (appLanguage == "id") "Biometric Authentication" else "Biometric Auth",
+                    title = if (appLanguage == "id") "Autentikasi Biometrik" else "Biometric Auth",
                     subtitle = if (biometricEnabled)
                         (if (appLanguage == "id") "Aktif ✓" else "On ✓")
                     else
@@ -266,7 +249,7 @@ fun EnhancedSettingsScreen(
                 )
             }
 
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
             // ════════════════════════════════════════════════════════
             // SECTION 4: STORAGE & CACHE
@@ -274,7 +257,7 @@ fun EnhancedSettingsScreen(
             
             SettingsSectionHeader(
                 title = if (appLanguage == "id") "💾 Penyimpanan" else "💾 Storage",
-                icon = Icons.Default.StorageFilled
+                icon = Icons.Default.Storage
             )
 
             SettingsCard {
@@ -299,7 +282,7 @@ fun EnhancedSettingsScreen(
 // ════════════════════════════════════════════════════════════════════════════
 
 @Composable
-fun SettingsSectionHeader(
+private fun SettingsSectionHeader(
     title: String,
     icon: ImageVector
 ) {
@@ -326,7 +309,7 @@ fun SettingsSectionHeader(
 }
 
 @Composable
-fun SettingsCard(
+private fun SettingsCard(
     content: @Composable () -> Unit
 ) {
     Card(
@@ -343,7 +326,7 @@ fun SettingsCard(
 }
 
 @Composable
-fun SettingsItem(
+private fun SettingsItem(
     icon: ImageVector,
     iconColor: Color,
     title: String,
@@ -373,7 +356,7 @@ fun SettingsItem(
 }
 
 @Composable
-fun SettingsToggleItem(
+private fun SettingsToggleItem(
     icon: ImageVector,
     iconColor: Color,
     title: String,
@@ -410,7 +393,7 @@ fun SettingsToggleItem(
 }
 
 @Composable
-fun LanguageOptionButton(
+private fun LanguageOptionButton(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -447,10 +430,8 @@ fun LanguageOptionButton(
     }
 }
 
-fun Modifier.alpha(alpha: Float): Modifier {
+private fun Modifier.alpha(alpha: Float): Modifier {
     return this.then(
         Modifier.graphicsLayer(alpha = alpha)
     )
 }
-
-import androidx.compose.ui.graphics.graphicsLayer

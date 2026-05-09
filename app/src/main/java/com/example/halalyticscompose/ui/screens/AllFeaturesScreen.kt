@@ -6,7 +6,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,39 +40,54 @@ data class FeatureActionItem(
 fun AllFeaturesScreen(navController: NavController) {
     // Categorize features for a true Super App feel
     val coreFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_scan_halal), Icons.Default.QrCode2, "scan", Color(0xFF00695C), Color(0xFFE0F2F1)),
-        FeatureActionItem(stringResource(R.string.feature_bpom), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF0277BD), Color(0xFFE1F5FE)),
-        FeatureActionItem(stringResource(R.string.feature_cosmetic), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF7B1FA2), Color(0xFFF3E5F5)),
-        FeatureActionItem(stringResource(R.string.feature_check_medicine), Icons.Default.Medication, "drug_interaction", Color(0xFFD32F2F), Color(0xFFFFEBEE))
+        FeatureActionItem(stringResource(R.string.feature_scan_halal), Icons.Default.QrCode2, "scan", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_bpom), Icons.Default.HealthAndSafety, "bpom_scanner", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_cosmetic), Icons.Default.AutoAwesome, "skincare_scanner", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_check_medicine), Icons.Default.Medication, "drug_interaction", MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_medicine_search), Icons.Default.Search, "medicine_search", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_intl_medicine), Icons.Default.Public, "international_medicine", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val healthSuiteFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_medical_records), Icons.Default.MedicalServices, "medical_records", Color(0xFFE91E63), Color(0xFFFCE4EC)),
-        FeatureActionItem(stringResource(R.string.feature_medical_resume), Icons.Default.Description, "medical_resume", Color(0xFFF57C00), Color(0xFFFFF3E0)),
-        FeatureActionItem(stringResource(R.string.feature_health_monitor), Icons.Default.MonitorHeart, "health_monitor", Color(0xFFC2185B), Color(0xFFFCE4EC))
+        FeatureActionItem(stringResource(R.string.feature_medical_records), Icons.Default.MedicalServices, "medical_records", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_medical_resume), Icons.Default.Description, "medical_resume", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_health_monitor), Icons.Default.MonitorHeart, "health_monitor", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_bmi_calculator), Icons.Default.Calculate, "bmi_calculator", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_medical_info), Icons.Default.Info, "medical_info", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_mental_health), Icons.Default.Psychology, "mental_health_hub", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val smartAiFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_ai_assistant), Icons.Default.SmartToy, "health_assistant", Color(0xFF512DA8), Color(0xFFEDE7F6)),
-        FeatureActionItem(stringResource(R.string.feature_health_journey), Icons.Default.CalendarMonth, "health_journey", Color(0xFF00796B), Color(0xFFE0F2F1)),
-        FeatureActionItem(stringResource(R.string.feature_nutrition_scan), Icons.Default.CameraAlt, "nutrition_scanner", Color(0xFFFBC02D), Color(0xFFFFF9C4)),
-        FeatureActionItem(stringResource(R.string.feature_health_diary), Icons.Default.Edit, "health_diary", Color(0xFF0097A7), Color(0xFFE0F7FA))
+        FeatureActionItem(stringResource(R.string.feature_ai_assistant), Icons.Default.SmartToy, "health_assistant", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_health_journey), Icons.Default.CalendarMonth, "health_journey", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_nutrition_scan), Icons.Default.CameraAlt, "nutrition_scanner", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_health_diary), Icons.Default.Edit, "health_diary", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_pill_scanner), Icons.Default.PhotoCamera, "pill_scanner", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_weekly_report), Icons.Default.Assessment, "weekly_report", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_local_ai), Icons.Default.Psychology, "local_ai_chat", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val aiExpansionFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_ocr_product), Icons.Default.QrCodeScanner, "ocr_scan", Color(0xFFE53935), Color(0xFFFFEBEE)),
-        FeatureActionItem(stringResource(R.string.feature_nutrition_ai), Icons.Default.MonitorHeart, "nutrition_dashboard", Color(0xFF00897B), Color(0xFFE0F2F1)),
-        FeatureActionItem(stringResource(R.string.feature_recipe_ai), Icons.Default.MenuBook, "recipes", Color(0xFF6A1B9A), Color(0xFFF3E5F5)),
-        FeatureActionItem(stringResource(R.string.feature_daily_mission), Icons.Default.TaskAlt, "daily_mission_dashboard", Color(0xFF1565C0), Color(0xFFE3F2FD))
+        FeatureActionItem(stringResource(R.string.feature_ocr_product), Icons.Default.QrCodeScanner, "ocr_scan", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_nutrition_ai), Icons.Default.MonitorHeart, "nutrition_dashboard", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_recipe_ai), Icons.Default.MenuBook, "recipes", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_daily_mission), Icons.Default.TaskAlt, "daily_mission_dashboard", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_encyclopedia), Icons.Default.LibraryBooks, "encyclopedia", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val supportFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_halocode), Icons.Default.Chat, "halocode", Color(0xFF00695C), Color(0xFFE0F2F1)),
-        FeatureActionItem(stringResource(R.string.feature_community), Icons.Default.Groups, "community", Color(0xFF1976D2), Color(0xFFE3F2FD)),
-        FeatureActionItem(stringResource(R.string.feature_health_pass), Icons.Default.VerifiedUser, "health_pass", Color(0xFF455A64), Color(0xFFECEFF1)),
-        FeatureActionItem(stringResource(R.string.feature_emergency), Icons.Default.LocalHospital, "emergency_p3k", Color(0xFFD32F2F), Color(0xFFFFEBEE)),
-        FeatureActionItem(stringResource(R.string.feature_report_issue), Icons.Default.Warning, "report_issue/0/General", Color(0xFFF57C00), Color(0xFFFFF3E0)),
-        FeatureActionItem(stringResource(R.string.feature_intl_medicine), Icons.Default.Public, "international_medicine", Color(0xFF1976D2), Color(0xFFE3F2FD))
+        FeatureActionItem(stringResource(R.string.feature_community), Icons.Default.Groups, "community", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_health_pass), Icons.Default.VerifiedUser, "health_pass", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_emergency), Icons.Default.LocalHospital, "emergency_p3k", MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_report_issue), Icons.Default.Warning, "report_issue/0/General", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_medicine_reminders), Icons.Default.Alarm, "medicine_reminders", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+    )
+
+    val accountFeatures = listOf(
+        FeatureActionItem(stringResource(R.string.feature_settings), Icons.Default.Settings, "settings", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_help_center), Icons.Default.Help, "help_center", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_barcode_gallery), Icons.Default.Collections, "barcode_gallery", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_privacy_policy), Icons.Default.Policy, "privacy_policy", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     Scaffold(
@@ -79,7 +96,7 @@ fun AllFeaturesScreen(navController: NavController) {
                 title = { Text(stringResource(R.string.all_features_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -95,7 +112,8 @@ fun AllFeaturesScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp)
+            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
                 FeatureSectionGrid(stringResource(R.string.all_features_core), coreFeatures, navController)
@@ -107,10 +125,13 @@ fun AllFeaturesScreen(navController: NavController) {
                 FeatureSectionGrid(stringResource(R.string.all_features_ai), smartAiFeatures, navController)
             }
             item {
-                FeatureSectionGrid(stringResource(R.string.all_features_expansion), aiExpansionFeatures, navController)
+                FeatureSectionGrid("Expansion & Tools", aiExpansionFeatures, navController)
             }
             item {
-                FeatureSectionGrid(stringResource(R.string.all_features_support), supportFeatures, navController)
+                FeatureSectionGrid("Support & Community", supportFeatures, navController)
+            }
+            item {
+                FeatureSectionGrid("Account & System", accountFeatures, navController)
             }
         }
     }

@@ -21,6 +21,10 @@ data class SymptomsAnalysisDataWrapper(
 )
 
 data class SymptomsAnalysis(
+    // Profile confirmation — AI confirms it read the profile
+    @SerializedName("profil_pasien_dibaca") val profil_pasien_dibaca: String? = null,
+    @SerializedName("catatan_lokasi") val catatan_lokasi: String? = null,
+    
     @SerializedName("ringkasan_keluhan") val ringkasan_keluhan: String? = null,
     @SerializedName("condition") val condition: String = "Unknown Condition",
     @SerializedName(value = "severity_label", alternate = ["tingkat_keparahan_label"]) val severity_label: String? = null,
@@ -41,6 +45,9 @@ data class SymptomsAnalysis(
     @SerializedName("lifestyle_advice") val lifestyle_advice: String? = null,
     @SerializedName("disease_explanations") val disease_explanations: List<DiseaseExplanation> = emptyList(),
     @SerializedName("trigger_factors") val trigger_factors: List<String> = emptyList(),
+    
+    // Herbal Remedies — displayed BEFORE pharmacy medicines
+    @SerializedName("herbal_remedies") val herbal_remedies: List<HerbalRemedy> = emptyList(),
     
     // Ingredients & Medicines
     @SerializedName(value = "recommended_ingredients", alternate = ["active_ingredients"]) 
@@ -67,6 +74,16 @@ data class SymptomsAnalysis(
     // Backward compatibility
     val active_ingredients: List<String> get() = recommended_ingredients
 }
+
+data class HerbalRemedy(
+    @SerializedName("name") val name: String = "",
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("how_to_prepare") val how_to_prepare: String? = null,
+    @SerializedName("how_to_use") val how_to_use: String? = null,
+    @SerializedName("frequency") val frequency: String? = null,
+    @SerializedName("duration") val duration: String? = null,
+    @SerializedName("precautions") val precautions: String? = null
+)
 
 data class HalalCheck(
     @SerializedName("status") val status: String = "unknown",
@@ -115,11 +132,13 @@ data class MedicationReminderResponse(
 )
 
 // User Reminders Response Wrapper
-data class UserRemindersResponse(
+data class UserMedicineRemindersResponse(
     @SerializedName("success") val success: Boolean,
     @SerializedName("data") val data: List<com.example.halalyticscompose.data.model.MedicationReminderItem>? = null,
     @SerializedName("message") val message: String? = null
 )
+
+typealias UserRemindersResponse = UserMedicineRemindersResponse
 
 // Next Dose Response
 data class NextDoseResponse(

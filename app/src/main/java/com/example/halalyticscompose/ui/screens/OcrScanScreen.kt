@@ -150,6 +150,16 @@ fun OcrScanScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+            val authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = hiltViewModel()
+            val userData by authViewModel.userData.collectAsState()
+            val userName = userData?.fullName ?: userData?.username ?: "User"
+            
+            Text(
+                text = "Halo, $userName",
+                color = Color.White.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
             Text(
                 text = "Arahkan kamera ke daftar komposisi produk",
                 color = Color.White,

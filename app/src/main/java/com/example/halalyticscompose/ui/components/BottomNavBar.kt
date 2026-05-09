@@ -17,11 +17,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
@@ -52,22 +58,37 @@ sealed class BottomNavItem(
     val unselectedIcon: ImageVector
 ) {
     object Home : BottomNavItem("home", R.string.home, Icons.Filled.Home, Icons.Outlined.Home)
-    object Search : BottomNavItem("search_hub", R.string.bottom_nav_search, Icons.Filled.Search, Icons.Outlined.Search)
+    object Search : BottomNavItem("manual_input", R.string.bottom_nav_search, Icons.Filled.Search, Icons.Outlined.Search)
     object History : BottomNavItem("history", R.string.bottom_nav_history, Icons.Outlined.History, Icons.Outlined.History)
     object Profile : BottomNavItem("profile", R.string.profile, Icons.Filled.Person, Icons.Outlined.Person)
+    
+    // Admin Items
+    object AdminDashboard : BottomNavItem("home", R.string.admin_panel_title, Icons.Filled.Build, Icons.Outlined.Build)
+    object AdminUsers : BottomNavItem("admin_users", R.string.admin_panel_users, Icons.Filled.Person, Icons.Outlined.Person)
+    object AdminNotifications : BottomNavItem("admin_notifications_app", R.string.notification_title, Icons.Filled.Notifications, Icons.Outlined.Notifications)
 }
 
 @Composable
 fun BottomNavBar(
     navController: NavController,
+    isAdmin: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Search,
-        BottomNavItem.History,
-        BottomNavItem.Profile
-    )
+    val items = if (isAdmin) {
+        listOf(
+            BottomNavItem.AdminDashboard,
+            BottomNavItem.AdminUsers,
+            BottomNavItem.AdminNotifications,
+            BottomNavItem.Profile
+        )
+    } else {
+        listOf(
+            BottomNavItem.Home,
+            BottomNavItem.Search,
+            BottomNavItem.History,
+            BottomNavItem.Profile
+        )
+    }
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -134,37 +155,39 @@ fun BottomNavBar(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(56.dp)
-                .background(
-                    brush = Brush.linearGradient(listOf(FabGradientStart, FabGradientEnd)),
-                    shape = CircleShape
-                )
-                .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                .clickable {
-                    if (currentRoute != "scan_hub") {
-                        navController.navigate("scan_hub")
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.QrCodeScanner,
-                contentDescription = stringResource(R.string.scan),
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = "H",
-                color = Color.White.copy(alpha = 0.9f),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
+        if (!isAdmin) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 10.dp, bottom = 8.dp)
-            )
+                    .align(Alignment.TopCenter)
+                    .size(56.dp)
+                    .background(
+                        brush = Brush.linearGradient(listOf(FabGradientStart, FabGradientEnd)),
+                        shape = CircleShape
+                    )
+                    .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                    .clickable {
+                        if (currentRoute != "scan_hub") {
+                            navController.navigate("scan_hub")
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.QrCodeScanner,
+                    contentDescription = stringResource(R.string.scan),
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "H",
+                    color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 10.dp, bottom = 8.dp)
+                )
+            }
         }
 
     }

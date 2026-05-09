@@ -40,6 +40,7 @@ import com.example.halalyticscompose.ui.viewmodel.ProductExternalViewModel
 @Composable
 fun SearchExternalScreen(
     navController: NavController,
+    initialQuery: String = "",
     viewModel: ProductExternalViewModel = hiltViewModel()
 ) {
     val focusManager = LocalFocusManager.current
@@ -53,8 +54,14 @@ fun SearchExternalScreen(
     val currentFilter by viewModel.currentFilter.collectAsState()
     
     // Local states
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf(initialQuery) }
     var selectedFilter by remember { mutableStateOf("All") }
+
+    LaunchedEffect(initialQuery) {
+        if (initialQuery.isNotEmpty()) {
+            viewModel.applyFilter(selectedFilter, initialQuery)
+        }
+    }
     
     val filters = listOf("All", "Halal", "Vegetarian", "Vegan")
     
@@ -452,21 +459,13 @@ private fun ProductItemCard(
                 contentAlignment = Alignment.Center
             ) {
                 val imageUrl = product.getBestImageUrl()
-                if (imageUrl != null) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = product.getDisplayName(),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        Icons.Outlined.Inventory2,
-                        contentDescription = null,
-                        tint = colors.onSurfaceVariant,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                val fallbackUrl = "https://ui-avatars.com/api/?name=${product.getDisplayName()}&background=1E293B&color=3B82F6&size=100"
+                AsyncImage(
+                    model = imageUrl ?: fallbackUrl,
+                    contentDescription = product.getDisplayName(),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
                 
                 // Nutriscore badge
                 product.nutriscoreGrade?.let { grade ->

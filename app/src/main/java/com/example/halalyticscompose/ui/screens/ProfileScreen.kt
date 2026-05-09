@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -18,21 +17,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import androidx.compose.ui.res.stringResource
 import com.example.halalyticscompose.R
-import androidx.compose.ui.layout.ContentScale
-import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.viewmodel.*
-
-// Color constants moved into theme-aware components
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +49,6 @@ fun ProfileScreen(
     val isDarkMode by mainViewModel.isDarkMode.collectAsState()
     val unreadNotificationCount by notificationViewModel.unreadCount.collectAsState()
     val pendingContributionCount by contributionViewModel.pendingCount.collectAsState()
-    val approvedContributionCount by contributionViewModel.approvedCount.collectAsState()
-
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         authViewModel.loadUserProfile()
@@ -68,16 +62,20 @@ fun ProfileScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             item {
                 ProfileHeader(
                     userData = userData,
                     totalScans = totalScans,
                     halalProducts = halalProducts,
-                    currentStreak = currentStreak,
-                    navController = navController
+                    currentStreak = currentStreak
                 )
+            }
+
+            item {
+                HealthProfileCard(userData = userData)
             }
 
             item {
@@ -116,7 +114,9 @@ fun ProfileScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item {
+                ProfileBanner()
+            }
         }
     }
 }
@@ -126,59 +126,182 @@ fun ProfileHeader(
     userData: com.example.halalyticscompose.data.model.User?,
     totalScans: Int,
     halalProducts: Int,
-    currentStreak: Int,
-    navController: NavController
+    currentStreak: Int
 ) {
+    val headerColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Brush.linearGradient(listOf(
-                MaterialTheme.colorScheme.primary, 
-                MaterialTheme.colorScheme.primaryContainer, 
-                MaterialTheme.colorScheme.secondaryContainer
-            )))
-            .padding(24.dp)
+            .background(
+                Brush.verticalGradient(
+                    listOf(headerColor, headerColor.copy(alpha = 0.85f))
+                )
+            )
+            .statusBarsPadding()
+            .padding(top = 32.dp, bottom = 48.dp, start = 24.dp, end = 24.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Box(
-                modifier = Modifier.size(100.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f))
             ) {
                 if (!userData?.image.isNullOrEmpty()) {
-                    AsyncImage(model = userData?.image, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    AsyncImage(
+                        model = userData?.image,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                 } else {
-                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.fillMaxSize().padding(20.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(20.dp),
+                        tint = Color.White
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(userData?.fullName ?: stringResource(R.string.account_default_user), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-            Text(userData?.email ?: "", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
+            Text(
+                text = userData?.fullName ?: userData?.username ?: stringResource(R.string.account_default_user),
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = userData?.address ?: "Batam, Indonesia",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 13.sp
+                )
+            }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            if (!userData?.bio.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = userData?.bio ?: "",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                StatHeaderItem(stringResource(R.string.home_stats_scan), totalScans.toString())
-                StatHeaderItem(stringResource(R.string.home_stats_halal), halalProducts.toString())
-                StatHeaderItem(stringResource(R.string.streak), "$currentStreak " + stringResource(R.string.profile_streak_day).replace("%1\$d ", ""))
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White.copy(alpha = 0.12f))
+                    .padding(vertical = 18.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StatItem("Total Scan", totalScans.toString())
+                Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color.White.copy(alpha = 0.25f)))
+                StatItem("Halal Stats", halalProducts.toString())
+                Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color.White.copy(alpha = 0.25f)))
+                StatItem("Streak", "$currentStreak hari")
             }
         }
     }
 }
 
 @Composable
-fun StatHeaderItem(label: String, value: String) {
+private fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text(label, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f), fontSize = 12.sp)
+        Text(
+            text = value,
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 22.sp,
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = label.uppercase(),
+            color = Color.White.copy(alpha = 0.75f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.5.sp
+        )
+    }
+}
+
+@Composable
+fun HealthProfileCard(userData: com.example.halalyticscompose.data.model.User?) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = "Health Profile",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                HealthInfoItem("Age", "${userData?.age ?: "-"} yrs", Icons.Default.Cake)
+                HealthInfoItem("Height", "${userData?.height ?: "-"} cm", Icons.Default.Height)
+                HealthInfoItem("Weight", "${userData?.weight ?: "-"} kg", Icons.Default.Scale)
+                HealthInfoItem("BMI", String.format("%.1f", userData?.bmi ?: 0.0), Icons.Default.Calculate)
+            }
+            
+            if (userData?.bloodType != null || userData?.allergy != null) {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                Row(modifier = Modifier.padding(20.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Blood Type", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(userData?.bloodType ?: "-", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Allergy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(userData?.allergy ?: "None", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HealthInfoItem(label: String, value: String, icon: ImageVector) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 fun MenuSection(title: String, items: List<MenuItem>) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text(title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, modifier = Modifier.padding(bottom = 8.dp))
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
@@ -188,18 +311,24 @@ fun MenuSection(title: String, items: List<MenuItem>) {
                         modifier = Modifier.fillMaxWidth().clickable { item.onClick() }.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(item.icon, contentDescription = null, tint = item.color ?: MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                        Box(
+                            modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(item.color?.copy(alpha = 0.1f) ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(item.icon, contentDescription = null, tint = item.color ?: MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(item.title, modifier = Modifier.weight(1f), color = item.color ?: MaterialTheme.colorScheme.onSurface)
+                        Text(item.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                         
                         if (item.badge != null) {
-                            Badge { Text(item.badge) }
+                            Badge(containerColor = MaterialTheme.colorScheme.error) { Text(item.badge) }
+                            Spacer(modifier = Modifier.width(8.dp))
                         }
                         
                         if (item.isSwitch) {
                             Switch(checked = item.switchState, onCheckedChange = { item.onClick() })
                         } else {
-                            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp))
                         }
                     }
                     if (index < items.size - 1) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
@@ -218,3 +347,41 @@ data class MenuItem(
     val badge: String? = null,
     val color: Color? = null
 )
+@Composable
+fun ProfileBanner() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2E7D32)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Celebration, null, tint = Color.White)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Ayo Jadi Kontributor!",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1B5E20)
+                )
+                Text(
+                    text = "Bantu sesama Muslim menemukan produk Halal.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF1B5E20).copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}

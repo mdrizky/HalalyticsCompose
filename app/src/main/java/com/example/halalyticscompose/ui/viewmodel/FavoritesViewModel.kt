@@ -41,23 +41,29 @@ class FavoritesViewModel @Inject constructor(
                 product?.let {
                     if (it.isFavorite) {
                         repository.removeFromFavorites(barcode)
-                        // Optional: sync with server
+                        // Sync with server
                         val token = sessionManager.getAuthToken()
-                        if (token != null) {
-                            // Logic to find favoriteId and delete...
+                        val serverId = it.favoriteServerId
+                        if (token != null && serverId != null) {
+                            apiService.deleteFavorite("Bearer $token", serverId)
                         }
                     } else {
                         repository.addToFavorites(barcode)
-                        // Optional: sync with server
+                        // Sync with server
                         val token = sessionManager.getAuthToken()
                         if (token != null) {
                             val request = AddFavoriteRequest(
-                                favoritable_id = 0, // Need actual ID if possible
-                                favoritable_type = "product",
+                                favoritable_id = 0, // In real case, we need product ID from server
+                                favoritable_type = "App\\Models\\ProductModel",
                                 product_name = it.name,
-                                halal_status = it.status
+                                halal_status = it.status,
+                                product_image = it.image
                             )
-                            apiService.addFavorite("Bearer $token", request)
+                            val response = apiService.addFavorite("Bearer $token", request)
+                            if (response.isSuccessful && response.body()?.success == true) {
+                                val serverId = response.body()?.data?.id
+                                repository.updateFavoriteServerId(barcode, serverId)
+                            }
                         }
                     }
                 }
@@ -92,10 +98,11 @@ class FavoritesViewModel @Inject constructor(
                                 image = favorite.productImage,
                                 timestamp = System.currentTimeMillis(),
                                 isFavorite = true,
+                                favoriteServerId = favorite.id,
                                 isSynced = true
                             )
                             repository.insertProduct(entity)
-                            repository.addToFavorites(barcode)
+                            repository.updateFavoriteServerId(barcode, favorite.id)
                         }
                     }
                 }

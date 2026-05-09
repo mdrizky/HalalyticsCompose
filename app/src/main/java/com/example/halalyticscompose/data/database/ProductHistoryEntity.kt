@@ -13,5 +13,6 @@ data class ProductHistoryEntity(
     val sources: String? = null,
     val timestamp: Long = System.currentTimeMillis(),
     val isFavorite: Boolean = false,
+    val favoriteServerId: Int? = null,
     val isSynced: Boolean = false
 )

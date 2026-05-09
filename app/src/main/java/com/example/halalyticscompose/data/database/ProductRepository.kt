@@ -51,6 +51,12 @@ class ProductRepository @Inject constructor(
     // Remove from favorites
     suspend fun removeFromFavorites(barcode: String) {
         productHistoryDao.updateFavoriteStatus(barcode, false)
+        productHistoryDao.updateFavoriteServerId(barcode, null)
+    }
+
+    // Update server ID for favorite
+    suspend fun updateFavoriteServerId(barcode: String, serverId: Int?) {
+        productHistoryDao.updateFavoriteServerId(barcode, serverId)
     }
     
     // Check if product is favorite

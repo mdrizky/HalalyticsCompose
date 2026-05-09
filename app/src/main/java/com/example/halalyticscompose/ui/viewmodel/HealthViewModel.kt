@@ -39,12 +39,23 @@ class HealthViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _categories = MutableStateFlow<List<CategoryItem>>(emptyList())
+    val categories: StateFlow<List<CategoryItem>> = _categories.asStateFlow()
+
     init {
         refreshHealthData()
+        fetchCategories()
+        loadBmi()
+    }
+
+    fun loadBmi() {
+        val savedBmi = sessionManager.getBmi() ?: 0f
+        _bmi.value = if (savedBmi > 0) String.format("%.1f", savedBmi) else "0.0"
     }
 
     fun refreshHealthData() {
-        updateDailyIntakeFromLocal()
+        loadBmi()
+        loadDailyIntake()
         fetchAiDailyInsight()
         fetchHealthScore()
     }
@@ -73,11 +84,35 @@ class HealthViewModel @Inject constructor(
                         caffeineLimitMg = 400,
                         calorieLimit = 2000,
                         sugarLimitG = 50,
-                        sodiumLimitMg = 2300
+                        sodiumLimitMg = 2300,
+                        carbsTargetG = 275,
+                        proteinTargetG = 50,
+                        fatTargetG = 70
                     )
                 )
             } catch (e: Exception) {
                 Log.e("HealthViewModel", "Failed reading local intake DB", e)
+            }
+        }
+    }
+
+    fun loadDailyIntake() {
+        val token = sessionManager.getAuthToken() ?: return
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = apiService.getDailyIntake("Bearer $token")
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _dailyIntake.value = response.body()
+                } else {
+                    // Fallback to local computation if API fails
+                    updateDailyIntakeFromLocal()
+                }
+            } catch (e: Exception) {
+                Log.e("HealthViewModel", "Failed to fetch daily intake", e)
+                updateDailyIntakeFromLocal()
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -125,6 +160,18 @@ class HealthViewModel @Inject constructor(
                 )
             )
             updateDailyIntakeFromLocal()
+        }
+    }
+    fun fetchCategories() {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getCategories()
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _categories.value = response.body()?.data ?: emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("HealthViewModel", "Failed to fetch categories", e)
+            }
         }
     }
 }

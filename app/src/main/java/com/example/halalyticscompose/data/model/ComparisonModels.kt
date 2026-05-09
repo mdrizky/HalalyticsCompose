@@ -18,7 +18,8 @@ data class ComparisonData(
     @SerializedName("comparison") val comparison: List<ProductComparison>,
     @SerializedName("better_choice") val betterChoice: String,
     @SerializedName("reason") val reason: String,
-    @SerializedName("summary") val summary: String
+    @SerializedName("summary") val summary: String,
+    @SerializedName("similarities") val similarities: List<String>? = null
 )
 
 data class ProductComparison(

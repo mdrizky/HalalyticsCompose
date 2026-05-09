@@ -159,6 +159,7 @@ data class Kategori(
     val namaKategori: String = ""
 )
 
+
 data class HealthEncyclopedia(
     val id: Int = 0,
     val type: String = "",
@@ -181,27 +182,3 @@ data class HealthEncyclopediaDetailResponse(
     val message: String? = null
 )
 
-/**
- * Leaderboard & Gamification Models
- */
-data class LeaderboardMember(
-    @SerializedName("rank") val rank: Int,
-    @SerializedName("username") val username: String,
-    @SerializedName("full_name") val fullName: String,
-    @SerializedName("total_points") val totalPoints: Int,
-    @SerializedName("level") val level: String,
-    @SerializedName("badge") val badge: String,
-    @SerializedName("is_current_user") val isCurrentUser: Boolean = false
-)
-
-data class LeaderboardResponse(
-    @SerializedName("success") val success: Boolean,
-    @SerializedName("message") val message: String?,
-    @SerializedName("content") val content: List<LeaderboardMember>?
-)
-
-data class MyRankResponse(
-    @SerializedName("success") val success: Boolean,
-    @SerializedName("message") val message: String?,
-    @SerializedName("content") val content: LeaderboardMember?
-)

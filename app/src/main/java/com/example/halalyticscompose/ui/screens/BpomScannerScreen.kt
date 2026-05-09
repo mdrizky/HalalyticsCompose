@@ -267,6 +267,19 @@ private fun BpomProductDetailCard(product: BpomProduct) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val fallbackUrl = "https://ui-avatars.com/api/?name=${product.namaProduk ?: "BP"}&background=E0F2F1&color=00897B&size=300"
+            coil.compose.AsyncImage(
+                model = if (!product.imageUrl.isNullOrEmpty()) product.imageUrl else fallbackUrl,
+                contentDescription = product.namaProduk,
+                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Hasil Verifikasi", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                 Spacer(modifier = Modifier.weight(1f))
@@ -314,15 +327,16 @@ private fun BpomProductListCard(product: BpomProduct, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
+            val fallbackUrl = "https://ui-avatars.com/api/?name=${product.namaProduk ?: "BP"}&background=E0F2F1&color=00897B&size=100"
+            coil.compose.AsyncImage(
+                model = if (!product.imageUrl.isNullOrEmpty()) product.imageUrl else fallbackUrl,
+                contentDescription = product.namaProduk,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFE0F2F1)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("BP", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold)
-            }
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
             Spacer(modifier = Modifier.size(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

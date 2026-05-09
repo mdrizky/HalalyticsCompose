@@ -60,6 +60,7 @@ class ThemeManager(private val context: Context) {
             THEME_LIGHT -> THEME_DARK
             THEME_DARK -> THEME_LIGHT
             THEME_SYSTEM -> THEME_DARK // Jika system, toggle ke dark
+            else -> THEME_LIGHT
         }
         setTheme(newTheme)
     }

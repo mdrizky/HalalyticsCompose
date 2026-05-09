@@ -65,6 +65,11 @@ class SessionManager(private val context: Context) {
         private const val KEY_AUTO_LOGOUT_MINUTES = "auto_logout_minutes"
         private const val KEY_LAST_BACKGROUND_TS = "last_background_ts"
         
+        // Location keys
+        private const val KEY_ADDRESS = "address"
+        private const val KEY_CITY = "city"
+        private const val KEY_PROVINCE = "province"
+        
         @Volatile
         private var instance: SessionManager? = null
         
@@ -233,6 +238,23 @@ class SessionManager(private val context: Context) {
     fun getActivityLevel(): String? = prefs.getString(KEY_ACTIVITY_LEVEL, null)
     fun getDietPreference(): String? = prefs.getString(KEY_DIET_PREFERENCE, null)
     fun getGoal(): String? = prefs.getString(KEY_GOAL, null)
+    
+    // ========================================
+    // Location Methods
+    // ========================================
+    
+    fun saveLocation(address: String?, city: String?, province: String?) {
+        prefs.edit().apply {
+            putString(KEY_ADDRESS, address)
+            putString(KEY_CITY, city)
+            putString(KEY_PROVINCE, province)
+            apply()
+        }
+    }
+    
+    fun getAddress(): String? = prefs.getString(KEY_ADDRESS, null)
+    fun getCity(): String? = prefs.getString(KEY_CITY, null)
+    fun getProvince(): String? = prefs.getString(KEY_PROVINCE, null)
     
     // ========================================
     // Stats Methods

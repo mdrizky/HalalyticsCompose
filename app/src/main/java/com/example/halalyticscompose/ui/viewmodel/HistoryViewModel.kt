@@ -50,6 +50,9 @@ class HistoryViewModel @Inject constructor(
     private val _currentStreak = MutableStateFlow(0)
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
+    private val _recommendedProducts = MutableStateFlow<List<ProductInfo>>(emptyList())
+    val recommendedProducts: StateFlow<List<ProductInfo>> = _recommendedProducts.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -78,6 +81,21 @@ class HistoryViewModel @Inject constructor(
         val token = sessionManager.getAuthToken() ?: return
         fetchHistory(token)
         fetchUserStats(token)
+        fetchRecommendations(token)
+    }
+
+    private fun fetchRecommendations(token: String) {
+        viewModelScope.launch {
+            try {
+                // Fetch for a default category, or general
+                val response = apiService.getRecommendations("Bearer $token", "food")
+                if (response.response_code == 200) {
+                    _recommendedProducts.value = response.content
+                }
+            } catch (e: Exception) {
+                Log.e("HistoryViewModel", "Fetch recommendations error", e)
+            }
+        }
     }
 
     fun startRealtimeSync() {

@@ -113,6 +113,7 @@ class AuthViewModel @Inject constructor(
                 _isLoggedIn.value = true
                 _accessToken.value = loginData.token
                 _isAdmin.value = user.role.equals("admin", ignoreCase = true)
+                _userData.value = user.toUser()
                 
                 onSuccess(loginData)
             }
@@ -129,19 +130,7 @@ class AuthViewModel @Inject constructor(
                 val response = apiService.register(request)
                 if (response.isSuccessful && response.body()?.success == true) {
                     val loginData = response.body()!!
-                    val user = loginData.user
-                    if (user != null) {
-                        sessionManager.saveAuthToken(loginData.token ?: "")
-                        sessionManager.saveUserId(user.id_user)
-                        sessionManager.saveUser(user.full_name ?: user.username, user.email)
-                        sessionManager.saveRole(user.role)
-                        
-                        _isLoggedIn.value = true
-                        _accessToken.value = loginData.token
-                        _isAdmin.value = user.role.equals("admin", ignoreCase = true)
-                        
-                        onSuccess(loginData)
-                    }
+                    onSuccess(loginData)
                 } else {
                     _errorMessage.value = response.body()?.message ?: "Registrasi gagal."
                 }
@@ -216,6 +205,9 @@ class AuthViewModel @Inject constructor(
         activityLevel: String? = null,
         gender: String? = null,
         bio: String? = null,
+        address: String? = null,
+        emergencyContact: String? = null,
+        birthDate: String? = null,
         image: java.io.File? = null,
         onSuccess: () -> Unit = {},
         onError: (String) -> Unit = {}
@@ -246,7 +238,10 @@ class AuthViewModel @Inject constructor(
                         goal = goal?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         activityLevel = activityLevel?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         gender = gender?.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        bio = bio?.toRequestBody("text/plain".toMediaTypeOrNull())
+                        bio = bio?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        address = address?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        emergencyContact = emergencyContact?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        birthDate = birthDate?.toRequestBody("text/plain".toMediaTypeOrNull())
                     )
                 } else {
                     apiService.updateProfile(
@@ -265,15 +260,19 @@ class AuthViewModel @Inject constructor(
                         goal = goal,
                         activityLevel = activityLevel,
                         gender = gender,
-                        bio = bio
+                        bio = bio,
+                        address = address,
+                        emergencyContact = emergencyContact,
+                        birthDate = birthDate
                     )
                 }
                 
                 if (response.isSuccess) {
-                    loadUserProfile()
+                    loadUserProfile() // Refresh local state from server
                     onSuccess()
                 } else {
-                    onError("Gagal memperbarui profil")
+                    val errorMsg = response.errorBody()?.string() ?: "Gagal memperbarui profil"
+                    onError(errorMsg)
                 }
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Update profile failed", e)
@@ -291,6 +290,39 @@ class AuthViewModel @Inject constructor(
         _userData.value = null
         _isAdmin.value = false
         onComplete()
+    }
+
+    fun changePassword(
+        current: String,
+        new: String,
+        confirm: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val token = _accessToken.value ?: return@launch
+                
+                val response = apiService.changePassword(
+                    bearer = "Bearer $token",
+                    current = current,
+                    new = new,
+                    confirm = confirm
+                )
+                
+                if (response.success) {
+                    onSuccess()
+                } else {
+                    onError(response.message ?: "Gagal mengganti password")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Change password failed", e)
+                onError(e.message ?: "Terjadi kesalahan")
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun clearError() {

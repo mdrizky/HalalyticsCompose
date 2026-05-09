@@ -4,35 +4,43 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.halalyticscompose.R
 import com.example.halalyticscompose.data.model.User
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
-import com.example.halalyticscompose.utils.SessionManager
+import coil.compose.AsyncImage
 import java.io.File
 import java.io.FileOutputStream
-import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,17 +52,29 @@ fun EditProfileScreen(
     val userData by viewModel.userData.collectAsState()
     val isLoadingVM by viewModel.isLoading.collectAsState()
     
+    // Form States
     var fullName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var height by remember { mutableStateOf("175") }
-    var weight by remember { mutableStateOf("70") }
-    var age by remember { mutableStateOf("28") }
-    var selectedDiet by remember { mutableStateOf("None") }
+    var email by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
+    var height by remember { mutableStateOf("") }
+    var weight by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Male") }
+    var bloodType by remember { mutableStateOf("-") }
+    var selectedDiet by remember { mutableStateOf("None") }
     var activityLevel by remember { mutableStateOf("medium") }
+    var address by remember { mutableStateOf("") }
+    var emergencyContact by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
     var allergy by remember { mutableStateOf("") }
     var medicalHistory by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
+    
+    // Password States
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     
     var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -64,30 +84,44 @@ fun EditProfileScreen(
 
     var isInitialized by remember { mutableStateOf(false) }
     
+    LaunchedEffect(Unit) {
+        viewModel.loadUserProfile()
+    }
+    
     LaunchedEffect(userData) {
         userData?.let { user ->
             if (!isInitialized) {
                 fullName = user.fullName ?: ""
                 phone = user.phone ?: ""
-                height = user.height?.toString() ?: "175"
-                weight = user.weight?.toString() ?: "70"
-                age = user.age?.toString() ?: "28"
-                selectedDiet = user.dietPreference ?: "None"
+                email = user.email
+                bio = user.bio ?: ""
+                height = user.height?.toString() ?: ""
+                weight = user.weight?.toString() ?: ""
+                age = user.age?.toString() ?: ""
                 gender = user.gender ?: "Male"
+                bloodType = user.bloodType ?: "-"
+                selectedDiet = user.dietPreference ?: "None"
                 activityLevel = user.activityLevel ?: "medium"
                 allergy = user.allergy ?: ""
                 medicalHistory = user.medicalHistory ?: ""
-                bio = user.bio ?: ""
+                address = user.address ?: ""
+                emergencyContact = user.emergencyContact ?: ""
+                birthDate = user.birthDate ?: ""
                 isInitialized = true
             }
         }
     }
 
-    fun persistProfile(redirectAfterSave: Boolean = false, showSuccessToast: Boolean = false) {
+    fun handleSave() {
+        if (fullName.isBlank()) {
+            Toast.makeText(context, "Nama lengkap tidak boleh kosong", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val imageFile = selectedImageUri?.let { uri ->
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
-                val file = File(context.cacheDir, "profile_${System.currentTimeMillis()}.jpg")
+                val file = File(context.cacheDir, "profile_update_${System.currentTimeMillis()}.jpg")
                 val outputStream = FileOutputStream(file)
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()
@@ -99,138 +133,459 @@ fun EditProfileScreen(
         viewModel.updateProfile(
             fullName = fullName,
             phone = phone,
+            bio = bio,
             height = height.toDoubleOrNull(),
             weight = weight.toDoubleOrNull(),
             age = age.toIntOrNull(),
-            dietPreference = selectedDiet,
             gender = gender,
+            bloodType = bloodType,
+            dietPreference = selectedDiet,
             activityLevel = activityLevel,
             allergy = allergy,
             medicalHistory = medicalHistory,
-            bio = bio,
+            address = address,
+            emergencyContact = emergencyContact,
+            birthDate = birthDate,
             image = imageFile,
             onSuccess = {
-                if (showSuccessToast) {
-                    Toast.makeText(context, "Profil berhasil diperbarui ✓", Toast.LENGTH_SHORT).show()
-                }
-                if (redirectAfterSave) {
-                    navController.popBackStack()
-                }
+                Toast.makeText(context, "Profil berhasil diperbarui ✨", Toast.LENGTH_SHORT).show()
+                navController.popBackStack()
             },
             onError = { msg ->
                 Toast.makeText(context, "Gagal simpan: $msg", Toast.LENGTH_SHORT).show()
             }
         )
     }
-    
+
+    if (userData == null && !isInitialized) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile") },
+                title = { Text("Edit Profil", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
                     }
                 },
                 actions = {
-                    TextButton(onClick = { persistProfile(redirectAfterSave = true, showSuccessToast = true) }) {
-                        Text("Simpan")
+                    Button(
+                        onClick = { handleSave() },
+                        enabled = !isLoadingVM,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        if (isLoadingVM) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                        } else {
+                            Text("Simpan")
+                        }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { paddingValues ->
-        if (isLoadingVM && !isInitialized) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(bottom = 32.dp)
+        ) {
+            // --- HEADER & PHOTO ---
+            item {
+                ProfilePhotoHeader(
+                    userData = userData,
+                    selectedUri = selectedImageUri,
+                    onPickPhoto = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+                )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item { ProfileHeaderSection(userData) }
-                
-                item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (selectedImageUri != null) {
-                                    AsyncImage(model = selectedImageUri, contentDescription = null, modifier = Modifier.size(44.dp).clip(CircleShape), contentScale = ContentScale.Crop)
-                                } else {
-                                    Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(44.dp))
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text("Foto Profil", fontWeight = FontWeight.SemiBold)
-                            }
-                            OutlinedButton(onClick = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
-                                Text("Ganti")
-                            }
+
+            // --- PERSONAL INFO SECTION ---
+            item {
+                SectionHeader("Informasi Pribadi", Icons.Default.Person)
+                EditCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        EditTextField(value = fullName, onValueChange = { fullName = it }, label = "Nama Lengkap", icon = Icons.Default.Badge)
+                        EditTextField(value = email, onValueChange = { }, label = "Email", icon = Icons.Default.Email, enabled = false)
+                        EditTextField(value = phone, onValueChange = { phone = it }, label = "Nomor HP", icon = Icons.Default.Phone, keyboardType = KeyboardType.Phone)
+                        EditTextField(value = birthDate, onValueChange = { birthDate = it }, label = "Tanggal Lahir", icon = Icons.Default.Cake, placeholder = "YYYY-MM-DD")
+                        EditTextField(value = address, onValueChange = { address = it }, label = "Alamat", icon = Icons.Default.Home)
+                        EditTextField(value = bio, onValueChange = { bio = it }, label = "Bio", icon = Icons.Default.EditNote, singleLine = false, minLines = 2)
+                    }
+                }
+            }
+
+            // --- HEALTH PROFILE SECTION ---
+            item {
+                SectionHeader("Profil Kesehatan", Icons.Default.HealthAndSafety)
+                EditCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            EditTextField(value = height, onValueChange = { height = it }, label = "Tinggi (cm)", icon = Icons.Default.Height, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                            EditTextField(value = weight, onValueChange = { weight = it }, label = "Berat (kg)", icon = Icons.Default.Scale, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            EditTextField(value = age, onValueChange = { age = it }, label = "Umur", icon = Icons.Default.CalendarToday, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                            BloodTypeDropdown(selected = bloodType, onSelected = { bloodType = it }, modifier = Modifier.weight(1f))
+                        }
+                        GenderSelector(selected = gender, onSelected = { gender = it })
+                        EditTextField(value = emergencyContact, onValueChange = { emergencyContact = it }, label = "Kontak Darurat", icon = Icons.Default.ContactPhone, keyboardType = KeyboardType.Phone)
+                        EditTextField(value = allergy, onValueChange = { allergy = it }, label = "Alergi", icon = Icons.Default.Warning, placeholder = "Kacang, Seafood, dll")
+                        EditTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = "Riwayat Medis", icon = Icons.Default.History, singleLine = false, minLines = 2)
+                    }
+                }
+            }
+
+            // --- SECURITY SECTION ---
+            item {
+                SectionHeader("Keamanan", Icons.Default.Security)
+                EditCard {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showPasswordDialog = true }
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Ganti Password", fontWeight = FontWeight.Bold)
+                            Text("Amankan akun Anda dengan password baru", fontSize = 12.sp, color = Color.Gray)
+                        }
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.Gray)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showPasswordDialog) {
+        ChangePasswordDialog(
+            currentPassword = currentPassword,
+            newPassword = newPassword,
+            confirmPassword = confirmPassword,
+            onCurrentChange = { currentPassword = it },
+            onNewChange = { newPassword = it },
+            onConfirmChange = { confirmPassword = it },
+            onDismiss = { showPasswordDialog = false },
+            onSubmit = {
+                if (newPassword != confirmPassword) {
+                    Toast.makeText(context, "Konfirmasi password tidak cocok", Toast.LENGTH_SHORT).show()
+                } else if (newPassword.length < 6) {
+                    Toast.makeText(context, "Password minimal 6 karakter", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.changePassword(
+                        current = currentPassword,
+                        new = newPassword,
+                        confirm = confirmPassword,
+                        onSuccess = {
+                            Toast.makeText(context, "Password berhasil diganti! 🔐", Toast.LENGTH_SHORT).show()
+                            showPasswordDialog = false
+                            currentPassword = ""
+                            newPassword = ""
+                            confirmPassword = ""
+                        },
+                        onError = { msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            },
+            isLoading = isLoadingVM
+        )
+    }
+}
+
+@Composable
+fun ProfilePhotoHeader(
+    userData: User?,
+    selectedUri: android.net.Uri?,
+    onPickPhoto: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Gradient background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(MaterialTheme.colorScheme.primary.copy(0.1f), Color.Transparent)
+                    )
+                )
+        )
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(contentAlignment = Alignment.BottomEnd) {
+                Surface(
+                    modifier = Modifier
+                        .size(110.dp)
+                        .border(4.dp, Color.White, CircleShape)
+                        .shadow(8.dp, CircleShape),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    if (selectedUri != null) {
+                        AsyncImage(
+                            model = selectedUri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (!userData?.image.isNullOrBlank()) {
+                        AsyncImage(
+                            model = userData?.image,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.primary.copy(0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Person, null, modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
                 
-                item {
-                    HealthProfileSection(
-                        height = height, weight = weight, age = age, gender = gender, activityLevel = activityLevel, medicalHistory = medicalHistory,
-                        onHeightChange = { height = it }, onWeightChange = { weight = it }, onAgeChange = { age = it }, onGenderChange = { gender = it },
-                        onActivityLevelChange = { activityLevel = it }, onMedicalHistoryChange = { medicalHistory = it }
-                    )
-                }
-                
-                item {
-                    DietaryPreferencesSection(selectedDiet = selectedDiet, allergyText = allergy, onDietChange = { selectedDiet = it }, onAllergyChange = { allergy = it })
+                SmallFloatingActionButton(
+                    onClick = onPickPhoto,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    modifier = Modifier.offset(x = (-4).dp, y = (-4).dp)
+                ) {
+                    Icon(Icons.Default.CameraAlt, null, modifier = Modifier.size(16.dp))
                 }
             }
-        }
-    }
-}
-
-// Re-using sub-composables from original file but keeping them simple for brevity in this refactor
-@Composable
-fun ProfileHeaderSection(userData: User?) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(80.dp).background(Brush.verticalGradient(listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))), CircleShape), contentAlignment = Alignment.Center) {
-                Text(text = "👤", fontSize = 32.sp)
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(text = userData?.fullName ?: "User", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(text = userData?.email ?: "user@halalytics.com", color = Color.Gray, fontSize = 14.sp)
-            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(userData?.username ?: "username", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
     }
 }
 
 @Composable
-fun HealthProfileSection(height: String, weight: String, age: String, gender: String, activityLevel: String, medicalHistory: String, onHeightChange: (String) -> Unit, onWeightChange: (String) -> Unit, onAgeChange: (String) -> Unit, onGenderChange: (String) -> Unit, onActivityLevelChange: (String) -> Unit, onMedicalHistoryChange: (String) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun SectionHeader(title: String, icon: ImageVector) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+fun EditCard(content: @Composable () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "🏃‍♂️ Health Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(value = height, onValueChange = onHeightChange, label = { Text("H (cm)") }, modifier = Modifier.weight(1f))
-                OutlinedTextField(value = weight, onValueChange = onWeightChange, label = { Text("W (kg)") }, modifier = Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(value = age, onValueChange = onAgeChange, label = { Text("Age") }, modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Gender")
-            Row {
-                listOf("Male", "Female").forEach { opt ->
-                    FilterChip(selected = gender == opt, onClick = { onGenderChange(opt) }, label = { Text(opt) }, modifier = Modifier.padding(end = 4.dp))
-                }
+            content()
+        }
+    }
+}
+
+@Composable
+fun EditTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector,
+    enabled: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    placeholder: String = "",
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        leadingIcon = { Icon(icon, null, modifier = Modifier.size(20.dp)) },
+        enabled = enabled,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = singleLine,
+        minLines = minLines,
+        placeholder = { if (placeholder.isNotEmpty()) Text(placeholder, color = Color.Gray) },
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+            disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BloodTypeDropdown(selected: String, onSelected: (String) -> Unit, modifier: Modifier = Modifier) {
+    val types = listOf("-", "A", "B", "AB", "O")
+    var expanded by remember { mutableStateOf(false) }
+    
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Gol. Darah") },
+            leadingIcon = { Icon(Icons.Default.WaterDrop, null, modifier = Modifier.size(20.dp), tint = Color.Red) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.menuAnchor(),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            )
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            types.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type) },
+                    onClick = {
+                        onSelected(type)
+                        expanded = false
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun DietaryPreferencesSection(selectedDiet: String, allergyText: String, onDietChange: (String) -> Unit, onAllergyChange: (String) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "🥗 Dietary", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            OutlinedTextField(value = allergyText, onValueChange = onAllergyChange, label = { Text("Allergies") }, modifier = Modifier.fillMaxWidth())
+fun GenderSelector(selected: String, onSelected: (String) -> Unit) {
+    Column {
+        Text("Jenis Kelamin", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = selected == "Male",
+                onClick = { onSelected("Male") },
+                label = { Text("Laki-laki") },
+                leadingIcon = { if (selected == "Male") Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
+            )
+            FilterChip(
+                selected = selected == "Female",
+                onClick = { onSelected("Female") },
+                label = { Text("Perempuan") },
+                leadingIcon = { if (selected == "Female") Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
+            )
         }
     }
+}
+
+@Composable
+fun ChangePasswordDialog(
+    currentPassword: String,
+    newPassword: String,
+    confirmPassword: String,
+    onCurrentChange: (String) -> Unit,
+    onNewChange: (String) -> Unit,
+    onConfirmChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSubmit: () -> Unit,
+    isLoading: Boolean
+) {
+    var showCurrent by remember { mutableStateOf(false) }
+    var showNew by remember { mutableStateOf(false) }
+    var showConfirm by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Ganti Password", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PasswordTextField(
+                    value = currentPassword,
+                    onValueChange = onCurrentChange,
+                    label = "Password Saat Ini",
+                    isVisible = showCurrent,
+                    onToggleVisibility = { showCurrent = !showCurrent }
+                )
+                PasswordTextField(
+                    value = newPassword,
+                    onValueChange = onNewChange,
+                    label = "Password Baru",
+                    isVisible = showNew,
+                    onToggleVisibility = { showNew = !showNew }
+                )
+                PasswordTextField(
+                    value = confirmPassword,
+                    onValueChange = onConfirmChange,
+                    label = "Konfirmasi Password Baru",
+                    isVisible = showConfirm,
+                    onToggleVisibility = { showConfirm = !showConfirm }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onSubmit,
+                enabled = !isLoading && currentPassword.isNotEmpty() && newPassword.isNotEmpty(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isLoading) CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                else Text("Simpan Password")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Batal") }
+        },
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+@Composable
+fun PasswordTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isVisible: Boolean,
+    onToggleVisibility: () -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = onToggleVisibility) {
+                Icon(if (isVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+            }
+        },
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    )
 }

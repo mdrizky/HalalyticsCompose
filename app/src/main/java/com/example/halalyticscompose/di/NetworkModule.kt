@@ -194,6 +194,23 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @javax.inject.Named("OllamaRetrofit")
+    fun provideOllamaRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:11434/") // Default for Android Emulator
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOllamaApiService(@javax.inject.Named("OllamaRetrofit") retrofit: Retrofit): com.example.halalyticscompose.data.api.OllamaApiService {
+        return retrofit.create(com.example.halalyticscompose.data.api.OllamaApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideChatWebSocketManager(
         okHttpClient: OkHttpClient,
         sessionManager: SessionManager,

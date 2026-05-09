@@ -131,7 +131,7 @@ fun BasicProfileScreen(
                     
                     // User name
                     Text(
-                        text = userData?.fullName ?: "Guest User",
+                        text = userData?.fullName ?: userData?.username ?: "Halalytics User",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1A202C)

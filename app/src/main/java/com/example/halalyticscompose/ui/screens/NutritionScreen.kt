@@ -38,6 +38,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -98,7 +100,7 @@ fun NutritionScreen(
                 title = { Text("Catatan Nutrisi") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 actions = {
@@ -114,7 +116,7 @@ fun NutritionScreen(
         floatingActionButton = {
             if (selectedTab == 0) {
                 FloatingActionButton(onClick = { showMealPicker = true }) {
-                    Icon(Icons.Default.AddAPhoto, contentDescription = null)
+                    Icon(Icons.Default.AddAPhoto, contentDescription = "Tambah Foto Makanan")
                 }
             }
         },
@@ -245,11 +247,15 @@ private fun DailyNutritionTab(
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(48.dp))
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text("Belum ada catatan makan hari ini")
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Button(onClick = onLogMeal) {
+                        Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Belum ada catatan makan hari ini", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onLogMeal,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                        ) {
                             Icon(Icons.Default.AddAPhoto, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Foto Makanan")
@@ -304,10 +310,12 @@ private fun MealLogCard(log: DailyNutritionLog) {
         Row(modifier = Modifier.padding(14.dp)) {
             AsyncImage(
                 model = log.imagePath,
-                contentDescription = null,
+                contentDescription = log.mealType,
                 modifier = Modifier
-                    .size(72.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {

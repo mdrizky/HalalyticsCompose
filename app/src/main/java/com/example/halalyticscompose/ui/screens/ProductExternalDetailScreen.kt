@@ -219,21 +219,13 @@ private fun ProductDetailContent(
                     contentAlignment = Alignment.Center
                 ) {
                     val imageUrl = product.getBestImageUrl()
-                    if (imageUrl != null) {
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = product.getDisplayName(),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
-                    } else {
-                        Icon(
-                            Icons.Outlined.Inventory2,
-                            contentDescription = null,
-                            tint = TextMuted,
-                            modifier = Modifier.size(64.dp)
-                        )
-                    }
+                    val fallbackUrl = "https://ui-avatars.com/api/?name=${product.getDisplayName()}&background=1E293B&color=3B82F6&size=400"
+                    AsyncImage(
+                        model = imageUrl ?: fallbackUrl,
+                        contentDescription = product.getDisplayName(),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
                     
                     // Nutriscore badge
                     product.nutriscoreGrade?.let { grade ->

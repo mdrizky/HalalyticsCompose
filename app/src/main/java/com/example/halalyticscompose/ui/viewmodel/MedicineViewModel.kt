@@ -143,7 +143,13 @@ class MedicineViewModel @Inject constructor(
                             allergies = sessionManager.getAllergy(),
                             medicalHistory = sessionManager.getMedicalHistory(),
                             isGlutenFree = sessionManager.isGlutenFree(),
-                            hasNutAllergy = sessionManager.hasNutAllergy()
+                            hasNutAllergy = sessionManager.hasNutAllergy(),
+                            bloodType = sessionManager.getBloodType(),
+                            activityLevel = sessionManager.getActivityLevel(),
+                            dietPreference = sessionManager.getDietPreference(),
+                            address = sessionManager.getAddress(),
+                            city = sessionManager.getCity(),
+                            province = sessionManager.getProvince()
                         )
                         _symptomsAnalysis.value = directResult
                         Log.d("MedicineVM", "Direct AI analysis success: ${directResult.condition}")

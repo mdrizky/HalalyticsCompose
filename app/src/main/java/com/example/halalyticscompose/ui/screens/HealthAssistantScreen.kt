@@ -95,6 +95,11 @@ fun HealthAssistantScreen(
                     symptoms = result
                     isListening = false
                     voiceStatus = context.getString(R.string.assistant_voice_detected)
+                    // Auto-trigger analysis for better UX
+                    if (result.isNotBlank()) {
+                        viewModel.analyzeSymptoms(result)
+                        showResults = true
+                    }
                 },
                 onError = { msg ->
                     isListening = false
@@ -162,6 +167,51 @@ fun HealthAssistantScreen(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
+        },
+        bottomBar = {
+            // Sticky bottom bar — Chat Dokter
+            if (showResults && symptomsAnalysis != null) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shadowElevation = 12.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 3.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.assistant_chat_doctor_title),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            stringResource(R.string.assistant_chat_doctor_desc),
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { navController.navigate("halocode") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF00897B)
+                            )
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.assistant_chat_doctor_button),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
@@ -281,6 +331,11 @@ fun HealthAssistantScreen(
                                                     symptoms = result
                                                     isListening = false
                                                     voiceStatus = context.getString(R.string.assistant_voice_detected)
+                                                    // Auto-trigger analysis for better UX
+                                                    if (result.isNotBlank()) {
+                                                        viewModel.analyzeSymptoms(result)
+                                                        showResults = true
+                                                    }
                                                 },
                                                 onError = { msg ->
                                                     isListening = false
@@ -496,6 +551,72 @@ fun HealthAssistantScreen(
                                 )
                             }
 
+                            // === Profil Pasien yang Dibaca AI ===
+                            if (!analysis.profil_pasien_dibaca.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(Color(0xFF00897B).copy(0.08f))
+                                        .border(1.dp, Color(0xFF00897B).copy(0.16f), RoundedCornerShape(14.dp))
+                                        .padding(14.dp)
+                                ) {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.PersonSearch, null, tint = Color(0xFF00897B), modifier = Modifier.size(18.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                stringResource(R.string.assistant_profile_read_title),
+                                                color = Color(0xFF00897B),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            analysis.profil_pasien_dibaca!!,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(0.85f),
+                                            fontSize = 13.sp,
+                                            lineHeight = 20.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // === Catatan Lokasi ===
+                            if (!analysis.catatan_lokasi.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(Color(0xFF5C6BC0).copy(0.08f))
+                                        .border(1.dp, Color(0xFF5C6BC0).copy(0.16f), RoundedCornerShape(14.dp))
+                                        .padding(14.dp)
+                                ) {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.LocationOn, null, tint = Color(0xFF5C6BC0), modifier = Modifier.size(18.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                stringResource(R.string.assistant_location_note_title),
+                                                color = Color(0xFF5C6BC0),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            analysis.catatan_lokasi!!,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(0.85f),
+                                            fontSize = 13.sp,
+                                            lineHeight = 20.sp
+                                        )
+                                    }
+                                }
+                            }
+
                             if (!analysis.ringkasan_keluhan.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.height(14.dp))
                                 Box(
@@ -671,6 +792,74 @@ fun HealthAssistantScreen(
                                 if (!analysis.future_prevention.isNullOrBlank()) {
                                     Text(stringResource(R.string.assistant_future_prevention), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp)
                                     Text(analysis.future_prevention!!, color = MaterialTheme.colorScheme.onSurface.copy(0.75f), fontSize = 13.sp, lineHeight = 20.sp)
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+                                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(0.05f))
+                                Spacer(modifier = Modifier.height(24.dp))
+                            }
+
+                            // === OBAT HERBAL & TRADISIONAL (SEBELUM OBAT APOTEK) ===
+                            if (analysis.herbal_remedies.isNotEmpty()) {
+                                SectionTitle(stringResource(R.string.assistant_herbal_title), Icons.Outlined.Spa, Color(0xFF2E7D32))
+                                Text(
+                                    stringResource(R.string.assistant_herbal_subtitle),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    analysis.herbal_remedies.forEach { herbal ->
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(14.dp))
+                                                .background(Color(0xFF2E7D32).copy(0.06f))
+                                                .border(1.dp, Color(0xFF2E7D32).copy(0.14f), RoundedCornerShape(14.dp))
+                                                .padding(14.dp)
+                                        ) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(Icons.Default.Eco, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(18.dp))
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Text(herbal.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
+                                                }
+                                                if (!herbal.description.isNullOrBlank()) {
+                                                    Text(herbal.description!!, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.8f), lineHeight = 18.sp)
+                                                }
+                                                if (!herbal.how_to_prepare.isNullOrBlank()) {
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Text(stringResource(R.string.assistant_herbal_prepare), fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = Color(0xFF2E7D32))
+                                                    Text(herbal.how_to_prepare!!, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.8f), lineHeight = 18.sp)
+                                                }
+                                                if (!herbal.how_to_use.isNullOrBlank()) {
+                                                    Text(stringResource(R.string.assistant_herbal_use), fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = Color(0xFF2E7D32))
+                                                    Text(herbal.how_to_use!!, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.8f), lineHeight = 18.sp)
+                                                }
+                                                if (!herbal.frequency.isNullOrBlank()) {
+                                                    Row {
+                                                        Icon(Icons.Default.AccessTime, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(14.dp))
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        Text(stringResource(R.string.assistant_herbal_frequency) + " ${herbal.frequency}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.8f))
+                                                    }
+                                                }
+                                                if (!herbal.duration.isNullOrBlank()) {
+                                                    Row {
+                                                        Icon(Icons.Default.DateRange, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(14.dp))
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        Text(stringResource(R.string.assistant_herbal_duration) + " ${herbal.duration}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(0.8f))
+                                                    }
+                                                }
+                                                if (!herbal.precautions.isNullOrBlank()) {
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Row(verticalAlignment = Alignment.Top) {
+                                                        Icon(Icons.Outlined.WarningAmber, null, tint = Color(0xFFE65100), modifier = Modifier.size(14.dp))
+                                                        Spacer(modifier = Modifier.width(4.dp))
+                                                        Text(stringResource(R.string.assistant_herbal_precaution) + " ${herbal.precautions}", fontSize = 11.sp, color = Color(0xFFE65100), lineHeight = 16.sp)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 Spacer(modifier = Modifier.height(24.dp))
                                 HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(0.05f))

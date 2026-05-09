@@ -199,7 +199,6 @@
     <string name="feature_scan_ai">Scan AI</string>
     <string name="feature_cek_obat">Check Medicine</string>
     <string name="feature_kosmetik">Cosmetics</string>
-    <string name="feature_halal_points">Halal</string>
     <string name="feature_bpom_id">BPOM</string>
     <string name="feature_ai_chat_id">AI Chat</string>
     <string name="feature_riwayat_id">History</string>
@@ -484,4 +483,18 @@
     <string name="medicine_reminder_save_success">Reminder saved successfully!</string>
     <string name="scan_flash_toggle">Toggle Flash</string>
     <string name="scan_live_badge">LIVE</string>
+
+    <!-- AI Assistant — Profile & Herbal Upgrade -->
+    <string name="assistant_profile_read_title">Patient Profile Read by AI</string>
+    <string name="assistant_location_note_title">Location Notes</string>
+    <string name="assistant_herbal_title">Herbal &amp; Traditional Remedies</string>
+    <string name="assistant_herbal_subtitle">Natural remedy recommendations before pharmacy medicines</string>
+    <string name="assistant_herbal_prepare">How to Prepare:</string>
+    <string name="assistant_herbal_use">How to Use:</string>
+    <string name="assistant_herbal_frequency">Frequency:</string>
+    <string name="assistant_herbal_duration">Duration:</string>
+    <string name="assistant_herbal_precaution">Precaution:</string>
+    <string name="assistant_chat_doctor_title">Still Unsure? Consult a Doctor</string>
+    <string name="assistant_chat_doctor_desc">Talk directly with a doctor/health expert</string>
+    <string name="assistant_chat_doctor_button">Chat with Doctor Now</string>
 </resources>

@@ -53,12 +53,15 @@ import com.example.halalyticscompose.ui.viewmodel.MainViewModel
 @Composable
 fun ManualInputScreen(
     navController: NavController,
+    initialCategory: String = "",
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf(initialCategory) }
     var errorMessage by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    var showBarcodeDialog by remember { mutableStateOf(false) }
+    var manualBarcode by remember { mutableStateOf("") }
 
     // Sample featured products for display
     val featuredProducts = remember {
@@ -167,7 +170,7 @@ fun ManualInputScreen(
                                 if (searchQuery.all { it.isDigit() } && searchQuery.length >= 8) {
                                     navController.navigate("product_detail/$searchQuery")
                                 } else {
-                                    navController.navigate("search_external")
+                                    navController.navigate("search_external?q=$searchQuery")
                                 }
                             }
                         }
@@ -221,7 +224,7 @@ fun ManualInputScreen(
                 categories.forEach { cat ->
                     CategoryChip(
                         category = cat,
-                        onClick = { navController.navigate("search_external") }
+                        onClick = { navController.navigate("search_external?q=${cat.name}") }
                     )
                 }
             }
@@ -317,12 +320,60 @@ fun ManualInputScreen(
                     icon = Icons.Default.Keyboard,
                     iconTint = Color(0xFFE65100),
                     onClick = {
-                        // Show barcode input dialog or inline
+                        showBarcodeDialog = true
                     }
                 )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
+        }
+
+        if (showBarcodeDialog) {
+            AlertDialog(
+                onDismissRequest = { showBarcodeDialog = false },
+                title = { Text("Input Barcode Manual", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        Text("Masukkan nomor barcode produk (EAN/UPC)", fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = manualBarcode,
+                            onValueChange = { if (it.all { char -> char.isDigit() }) manualBarcode = it },
+                            label = { Text("Nomor Barcode") },
+                            placeholder = { Text("Contoh: 8996001600016") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = {
+                                if (manualBarcode.length >= 8) {
+                                    showBarcodeDialog = false
+                                    navController.navigate("product_detail/$manualBarcode")
+                                }
+                            }),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (manualBarcode.length >= 8) {
+                                showBarcodeDialog = false
+                                navController.navigate("product_detail/$manualBarcode")
+                            }
+                        },
+                        enabled = manualBarcode.length >= 8
+                    ) {
+                        Text("Cari Produk")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBarcodeDialog = false }) {
+                        Text("Batal")
+                    }
+                },
+                shape = RoundedCornerShape(24.dp)
+            )
         }
     }
 }

@@ -210,23 +210,25 @@ fun SimpleRegisterScreen(
                                 onClick = { isPasswordVisible = !isPasswordVisible }
                             ) {
                                 Icon(
-                                    if (isPasswordVisible) Icons.Default.Visibility 
+                                    imageVector = if (isPasswordVisible) Icons.Default.Visibility 
                                     else Icons.Default.VisibilityOff,
                                     contentDescription = if (isPasswordVisible) stringResource(R.string.register_hide_password) else stringResource(R.string.register_show_password),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (isPasswordVisible) MaterialTheme.colorScheme.primary else Color.Gray
                                 )
                             }
                         },
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None 
                         else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = if (isDarkMode) TextGray.copy(alpha = 0.3f) else Color.Gray.copy(alpha = 0.3f),
-                            focusedTextColor = if (isDarkMode) TextWhite else Color.Black,
-                            unfocusedTextColor = if (isDarkMode) TextWhite else Color.Black,
-                            focusedLabelColor = if (isDarkMode) HalalGreen else Color(0xFF667EEA),
-                            unfocusedLabelColor = if (isDarkMode) TextGray else Color.Gray
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     
@@ -250,23 +252,25 @@ fun SimpleRegisterScreen(
                                 onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible }
                             ) {
                                 Icon(
-                                    if (isConfirmPasswordVisible) Icons.Default.Visibility 
+                                    imageVector = if (isConfirmPasswordVisible) Icons.Default.Visibility 
                                     else Icons.Default.VisibilityOff,
                                     contentDescription = if (isConfirmPasswordVisible) stringResource(R.string.register_hide_password) else stringResource(R.string.register_show_password),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (isConfirmPasswordVisible) MaterialTheme.colorScheme.primary else Color.Gray
                                 )
                             }
                         },
                         visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None 
                         else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = if (isDarkMode) TextGray.copy(alpha = 0.3f) else Color.Gray.copy(alpha = 0.3f),
-                            focusedTextColor = if (isDarkMode) TextWhite else Color.Black,
-                            unfocusedTextColor = if (isDarkMode) TextWhite else Color.Black,
-                            focusedLabelColor = if (isDarkMode) HalalGreen else Color(0xFF667EEA),
-                            unfocusedLabelColor = if (isDarkMode) TextGray else Color.Gray
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     
@@ -557,7 +561,7 @@ fun SimpleRegisterScreen(
                                     medicalHistory = medicalHistory
                                 ),
                                 onSuccess = {
-                                    navController.navigate("basic_profile") {
+                                    navController.navigate("login?reg_user=$username&reg_pass=$password&reg_success=1") {
                                         popUpTo("register") { inclusive = true }
                                     }
                                 }

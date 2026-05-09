@@ -41,15 +41,13 @@
     <string name="home_recommendations">Rekomendasi</string>
     <string name="home_health_articles">Artikel Kesehatan</string>
     <string name="home_total_scans_label">Total Scan</string>
-    <string name="home_halal_points_label">Poin Halal</string>
-    <string name="home_health_score_label">Skor Sehat</string>
-    <string name="home_streak_label">Streak</string>
+
     <string name="home_ai_insight_title">AI Daily Insight</string>
 
     <string name="feature_scan_ai">Scan AI</string>
     <string name="feature_cek_obat">Cek Obat</string>
     <string name="feature_kosmetik">Kosmetik</string>
-    <string name="feature_halal_points">Halal</string>
+
     <string name="feature_bpom_id">BPOM</string>
     <string name="feature_ai_chat_id">AI Chat</string>
     <string name="feature_riwayat_id">Riwayat</string>
@@ -74,6 +72,7 @@
     <string name="search_hub_hint">Cari makanan, obat, kosmetik...</string>
     <string name="search_hub_all">Semua</string>
     <string name="search_hub_food">Makanan</string>
+    <string name="search_hub_beverage">Minuman</string>
     <string name="search_hub_medicine">Obat</string>
     <string name="search_hub_cosmetic">Kosmetik</string>
     <string name="search_hub_global">Global Search</string>
@@ -127,7 +126,7 @@
     <string name="common_close">Tutup</string>
     <string name="common_save">Simpan</string>
     <string name="common_edit">Edit</string>
-    <string name="home_greeting_generic">Halo</string>
+    <string name="home_greeting_generic">Selamat datang</string>
     <string name="bottom_nav_search">Cari</string>
     <string name="bottom_nav_history">Riwayat</string>
     <string name="bottom_nav_profile">Profil</string>
@@ -150,6 +149,24 @@
     <string name="mental_health_topic_family_desc">Masalah dalam keluarga atau hubungan bisa menjadi sumber stres yang signifikan. Konseling dapat membantu memperbaiki komunikasi dan membangun hubungan yang lebih sehat.</string>
     <string name="mental_health_topic_lonely">Kesepian</string>
     <string name="mental_health_topic_lonely_desc">Kesepian adalah perasaan terisolasi meskipun dikelilingi orang lain. Ini umum terjadi dan bisa diatasi dengan langkah-langkah kecil menuju koneksi sosial.</string>
+    <string name="account_profile_image">Foto Profil</string>
+    <string name="common_location">Lokasi</string>
+    <string name="mental_health_assessments">Asesmen Mental</string>
+    <string name="mental_health_consult">Konsultasi</string>
+    <string name="mental_health_consult_desc">Konsultasi dengan ahli</string>
+    <string name="mental_health_desc">Kesehatan Mental</string>
+    <string name="mental_health_start">Mulai</string>
+    <string name="topic_anxiety">Kecemasan</string>
+    <string name="topic_selfcare">Perawatan Diri</string>
+    <string name="topic_sleep">Tidur</string>
+    <string name="topic_stress">Stres</string>
+    <string name="assess_anxiety_title">Asesmen Kecemasan</string>
+    <string name="assess_anxiety_desc">Uji tingkat kecemasan Anda</string>
+    <string name="assess_mood_title">Pelacak Mood</string>
+    <string name="assess_mood_desc">Catat perasaan Anda hari ini</string>
+    <string name="health_suite_item_lab_title">Hasil Lab</string>
+    <string name="health_suite_item_lab_desc">Analisis hasil laboratorium</string>
+    <string name="home_action_lab">Cek Lab</string>
 
     
     
@@ -298,6 +315,22 @@
     <string name="feature_emergency">Emergency</string>
     <string name="feature_report_issue">Report Issue</string>
     <string name="feature_intl_medicine">Intl Medicine</string>
+    <string name="feature_bmi_calculator">BMI Calculator</string>
+    <string name="feature_medical_info">Info Medis</string>
+    <string name="feature_mental_health">Mental Hub</string>
+    <string name="feature_pill_scanner">Pill Scanner</string>
+    <string name="feature_weekly_report">Weekly Report</string>
+    <string name="feature_encyclopedia">Ensiklopedia</string>
+    <string name="feature_settings">Pengaturan</string>
+    <string name="feature_help_center">Help Center</string>
+    <string name="feature_barcode_gallery">Barcode Gallery</string>
+    <string name="feature_medicine_reminders">Pengingat Obat</string>
+    <string name="feature_medicine_search">Cari Obat</string>
+    <string name="feature_admin_panel">Admin Panel</string>
+    <string name="feature_admin_notifications">Admin Notif</string>
+    <string name="feature_privacy_policy">Kebijakan Privasi</string>
+    <string name="feature_local_ai">Local AI Chat</string>
+    <string name="feature_local_ai_desc">Bicara dengan AI lokal (Ollama)</string>
 
     <string name="history_title">Riwayat Scan</string>
     <string name="history_total">Total Scan</string>
@@ -502,4 +535,23 @@
     <string name="medicine_reminder_save_success">Pengingat berhasil disimpan!</string>
     <string name="scan_flash_toggle">Toggle Flash</string>
     <string name="scan_live_badge">LIVE</string>
+
+    <!-- AI Assistant — Profile & Herbal Upgrade -->
+    <string name="assistant_profile_read_title">Profil Pasien yang Dibaca AI</string>
+    <string name="assistant_location_note_title">Catatan Lokasi</string>
+    <string name="assistant_herbal_title">Obat Herbal &amp; Tradisional</string>
+    <string name="assistant_herbal_subtitle">Rekomendasi obat alami sebelum obat apotek</string>
+    <string name="assistant_herbal_prepare">Cara Menyiapkan:</string>
+    <string name="assistant_herbal_use">Cara Menggunakan:</string>
+    <string name="assistant_herbal_frequency">Frekuensi:</string>
+    <string name="assistant_herbal_duration">Durasi:</string>
+    <string name="assistant_herbal_precaution">Peringatan:</string>
+    <string name="assistant_chat_doctor_title">Masih Ragu? Konsultasi Dokter</string>
+    <string name="assistant_chat_doctor_desc">Bicara langsung dengan dokter/pakar kesehatan</string>
+    <string name="assistant_chat_doctor_button">Chat Dokter Sekarang</string>
+    <string name="common_send">Kirim</string>
+    <string name="local_ai_title">Halalytics Local AI</string>
+    <string name="local_ai_subtitle">Ollama Powered</string>
+    <string name="local_ai_clear_chat">Hapus Chat</string>
+    <string name="local_ai_input_placeholder">Tanya AI...</string>
 </resources>

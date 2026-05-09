@@ -137,21 +137,6 @@ data class IngredientSubstitution(
 
 // (AR Finder models removed)
 
-data class Mission(
-    val id: String,
-    val title: String,
-    val description: String,
-    @SerializedName("is_completed") val isCompleted: Boolean,
-    @SerializedName("points_reward") val pointsReward: Int,
-    @SerializedName("icon_type") val iconType: String,
-)
-
-data class DailyMissionData(
-    val missions: List<Mission>,
-    @SerializedName("points_earned_today") val pointsEarnedToday: Int,
-    @SerializedName("completed_count") val completedCount: Int,
-    @SerializedName("total_count") val totalCount: Int,
-)
 
 
 // ============================================================
