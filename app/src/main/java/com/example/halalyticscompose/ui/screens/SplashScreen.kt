@@ -159,18 +159,34 @@ fun SplashScreen(
 
         onSplashComplete()
 
-        if (isLoggedIn) {
+        try {
             val sm = SessionManager.getInstance(context)
-            val dest = when (sm.getRole()?.lowercase()) {
-                "nutritionist" -> "nutritionist_home"
-                else -> "home"
+            val currentlyLoggedIn = sm.isLoggedIn()
+            android.util.Log.d("HalalyticsNav", "Splash screen complete. isLoggedIn = $currentlyLoggedIn, role = ${sm.getRole()}")
+            
+            if (currentlyLoggedIn) {
+                val dest = when (sm.getRole()?.lowercase()) {
+                    "nutritionist" -> "nutritionist_home"
+                    else -> "home"
+                }
+                android.util.Log.d("HalalyticsNav", "Navigating to home route: $dest")
+                navController.navigate(dest) {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                }
+            } else {
+                android.util.Log.d("HalalyticsNav", "Navigating to login route")
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                }
             }
-            navController.navigate(dest) {
-                popUpTo("splash") { inclusive = true }
-            }
-        } else {
-            navController.navigate("login") {
-                popUpTo("splash") { inclusive = true }
+        } catch (e: Exception) {
+            android.util.Log.e("HalalyticsNav", "Navigation error from Splash Screen", e)
+            try {
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            } catch (fallbackEx: Exception) {
+                android.util.Log.e("HalalyticsNav", "Fallback navigation failed", fallbackEx)
             }
         }
     }
