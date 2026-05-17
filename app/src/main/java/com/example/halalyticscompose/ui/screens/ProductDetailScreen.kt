@@ -44,6 +44,9 @@ import com.example.halalyticscompose.ui.viewmodel.AlternativesUiState
 import com.example.halalyticscompose.ui.viewmodel.ProductViewModel
 import com.example.halalyticscompose.ui.components.InfoRow
 import com.example.halalyticscompose.ui.components.ConfidenceBadge
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
+import com.example.halalyticscompose.utils.ImageUtils
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -241,12 +244,24 @@ fun ProductDetailContentPremium(
         item {
             Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
                 val fallbackUrl = "https://ui-avatars.com/api/?name=${product.name}&background=1E293B&color=3B82F6&size=400"
+                
+                // Try to get the best image URL available
+                val rawImageUrl = when {
+                    !product.imageFrontUrl.isNullOrBlank() -> product.imageFrontUrl
+                    !product.imageUrl.isNullOrBlank() -> product.imageUrl
+                    !product.image.isNullOrBlank() -> product.image
+                    else -> null
+                }
+                
+                val finalImageUrl = ImageUtils.normalizeUrl(rawImageUrl) ?: fallbackUrl
+                
                 AsyncImage(
-                    model = if (!product.imageFrontUrl.isNullOrBlank()) product.imageFrontUrl else fallbackUrl,
+                    model = finalImageUrl,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.background))))
                 
                 // Status Badge overlay
@@ -255,6 +270,13 @@ fun ProductDetailContentPremium(
                     modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)
                 )
             }
+        }
+
+        item {
+            MedicalAiDisclaimerBanner(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                compact = true
+            )
         }
 
         // Profile Context & Allergies

@@ -98,4 +98,8 @@ class ProductRepository @Inject constructor(
     suspend fun markAsSynced(barcode: String) {
         productHistoryDao.markAsSynced(barcode)
     }
+
+    suspend fun clearAllLocalData() {
+        productHistoryDao.deleteAllProducts()
+    }
 }

@@ -23,8 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -67,6 +67,7 @@ import com.example.halalyticscompose.data.model.DailyNutritionLog
 import com.example.halalyticscompose.data.model.NutritionHistoryItem
 import com.example.halalyticscompose.ui.viewmodel.NutritionUiState
 import com.example.halalyticscompose.ui.viewmodel.NutritionViewModel
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +101,7 @@ fun NutritionScreen(
                 title = { Text("Catatan Nutrisi") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 actions = {
@@ -130,6 +131,11 @@ fun NutritionScreen(
                 Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Hari Ini") })
                 Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Kalender") })
             }
+
+            MedicalAiDisclaimerBanner(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                compact = true
+            )
 
             when (selectedTab) {
                 0 -> DailyNutritionTab(

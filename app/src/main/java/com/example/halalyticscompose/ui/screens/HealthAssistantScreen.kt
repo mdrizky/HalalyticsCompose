@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.theme.*
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 import com.example.halalyticscompose.ui.viewmodel.MedicineViewModel
 import com.example.halalyticscompose.utils.VoiceRecognitionHelper
 import com.example.halalyticscompose.utils.TextToSpeechHelper
@@ -256,6 +257,12 @@ fun HealthAssistantScreen(
                     )
                 }
             }
+
+            MedicalAiDisclaimerBanner(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                compact = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Input Section
             Box(

@@ -24,7 +24,9 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.TipsAndUpdates
+import androidx.compose.material.icons.filled.MedicalInformation
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 import com.example.halalyticscompose.ui.viewmodel.AiReportViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,6 +112,7 @@ fun AiReportScreen(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    MedicalAiDisclaimerBanner(compact = true)
                     val insight = uiState.insight
                     Card(
                         shape = RoundedCornerShape(24.dp),
@@ -154,6 +158,68 @@ fun AiReportScreen(
                                     Icon(Icons.Default.TipsAndUpdates, null, tint = Color(0xFFF59E0B))
                                     Spacer(modifier = Modifier.size(10.dp))
                                     Text(tip, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+
+                    if (uiState.reports.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("AI Consultation History", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        uiState.reports.forEach { report ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(Icons.Default.MedicalInformation, null, tint = Color(0xFF3B82F6), modifier = Modifier.size(20.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = if (report.type == "bmi") "BMI Analysis" else "Health Consultation",
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                        Text(
+                                            text = report.created_at.substringBefore("T"),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                                    
+                                    Text(
+                                        text = report.ai_response.status_fisik ?: "No analysis available",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        lineHeight = 20.sp
+                                    )
+                                    
+                                    if (report.ai_response.pesan_motivasi != null) {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(Color(0xFF3B82F6).copy(alpha = 0.1f))
+                                                .padding(12.dp)
+                                        ) {
+                                            Text(
+                                                text = "💡 ${report.ai_response.pesan_motivasi}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color(0xFF3B82F6),
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

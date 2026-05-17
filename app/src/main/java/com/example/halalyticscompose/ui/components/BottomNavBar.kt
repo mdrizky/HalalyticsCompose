@@ -23,6 +23,11 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.outlined.Chat
+
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.History
@@ -58,34 +63,46 @@ sealed class BottomNavItem(
     val unselectedIcon: ImageVector
 ) {
     object Home : BottomNavItem("home", R.string.home, Icons.Filled.Home, Icons.Outlined.Home)
-    object Search : BottomNavItem("manual_input", R.string.bottom_nav_search, Icons.Filled.Search, Icons.Outlined.Search)
-    object History : BottomNavItem("history", R.string.bottom_nav_history, Icons.Outlined.History, Icons.Outlined.History)
+    object Health : BottomNavItem("health_suite_hub", R.string.bottom_nav_health, Icons.Filled.MonitorHeart, Icons.Default.MonitorHeart)
+    object Community : BottomNavItem("community_hub", R.string.feature_community, Icons.Filled.Groups, Icons.Default.Groups)
     object Profile : BottomNavItem("profile", R.string.profile, Icons.Filled.Person, Icons.Outlined.Person)
+
     
     // Admin Items
     object AdminDashboard : BottomNavItem("home", R.string.admin_panel_title, Icons.Filled.Build, Icons.Outlined.Build)
     object AdminUsers : BottomNavItem("admin_users", R.string.admin_panel_users, Icons.Filled.Person, Icons.Outlined.Person)
     object AdminNotifications : BottomNavItem("admin_notifications_app", R.string.notification_title, Icons.Filled.Notifications, Icons.Outlined.Notifications)
+
+    // Nutritionist Items
+    object NutriHome : BottomNavItem("nutritionist_home", R.string.bottom_nav_dashboard, Icons.Filled.MonitorHeart, Icons.Default.MonitorHeart)
+    object NutriConsult : BottomNavItem("consultations", R.string.bottom_nav_consultations, Icons.AutoMirrored.Filled.Chat, Icons.AutoMirrored.Outlined.Chat)
+    object NutriPatients : BottomNavItem("community_hub", R.string.bottom_nav_patients, Icons.Filled.Groups, Icons.Default.Groups)
 }
 
 @Composable
 fun BottomNavBar(
     navController: NavController,
     isAdmin: Boolean = false,
+    isNutritionist: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val items = if (isAdmin) {
-        listOf(
+    val items = when {
+        isAdmin -> listOf(
             BottomNavItem.AdminDashboard,
             BottomNavItem.AdminUsers,
             BottomNavItem.AdminNotifications,
             BottomNavItem.Profile
         )
-    } else {
-        listOf(
+        isNutritionist -> listOf(
+            BottomNavItem.NutriHome,
+            BottomNavItem.NutriConsult,
+            BottomNavItem.NutriPatients,
+            BottomNavItem.Profile
+        )
+        else -> listOf(
             BottomNavItem.Home,
-            BottomNavItem.Search,
-            BottomNavItem.History,
+            BottomNavItem.Health,
+            BottomNavItem.Community,
             BottomNavItem.Profile
         )
     }
@@ -137,7 +154,12 @@ fun BottomNavBar(
 
                     Spacer(modifier = Modifier.size(54.dp))
 
-                    NavItem(items[2], currentRoute == items[2].route) {
+                    NavItem(
+                        items[2],
+                        currentRoute == items[2].route ||
+                            currentRoute == "community" ||
+                            (currentRoute?.startsWith("community_") == true)
+                    ) {
                         if (currentRoute != items[2].route) navController.navigate(items[2].route) {
                             popUpTo("home") { saveState = true }
                             launchSingleTop = true

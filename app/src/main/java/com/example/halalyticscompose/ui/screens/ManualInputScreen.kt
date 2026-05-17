@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -63,16 +62,46 @@ fun ManualInputScreen(
     var showBarcodeDialog by remember { mutableStateOf(false) }
     var manualBarcode by remember { mutableStateOf("") }
 
-    // Sample featured products for display
-    val featuredProducts = remember {
-        listOf(
-            FeaturedProduct("Indomie Goreng", "Indofood", "8996001600016", "https://images.openfoodfacts.org/images/products/899/600/160/0016/front_en.6.400.jpg", "Halal"),
-            FeaturedProduct("Oreo Original", "Mondelez", "7622210440532", "https://images.openfoodfacts.org/images/products/762/221/044/0532/front_en.12.400.jpg", "Halal"),
-            FeaturedProduct("Pocari Sweat", "Otsuka", "8996001600603", "https://images.openfoodfacts.org/images/products/899/600/160/0603/front_en.3.400.jpg", "Halal"),
-            FeaturedProduct("Teh Botol Sosro", "Sosro", "8886008101053", "https://images.openfoodfacts.org/images/products/888/600/810/1053/front_id.7.400.jpg", "Halal"),
-            FeaturedProduct("Milo Active-Go", "Nestlé", "9556001068880", "https://images.openfoodfacts.org/images/products/955/600/106/8880/front_en.3.400.jpg", "Halal"),
-            FeaturedProduct("Good Day Cappuccino", "Santos Jaya", "8991002105010", "https://images.openfoodfacts.org/images/products/899/100/210/5010/front_id.6.400.jpg", "Halal")
+    // Dynamic featured products based on category
+    val allProducts = remember {
+        mapOf(
+            "Makanan" to listOf(
+                FeaturedProduct("Indomie Goreng", "Indofood", "8996001600016", "https://images.openfoodfacts.org/images/products/899/600/160/0016/front_en.6.400.jpg", "Halal"),
+                FeaturedProduct("Oreo Original", "Mondelez", "7622210440532", "https://images.openfoodfacts.org/images/products/762/221/044/0532/front_en.12.400.jpg", "Halal"),
+                FeaturedProduct("SilverQueen Milk Chocolate", "Petra Food", "8991001101235", "https://images.openfoodfacts.org/images/products/899/100/110/1235/front_id.10.400.jpg", "Halal"),
+                FeaturedProduct("Beng-Beng Share It", "Mayora", "8996001300060", "https://images.openfoodfacts.org/images/products/899/600/130/0060/front_id.26.400.jpg", "Halal")
+            ),
+            "Minuman" to listOf(
+                FeaturedProduct("Pocari Sweat", "Otsuka", "8996001600603", "https://images.openfoodfacts.org/images/products/899/600/160/0603/front_en.3.400.jpg", "Halal"),
+                FeaturedProduct("Teh Botol Sosro", "Sosro", "8886008101053", "https://images.openfoodfacts.org/images/products/888/600/810/1053/front_id.7.400.jpg", "Halal"),
+                FeaturedProduct("Milo Active-Go", "Nestlé", "9556001068880", "https://images.openfoodfacts.org/images/products/955/600/106/8880/front_en.3.400.jpg", "Halal"),
+                FeaturedProduct("Bear Brand", "Nestlé", "8992696404443", "https://images.openfoodfacts.org/images/products/899/269/640/4443/front_id.10.400.jpg", "Halal")
+            ),
+            "Obat" to listOf(
+                FeaturedProduct("Panadol Biru", "GSK", "8992901111116", "https://www.panadol.com/content/dam/cf-consumer-healthcare/panadol/id_ID/products/panadol-regular/Panadol-Regular-Tablet-Box-ID.png", "Aman"),
+                FeaturedProduct("Bodrex Extra", "Tempo Scan", "8998009010212", "https://www.bodrex.com/sites/default/files/product/bodrex-extra.png", "Aman"),
+                FeaturedProduct("Promag Tablet", "Kalbe", "8992800531015", "https://kalbeconsumerhealth.com/images/products/promag-tablet.png", "Aman")
+            ),
+            "Kosmetik" to listOf(
+                FeaturedProduct("Wardah Lightening Day", "Wardah", "8993110010012", "https://www.wardahbeauty.com/uploads/product/lightening-day-cream-20gr.png", "Halal"),
+                FeaturedProduct("MS Glow Night Cream", "MS Glow", "8997216110015", "https://msglowid.com/assets/images/product/night-cream.png", "Aman"),
+                FeaturedProduct("Kahf Face Wash", "Paragon", "8993110010500", "https://www.kahfeveryday.com/uploads/product/face-wash.png", "Halal")
+            ),
+            "Jamu" to listOf(
+                FeaturedProduct("Tolak Angin", "Sido Muncul", "8998898110011", "https://sidomuncul.co.id/images/products/tolak-angin.png", "Halal"),
+                FeaturedProduct("Antangin JRG", "Deltomed", "8993333110015", "https://deltomed.id/images/products/antangin.png", "Halal")
+            )
         )
+    }
+
+    // Default list if category not found or is empty
+    val displayedProducts = remember(initialCategory) {
+        if (initialCategory.isBlank()) {
+            allProducts.values.flatten().shuffled().take(6)
+        } else {
+            val found = allProducts.entries.find { it.key.lowercase() == initialCategory.lowercase() }
+            found?.value ?: allProducts.values.flatten().filter { it.name.contains(initialCategory, ignoreCase = true) }.take(6)
+        }
     }
 
     val categories = remember {
@@ -261,7 +290,7 @@ fun ManualInputScreen(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                featuredProducts.chunked(2).forEach { rowProducts ->
+                displayedProducts.chunked(2).forEach { rowProducts ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -460,7 +489,9 @@ private fun FeaturedProductCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Fit,
+                    placeholder = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_gallery),
+                    error = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_dialog_alert)
                 )
 
                 // Halal badge
@@ -576,7 +607,7 @@ private fun QuickActionRow(
             }
 
             Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                Icons.Default.KeyboardArrowRight,
                 null,
                 tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp)

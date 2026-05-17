@@ -161,9 +161,11 @@ fun ProfileStatusScreen(
                             )
                             Text(
                                 text = when {
+                                    bmiValue < 17.0 -> "Sangat Kurus"
                                     bmiValue < 18.5 -> "Kurus"
-                                    bmiValue < 25 -> "Normal"
-                                    bmiValue < 30 -> "Berlebih"
+                                    bmiValue < 20.0 -> "Normal (Tipis)"
+                                    bmiValue < 23.0 -> "Normal (Ideal)"
+                                    bmiValue < 25.0 -> "Berlebih"
                                     else -> "Obesitas"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,

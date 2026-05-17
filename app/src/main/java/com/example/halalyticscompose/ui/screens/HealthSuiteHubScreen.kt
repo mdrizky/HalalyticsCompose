@@ -2,72 +2,33 @@ package com.example.halalyticscompose.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MonitorHeart
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.navigation.NavController
+import com.example.halalyticscompose.R
 import com.example.halalyticscompose.ui.viewmodel.MainViewModel
 import com.example.halalyticscompose.ui.viewmodel.MedicalRecordsViewModel
-import androidx.navigation.NavController
-import androidx.compose.ui.res.stringResource
-import com.example.halalyticscompose.R
-import com.example.halalyticscompose.ui.theme.*
-
-// Color constants moved into theme-aware components
-
-private data class HubItem(
-    val title: String,
-    val subtitle: String,
-    val route: String
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,18 +51,43 @@ fun HealthSuiteHubScreen(
         medicalRecordsViewModel.loadRecords()
     }
 
-    val summaries = remember(medicalRecords) {
-        medicalRecords.take(5).map { record ->
-            HubItem(
-                title = record.title,
-                subtitle = "${record.recordType} • ${record.recordDate}",
-                route = "medical_records"
-            )
-        }
-    }
+    // ═══ Feature Categories ═══
+    val nutritionFeatures = listOf(
+        HealthFeatureItem("Kalori", "Hitung asupan harian", Icons.Default.LocalFireDepartment, Color(0xFFFF6D00), "calorie_counter"),
+        HealthFeatureItem("Air Minum", "Pelacak hidrasi", Icons.Default.WaterDrop, Color(0xFF00B0FF), "water_tracker"),
+        HealthFeatureItem("Scan Makanan", "AI foto-ke-gizi", Icons.Default.CameraAlt, Color(0xFF00C853), "meal_scan"),
+        HealthFeatureItem("Voice Log", "Catat lewat suara", Icons.Default.Mic, Color(0xFF7C4DFF), "voice_logging"),
+    )
+
+    val healthFeatures = listOf(
+        HealthFeatureItem("AI Asisten", "Tanya kesehatan", Icons.Default.SmartToy, Color(0xFF00897B), "health_assistant"),
+        HealthFeatureItem("Monitor", "Pantauan tubuh", Icons.Default.MonitorHeart, Color(0xFFE91E63), "health_monitor"),
+        HealthFeatureItem("Diary", "Jurnal kesehatan", Icons.Default.Edit, Color(0xFF5C6BC0), "health_diary"),
+        HealthFeatureItem("Resep", "Menu sehat", Icons.Default.RestaurantMenu, Color(0xFFFF9800), "recipes"),
+    )
+
+    val medicalFeatures = listOf(
+        HealthFeatureItem("Rekam Medis", "Catatan digital", Icons.Default.Description, Color(0xFF26A69A), "medical_records"),
+        HealthFeatureItem("Obat", "Pengingat jadwal", Icons.Default.Medication, Color(0xFFEF5350), "medicine_reminders"),
+        HealthFeatureItem("Emergency", "QR medis darurat", Icons.Default.QrCode2, Color(0xFFD32F2F), "emergency_qr"),
+        HealthFeatureItem("Health Pass", "Kartu kesehatan", Icons.Default.Badge, Color(0xFF0288D1), "health_pass"),
+    )
+
+    val advancedFeatures = listOf(
+        HealthFeatureItem("Drug Check", "Cek interaksi obat", Icons.Default.Science, Color(0xFF8E24AA), "drug_interaction"),
+        HealthFeatureItem("Pill ID", "Identifikasi pil", Icons.Default.Visibility, Color(0xFF43A047), "pill_scanner"),
+        HealthFeatureItem("Mental", "Kesehatan mental", Icons.Default.Psychology, Color(0xFFFF7043), "mental_health_hub"),
+        HealthFeatureItem("BMI", "Kalkulator berat", Icons.Default.FitnessCenter, Color(0xFF546E7A), "bmi_calculator"),
+    )
+
+    val comingSoonFeatures = listOf(
+        HealthFeatureItem("Tidur", "Analisis tidur", Icons.Default.Bedtime, Color(0xFF5C6BC0), "sleep_tracker"),
+        HealthFeatureItem("Wearable", "Smartwatch sync", Icons.Default.Watch, Color(0xFF2979FF), "wearable_integration"),
+        HealthFeatureItem("Belanja", "Auto grocery list", Icons.Default.ShoppingCart, Color(0xFF00C853), "grocery_list"),
+    )
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color(0xFFF8F9FA),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.health_suite_title), fontWeight = FontWeight.Bold) },
@@ -111,13 +97,13 @@ fun HealthSuiteHubScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { navController.navigate("notifications") }) {
                         Icon(Icons.Default.NotificationsNone, null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = Color.White,
+                    titleContentColor = Color(0xFF1A1A1A)
                 )
             )
         }
@@ -125,306 +111,356 @@ fun HealthSuiteHubScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            // Family Profile Selector
             item {
-                Text(
-                    "Selected Health Context",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    item {
-                        QuickHubProfileChip(
-                            name = "Me",
-                            isSelected = selectedProfile == null,
-                            onClick = { mainViewModel.selectFamilyProfile(null) }
-                        )
-                    }
-                    items(familyProfiles.size) { index ->
-                        val profile = familyProfiles[index]
-                        QuickHubProfileChip(
-                            name = profile.name,
-                            isSelected = selectedProfile?.id == profile.id,
-                            onClick = { mainViewModel.selectFamilyProfile(profile) }
-                        )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        "Profil Aktif",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF00C853),
+                        fontWeight = FontWeight.Bold
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        item {
+                            HealthProfileChip(
+                                name = "Saya",
+                                isSelected = selectedProfile == null,
+                                onClick = { mainViewModel.selectFamilyProfile(null) }
+                            )
+                        }
+                        items(familyProfiles.size) { index ->
+                            val profile = familyProfiles[index]
+                            HealthProfileChip(
+                                name = profile.name,
+                                isSelected = selectedProfile?.id == profile.id,
+                                onClick = { mainViewModel.selectFamilyProfile(profile) }
+                            )
+                        }
                     }
                 }
             }
 
+            // Hero Card
             item {
                 Card(
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                 ) {
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .background(
+                                Brush.linearGradient(listOf(Color(0xFF004D40), Color(0xFF26A69A)))
+                            )
+                            .padding(24.dp)
                     ) {
-                        Text(
-                            "Status Emergency",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            "Siap siaga dengan bantuan triage AI.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "Details",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.clickable { navController.navigate("ai_analysis") }
-                        )
-                    }
-                }
-            }
-
-            item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            stringResource(R.string.health_suite_hero_title),
-                            fontWeight = FontWeight.ExtraBold,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.health_suite_hero_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                        )
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { navController.navigate("medical_resume") },
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 11.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Default.UploadFile, contentDescription = null, tint = Color.White)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Upload Documents", color = Color.White, fontWeight = FontWeight.Bold)
+                        Column {
+                            Text(
+                                stringResource(R.string.health_suite_hero_title),
+                                fontWeight = FontWeight.ExtraBold,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                stringResource(R.string.health_suite_hero_subtitle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                HeroActionChip("Scan AI", Icons.Default.QrCodeScanner) {
+                                    navController.navigate("scan_hub")
+                                }
+                                HeroActionChip("Kalori", Icons.Default.LocalFireDepartment) {
+                                    navController.navigate("calorie_counter")
+                                }
+                                HeroActionChip("Resume", Icons.Default.Description) {
+                                    navController.navigate("medical_resume")
+                                }
                             }
                         }
                     }
                 }
             }
 
+            // ═══ NUTRISI & MAKANAN ═══
             item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Halalytics AI Assistant", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                        }
-                        Text(
-                            stringResource(R.string.health_suite_item_assistant_title),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedTextField(
-                            value = "",
-                            onValueChange = { },
-                            modifier = Modifier.fillMaxWidth().clickable { navController.navigate("health_assistant") },
-                            enabled = false,
-                            placeholder = { Text(stringResource(R.string.home_search_hint)) },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                disabledBorderColor = MaterialTheme.colorScheme.outline
-                            )
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            QuickHubChip("AI Triage", "health_assistant", navController)
-                            QuickHubChip("Diary", "health_diary", navController)
-                            QuickHubChip("Health Pass", "health_pass", navController)
-                        }
-                    }
-                }
+                SectionHeader("🍽️ Nutrisi & Makanan")
+            }
+            item {
+                FeatureGrid(features = nutritionFeatures, navController = navController)
             }
 
+            // ═══ KESEHATAN ═══
             item {
+                SectionHeader("💚 Kesehatan & Wellness")
+            }
+            item {
+                FeatureGrid(features = healthFeatures, navController = navController)
+            }
+
+            // ═══ MEDIS ═══
+            item {
+                SectionHeader("🏥 Rekam Medis & Darurat")
+            }
+            item {
+                FeatureGrid(features = medicalFeatures, navController = navController)
+            }
+
+            // ═══ ADVANCED AI ═══
+            item {
+                SectionHeader("🤖 AI Lanjutan")
+            }
+            item {
+                FeatureGrid(features = advancedFeatures, navController = navController)
+            }
+
+            // ═══ COMING SOON ═══
+            item {
+                SectionHeader("🚀 Segera Hadir")
+            }
+            item {
+                FeatureGrid(features = comingSoonFeatures, navController = navController, isComingSoon = true)
+            }
+
+            // Recent Medical Records
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Recent Health Summaries", fontWeight = FontWeight.Bold)
+                    Text("Catatan Medis Terbaru", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Text(
-                        text = "View All",
-                        color = MaterialTheme.colorScheme.primary,
+                        "Lihat Semua",
+                        color = Color(0xFF00C853),
                         fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp,
                         modifier = Modifier.clickable { navController.navigate("medical_records") }
                     )
                 }
             }
 
-            if (isMedicalLoading && summaries.isEmpty()) {
+            if (isMedicalLoading && medicalRecords.isEmpty()) {
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            androidx.compose.material3.CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp
-                            )
+                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                             Spacer(modifier = Modifier.width(10.dp))
                             Text("Memuat ringkasan medis...")
                         }
                     }
                 }
-            } else if (summaries.isEmpty()) {
+            } else if (medicalRecords.isEmpty()) {
                 item {
-                    SummaryCard(
-                        item = HubItem(
-                            title = "Belum ada ringkasan medis",
-                            subtitle = "Tambah data di Rekam Medis Digital untuk melihat ringkasan terbaru.",
-                            route = "medical_records"
-                        ),
-                        navController = navController
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(Icons.Default.Description, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Belum ada catatan medis", fontWeight = FontWeight.SemiBold)
+                            Text("Tambah data di Rekam Medis Digital.", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
+                    }
                 }
             } else {
-                items(items = summaries, key = { "${it.title}|${it.subtitle}" }) { item ->
-                    SummaryCard(item = item, navController = navController)
+                items(medicalRecords.take(3)) { record ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clickable { navController.navigate("medical_records") },
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color(0xFFE0F2F1)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Description, contentDescription = null, tint = Color(0xFF00C853))
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(record.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text(
+                                    "${record.recordType} • ${record.recordDate}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Quick Access", fontWeight = FontWeight.Bold)
-            }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuickHubIcon("Monitoring", Icons.Default.MonitorHeart, "health_monitor", navController)
-                    QuickHubIcon("Resume", Icons.Default.Description, "medical_resume", navController)
-                    QuickHubIcon("Diary", Icons.Default.Edit, "health_diary", navController)
-                    QuickHubIcon("Pass", Icons.Default.QrCode2, "health_pass", navController)
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
+// ═══ COMPOSABLE HELPERS ═══
+
+data class HealthFeatureItem(
+    val title: String,
+    val subtitle: String,
+    val icon: ImageVector,
+    val color: Color,
+    val route: String
+)
+
 @Composable
-private fun SummaryCard(item: HubItem, navController: NavController) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate(item.route) },
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+private fun SectionHeader(title: String) {
+    Text(
+        title,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    )
+}
+
+@Composable
+private fun FeatureGrid(
+    features: List<HealthFeatureItem>,
+    navController: NavController,
+    isComingSoon: Boolean = false
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Mint),
-                contentAlignment = Alignment.Center
+        features.chunked(4).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Icon(Icons.Default.Description, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                row.forEach { feature ->
+                    FeatureItemCard(
+                        modifier = Modifier.weight(1f),
+                        feature = feature,
+                        isComingSoon = isComingSoon,
+                        onClick = { navController.navigate(feature.route) }
+                    )
+                }
+                // Fill remaining space if row has less than 4 items
+                repeat(4 - row.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.title, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
-                Text(item.subtitle, color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall)
-            }
-            Icon(Icons.Default.Add, contentDescription = null, tint = Gold)
         }
     }
 }
 
 @Composable
-private fun QuickHubChip(label: String, route: String, navController: NavController) {
+private fun FeatureItemCard(
+    modifier: Modifier = Modifier,
+    feature: HealthFeatureItem,
+    isComingSoon: Boolean = false,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.clickable { navController.navigate(route) },
-        shape = RoundedCornerShape(100.dp),
-        colors = CardDefaults.cardColors(containerColor = Mint)
-    ) {
-        Text(label, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.primary)
-    }
-}
-
-@Composable
-private fun RowScope.QuickHubIcon(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, route: String, navController: NavController) {
-    Card(
-        modifier = Modifier
-            .weight(1f)
-            .clickable { navController.navigate(route) },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        modifier = modifier
+            .aspectRatio(0.85f)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .fillMaxSize()
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.Center
         ) {
-            Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.primary)
-            Text(label, style = MaterialTheme.typography.bodySmall)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(feature.color.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    feature.icon,
+                    contentDescription = null,
+                    tint = feature.color,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                feature.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
+            Text(
+                feature.subtitle,
+                fontSize = 9.sp,
+                color = if (isComingSoon) Color(0xFFFF6D00) else Color.Gray,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
     }
 }
 
 @Composable
-private fun QuickHubProfileChip(name: String, isSelected: Boolean, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.clickable { onClick() },
+private fun HeroActionChip(label: String, icon: ImageVector, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White.copy(alpha = 0.2f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+private fun HealthProfileChip(name: String, isSelected: Boolean, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(100.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-        )
+        color = if (isSelected) Color(0xFF00C853) else Color(0xFF00C853).copy(alpha = 0.1f)
     ) {
         Text(
             text = name,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = if (isSelected) Color.White else MaterialTheme.colorScheme.primary,
+            color = if (isSelected) Color.White else Color(0xFF00C853),
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.bodySmall
         )

@@ -8,6 +8,8 @@ import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.services.FirebaseRealtimeListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,12 +32,14 @@ class ScanHistoryViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private var realtimeJob: Job? = null
+
     fun loadHistory(token: String, userId: Int) {
-        viewModelScope.launch {
+        realtimeJob?.cancel()
+        realtimeJob = viewModelScope.launch {
             _loading.value = true
             _errorMessage.value = null
             try {
-                // API Load Realtime
                 val response = apiService.getRealtimeScanHistory("Bearer $token")
                 if (response.success) {
                     _history.value = response.data?.data ?: emptyList()
@@ -45,8 +49,28 @@ class ScanHistoryViewModel @Inject constructor(
                     _errorMessage.value = response.message ?: "Riwayat gagal dimuat dari server."
                 }
 
-                // Realtime Sync
-                startRealtimeListener(userId)
+                try {
+                    val listener = FirebaseRealtimeListener(userId)
+                    listener.listenToScanHistory().collect { update ->
+                        val currentList = _history.value
+                        if (currentList.none { it.id == update.id }) {
+                            val newItem = ScanHistoryItem(
+                                id = update.id,
+                                productName = update.product_name,
+                                productImage = null,
+                                barcode = update.barcode,
+                                halalStatus = update.halal_status,
+                                source = "realtime",
+                                scanMethod = "unknown",
+                                createdAt = "Baru saja"
+                            )
+                            _history.value = listOf(newItem) + currentList
+                        }
+                    }
+                } catch (_: CancellationException) {
+                } catch (e: Exception) {
+                    Log.e("ScanHistoryViewModel", "Realtime listener error", e)
+                }
             } catch (e: Exception) {
                 Log.e("ScanHistoryViewModel", "Failed to load history", e)
                 _history.value = emptyList()
@@ -57,49 +81,27 @@ class ScanHistoryViewModel @Inject constructor(
         }
     }
 
-    private fun startRealtimeListener(userId: Int) {
-        val listener = FirebaseRealtimeListener(userId)
+    fun deleteHistory(token: String, historyId: Int) {
         viewModelScope.launch {
-            listener.listenToScanHistory().collect { update ->
-                // Check if exists
-                val currentList = _history.value
-                if (currentList.none { it.id == update.id }) {
-                    val newItem = ScanHistoryItem(
-                        id = update.id,
-                        productName = update.product_name,
-                        productImage = null, // lightweight update from real-time db
-                        barcode = update.barcode, // Ensuring barcode is available for navigation
-                        halalStatus = update.halal_status,
-                        source = "realtime",
-                        scanMethod = "unknown",
-                        createdAt = "Just now" // Visual indicator for real-time update
-                    )
-                    
-                    val newList = mutableListOf<ScanHistoryItem>()
-                    newList.add(newItem)
-                    newList.addAll(currentList)
-                    _history.value = newList
-                    
-                    // Optimistic stats update? Maybe too complex, let's keep it simple
+            val snapshot = _history.value
+            val optimistic = snapshot.filter { it.id != historyId }
+            _history.value = optimistic
+            try {
+                val response = apiService.deleteScanHistory("Bearer $token", historyId)
+                if (!response.isSuccessful) {
+                    _history.value = snapshot
+                    _errorMessage.value = "Gagal hapus di server (${response.code()})."
                 }
+            } catch (e: Exception) {
+                _history.value = snapshot
+                _errorMessage.value = "Gagal hapus riwayat: ${e.message ?: "Unknown error"}"
+                Log.e("ScanHistoryViewModel", "Failed to delete history", e)
             }
         }
     }
 
-    fun deleteHistory(token: String, historyId: Int) {
-        viewModelScope.launch {
-            try {
-                // Optimistic UI Update
-                val currentList = _history.value.filter { it.id != historyId }
-                _history.value = currentList
-                
-                // API Call
-                apiService.deleteScanHistory("Bearer $token", historyId)
-            } catch (e: Exception) {
-                // Rollback if needed
-                Log.e("ScanHistoryViewModel", "Failed to delete history", e)
-                _errorMessage.value = "Gagal hapus riwayat: ${e.message ?: "Unknown error"}"
-            }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        realtimeJob?.cancel()
     }
 }

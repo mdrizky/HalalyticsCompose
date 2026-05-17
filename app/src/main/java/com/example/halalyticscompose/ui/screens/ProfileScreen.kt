@@ -30,6 +30,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.halalyticscompose.R
 import com.example.halalyticscompose.ui.viewmodel.*
+import com.example.halalyticscompose.utils.ImageUtils
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,9 +151,10 @@ fun ProfileHeader(
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f))
             ) {
-                if (!userData?.image.isNullOrEmpty()) {
+                val profileImageUrl = ImageUtils.normalizeUrl(userData?.image)
+                if (profileImageUrl != null) {
                     AsyncImage(
-                        model = userData?.image,
+                        model = profileImageUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -165,6 +168,7 @@ fun ProfileHeader(
                     )
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = userData?.fullName ?: userData?.username ?: stringResource(R.string.account_default_user),
@@ -328,7 +332,7 @@ fun MenuSection(title: String, items: List<MenuItem>) {
                         if (item.isSwitch) {
                             Switch(checked = item.switchState, onCheckedChange = { item.onClick() })
                         } else {
-                            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp))
                         }
                     }
                     if (index < items.size - 1) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)

@@ -126,7 +126,7 @@ fun ScanScreen(
                     onClick = { navController.navigateUp() }
                 ) {
                         Icon(
-                            Icons.Default.Close,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.common_back),
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(26.dp)

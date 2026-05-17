@@ -145,8 +145,9 @@ data class RecordScanRequest(
 )
 
 data class AddFavoriteRequest(
-    val favoritable_type: String,
-    val favoritable_id: Int,
+    val favoritable_type: String = "App\\Models\\ProductModel",
+    val favoritable_id: Int? = null,
+    val barcode: String? = null,
     val product_name: String,
     val product_image: String? = null,
     val halal_status: String,

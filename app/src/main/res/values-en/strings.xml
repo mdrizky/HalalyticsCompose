@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Halalytics</string>
+    <string name="medical_disclaimer_title">Medical &amp; AI notice</string>
+    <string name="medical_disclaimer_body_short">AI output is educational only—not a diagnosis or prescription. Consult a licensed clinician.</string>
+    <string name="medical_disclaimer_body">Scores, summaries, and AI suggestions in Halalytics are informational and may be incorrect. They do not replace professional medical or dietetic advice. For medications, conditions, or clinical nutrition decisions, contact a qualified healthcare provider.</string>
     <string name="settings_title">Settings</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="language">Language</string>
@@ -122,7 +125,7 @@
     <string name="register_error_email">Please enter your email</string>
     <string name="register_error_invalid_email">Please enter a valid email address</string>
     <string name="register_error_password">Please enter a password</string>
-    <string name="register_error_password_short">Password must be at least 6 characters</string>
+    <string name="register_error_password_short">Password must be at least 8 characters</string>
     <string name="register_error_confirm_password">Please confirm your password</string>
     <string name="register_error_password_mismatch">Passwords do not match</string>
     <string name="register_error_phone">Please enter your phone number</string>

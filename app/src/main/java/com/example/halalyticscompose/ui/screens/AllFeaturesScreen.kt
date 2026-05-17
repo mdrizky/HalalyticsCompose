@@ -63,20 +63,19 @@ fun AllFeaturesScreen(navController: NavController) {
         FeatureActionItem(stringResource(R.string.feature_nutrition_scan), Icons.Default.CameraAlt, "nutrition_scanner", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_health_diary), Icons.Default.Edit, "health_diary", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_pill_scanner), Icons.Default.PhotoCamera, "pill_scanner", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-        FeatureActionItem(stringResource(R.string.feature_weekly_report), Icons.Default.Assessment, "weekly_report", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-        FeatureActionItem(stringResource(R.string.feature_local_ai), Icons.Default.Psychology, "local_ai_chat", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+        FeatureActionItem(stringResource(R.string.feature_weekly_report), Icons.Default.Assessment, "weekly_report", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val aiExpansionFeatures = listOf(
         FeatureActionItem(stringResource(R.string.feature_ocr_product), Icons.Default.QrCodeScanner, "ocr_scan", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_nutrition_ai), Icons.Default.MonitorHeart, "nutrition_dashboard", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
-        FeatureActionItem(stringResource(R.string.feature_recipe_ai), Icons.Default.MenuBook, "recipes", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_recipe_ai), Icons.AutoMirrored.Filled.MenuBook, "recipes", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_daily_mission), Icons.Default.TaskAlt, "daily_mission_dashboard", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-        FeatureActionItem(stringResource(R.string.feature_encyclopedia), Icons.Default.LibraryBooks, "encyclopedia", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+        FeatureActionItem(stringResource(R.string.feature_encyclopedia), Icons.AutoMirrored.Filled.LibraryBooks, "encyclopedia", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )
 
     val supportFeatures = listOf(
-        FeatureActionItem(stringResource(R.string.feature_community), Icons.Default.Groups, "community", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_community), Icons.Default.Groups, "community_hub", MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_health_pass), Icons.Default.VerifiedUser, "health_pass", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_emergency), Icons.Default.LocalHospital, "emergency_p3k", MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.error.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_report_issue), Icons.Default.Warning, "report_issue/0/General", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
@@ -85,7 +84,7 @@ fun AllFeaturesScreen(navController: NavController) {
 
     val accountFeatures = listOf(
         FeatureActionItem(stringResource(R.string.feature_settings), Icons.Default.Settings, "settings", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-        FeatureActionItem(stringResource(R.string.feature_help_center), Icons.Default.Help, "help_center", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        FeatureActionItem(stringResource(R.string.feature_help_center), Icons.AutoMirrored.Filled.Help, "help_center", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_barcode_gallery), Icons.Default.Collections, "barcode_gallery", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         FeatureActionItem(stringResource(R.string.feature_privacy_policy), Icons.Default.Policy, "privacy_policy", MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
     )

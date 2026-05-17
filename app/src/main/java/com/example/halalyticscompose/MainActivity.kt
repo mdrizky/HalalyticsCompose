@@ -41,6 +41,10 @@ import com.example.halalyticscompose.utils.LanguageManager
 import com.example.halalyticscompose.utils.BiometricAuthHelper
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import android.content.Intent
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
+import com.facebook.CallbackManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.graphics.Color
@@ -165,6 +169,15 @@ private fun MedicalRouteGuard(
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
+
+    private val facebookCallbackManager: CallbackManager = CallbackManager.Factory.create()
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        facebookCallbackManager.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -183,8 +196,10 @@ class MainActivity : FragmentActivity() {
             val autoLogoutMinutes by mainViewModel.autoLogoutMinutes.collectAsState()
             val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
             val isAdmin by authViewModel.isAdmin.collectAsState()
+            val isNutritionist by authViewModel.isNutritionist.collectAsState()
 
             HalalyticsComposeTheme(darkTheme = isDarkMode) {
+                CompositionLocalProvider(LocalFacebookCallbackManager provides facebookCallbackManager) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -313,7 +328,8 @@ class MainActivity : FragmentActivity() {
                     when {
                         !sessionManager.isLoggedIn() -> "splash"
                         sessionManager.getRole()?.equals("admin", ignoreCase = true) == true -> "home"
-                        else -> "home" // Authenticated users go to home
+                        sessionManager.getRole()?.equals("nutritionist", ignoreCase = true) == true -> "nutritionist_home"
+                        else -> "home"
                     }
                 }
                 
@@ -353,15 +369,11 @@ class MainActivity : FragmentActivity() {
                         )
                     }
 
-                    // Login Screen (supports auto-fill from register)
+                    // Login — jangan pernah sertakan password di deep link / savedState.
                     composable(
-                        "login?reg_user={reg_user}&reg_pass={reg_pass}&reg_success={reg_success}",
+                        "login?reg_user={reg_user}&reg_success={reg_success}",
                         arguments = listOf(
-                            androidx.navigation.navArgument("reg_user") { 
-                                type = androidx.navigation.NavType.StringType
-                                defaultValue = ""
-                            },
-                            androidx.navigation.navArgument("reg_pass") {
+                            androidx.navigation.navArgument("reg_user") {
                                 type = androidx.navigation.NavType.StringType
                                 defaultValue = ""
                             },
@@ -372,13 +384,11 @@ class MainActivity : FragmentActivity() {
                         )
                     ) { backStackEntry ->
                         val regUser = backStackEntry.arguments?.getString("reg_user") ?: ""
-                        val regPass = backStackEntry.arguments?.getString("reg_pass") ?: ""
                         val regSuccess = backStackEntry.arguments?.getString("reg_success") == "1"
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             LoginScreen(
                                 navController = navController,
                                 prefillUsername = regUser,
-                                prefillPassword = regPass,
                                 showRegisterSuccess = regSuccess
                             )
                         }
@@ -404,14 +414,20 @@ class MainActivity : FragmentActivity() {
                     // Home Screen
                     composable("home") {
                         MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
-                            if (isAdmin) {
-                                AdminPanelScreen(navController = navController)
-                            } else {
-                                HomeScreen(
+                            when {
+                                isAdmin -> AdminPanelScreen(navController = navController)
+                                isNutritionist -> NutritionistHomeScreen(navController = navController)
+                                else -> HomeScreen(
                                     navController = navController,
                                     paddingValues = paddingValues
                                 )
                             }
+                        }
+                    }
+
+                    composable("nutritionist_home") {
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = false) { paddingValues ->
+                            NutritionistHomeScreen(navController = navController)
                         }
                     }
 
@@ -458,6 +474,54 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                     
+                    // Scan Hub Screen
+                    composable("scan_hub") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            ScanHubScreen(navController = navController)
+                        }
+                    }
+
+                    composable("voice_logging") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            VoiceLoggingScreen(navController = navController)
+                        }
+                    }
+
+                    // Water Tracker Screen
+                    composable("water_tracker") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            WaterTrackerScreen(navController = navController)
+                        }
+                    }
+
+                    // Calorie Counter Screen
+                    composable("calorie_counter") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            CalorieCounterScreen(navController = navController)
+                        }
+                    }
+
+                    // Grocery List (Under Development)
+                    composable("grocery_list") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            GroceryListScreen(navController = navController)
+                        }
+                    }
+
+                    // Wearable Integration (Under Development)
+                    composable("wearable_integration") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            WearableIntegrationScreen(navController = navController)
+                        }
+                    }
+
+                    // Sleep Tracker (Under Development)
+                    composable("sleep_tracker") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            SleepTrackerScreen(navController = navController)
+                        }
+                    }
+
                     // Settings Screen
                     composable("settings") {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
@@ -528,9 +592,9 @@ class MainActivity : FragmentActivity() {
                         AllFeaturesScreen(navController = navController)
                     }
 
-                    composable("local_ai_chat") {
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            LocalAIChatScreen(navController = navController)
+                    composable("community_hub") {
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
+                            CommunityHubScreen(navController = navController)
                         }
                     }
 
@@ -1315,12 +1379,11 @@ class MainActivity : FragmentActivity() {
                     composable("help_center") {
                         HelpCenterScreen(navController = navController)
                     }
-                    }
                 }
                 } // End of Surface
+                } // CompositionLocalProvider (Facebook)
             }
         }
     }
-
-
+}
 

@@ -421,7 +421,7 @@ fun InternationalMedicineScreen(navController: NavController) {
                                                 )
                                             }
                                             Icon(
-                                                Icons.Default.ChevronRight,
+                                                Icons.Default.KeyboardArrowRight,
                                                 contentDescription = "Detail",
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )

@@ -32,10 +32,10 @@
 # =====================================================
 # 2. APP DATA MODELS (keep all models for JSON parsing)
 # =====================================================
--keep class com.example.halalyticscompose.Data.Model.** { *; }
--keep class com.example.halalyticscompose.Data.API.** { *; }
--keep class com.example.halalyticscompose.Data.Network.** { *; }
--keep class com.example.halalyticscompose.Data.Local.Entities.** { *; }
+-keep class com.example.halalyticscompose.data.model.** { *; }
+-keep class com.example.halalyticscompose.data.api.** { *; }
+-keep class com.example.halalyticscompose.data.network.** { *; }
+-keep class com.example.halalyticscompose.data.local.entities.** { *; }
 
 # =====================================================
 # 3. RETROFIT / OKHTTP

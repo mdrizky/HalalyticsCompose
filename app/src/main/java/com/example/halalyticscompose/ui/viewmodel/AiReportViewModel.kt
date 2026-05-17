@@ -19,7 +19,23 @@ data class AiReportUiState(
     val isLoading: Boolean = false,
     val stats: WeeklyStats? = null,
     val insight: AiInsight? = null,
+    val reports: List<MedicalReportHistory> = emptyList(),
     val errorMessage: String? = null
+)
+
+data class MedicalReportHistory(
+    val id: Int,
+    val type: String,
+    val created_at: String,
+    val ai_response: AiReportResponseData
+)
+
+data class AiReportResponseData(
+    val status_fisik: String? = null,
+    val target_2_bulan: String? = null,
+    val saran_nutrisi: List<String>? = null,
+    val saran_olahraga: List<String>? = null,
+    val pesan_motivasi: String? = null
 )
 
 @HiltViewModel
@@ -57,10 +73,23 @@ class AiReportViewModel @Inject constructor(
                         response.insight
                     }
                     
+                    
+                    // Fetch History of AI Medical Reports
+                    var reportsHistory: List<MedicalReportHistory> = emptyList()
+                    try {
+                        val reportsResponse = apiService.getMedicalReportsHistory(token)
+                        if (reportsResponse.success && reportsResponse.data != null) {
+                            reportsHistory = reportsResponse.data
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AiReportVM", "Error fetching medical reports history", e)
+                    }
+
                     _uiState.value = AiReportUiState(
                         isLoading = false,
                         stats = response.stats,
-                        insight = insightData
+                        insight = insightData,
+                        reports = reportsHistory
                     )
                     Log.d("AiReportVM", "Report loaded successfully")
                 } else {

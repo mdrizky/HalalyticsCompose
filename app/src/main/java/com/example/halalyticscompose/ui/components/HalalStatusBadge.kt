@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,7 +43,7 @@ enum class HalalStatus(
     HALAL("HALAL", "حلال", HalalBadgePalette.HalalGreen, HalalBadgePalette.HalalGreenBg, Icons.Default.CheckCircle),
     HARAM("HARAM", "حرام", HalalBadgePalette.HaramRed, HalalBadgePalette.HaramRedBg, Icons.Default.Block),
     SYUBHAT("SYUBHAT", "شبهة", HalalBadgePalette.SyubhatOrange, HalalBadgePalette.SyubhatOrangeBg, Icons.Default.Warning),
-    UNKNOWN("BELUM DIVERIFIKASI", "غير معروف", HalalBadgePalette.UnknownGray, HalalBadgePalette.UnknownGrayBg, Icons.Default.HelpOutline);
+    UNKNOWN("BELUM DIVERIFIKASI", "غير معروف", HalalBadgePalette.UnknownGray, HalalBadgePalette.UnknownGrayBg, Icons.AutoMirrored.Filled.HelpOutline);
 
     companion object {
         fun fromString(status: String?): HalalStatus {
@@ -157,7 +158,7 @@ fun HalalConfidenceIndicator(
     ) {
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
-                progress = score / 100f,
+                progress = { score / 100f },
                 modifier = Modifier.size(56.dp),
                 color = color,
                 trackColor = color.copy(0.15f),

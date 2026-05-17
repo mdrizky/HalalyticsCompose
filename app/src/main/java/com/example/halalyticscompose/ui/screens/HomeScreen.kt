@@ -41,11 +41,16 @@ import coil.compose.AsyncImage
 import com.example.halalyticscompose.R
 import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.ui.viewmodel.*
+import com.example.halalyticscompose.utils.ImageUtils
+
 import com.example.halalyticscompose.ui.components.*
 import com.example.halalyticscompose.ui.components.HealthSummarySection
 import com.example.halalyticscompose.data.model.CategoryItem
 import com.example.halalyticscompose.data.model.HealthArticleItem
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
@@ -70,45 +75,13 @@ fun HomeScreen(
     val unreadCount by notificationViewModel.unreadCount.collectAsState()
     val banners by historyViewModel.banners.collectAsState()
     
-    // PREMIUM RECOMMENDATIONS: Real data for demo
-    val recommendedProducts = remember {
-        listOf(
-            com.example.halalyticscompose.data.model.ProductInfo(
-                id = 1,
-                barcode = "8996001600016",
-                name = "Indomie Goreng Special",
-                brand = "Indofood",
-                category = "Food",
-                image = "https://images.openfoodfacts.org/images/products/899/600/160/0016/front_en.6.400.jpg"
-            ),
-            com.example.halalyticscompose.data.model.ProductInfo(
-                id = 2,
-                barcode = "7622210440532",
-                name = "Oreo Sandwich Cookies",
-                brand = "Mondelez",
-                category = "Food",
-                image = "https://images.openfoodfacts.org/images/products/762/221/044/0532/front_en.12.400.jpg"
-            ),
-            com.example.halalyticscompose.data.model.ProductInfo(
-                id = 3,
-                barcode = "8992761121016",
-                name = "SilverQueen Milk Chocolate",
-                brand = "SilverQueen",
-                category = "Food",
-                image = "https://images.openfoodfacts.org/images/products/899/276/112/1016/front_id.10.400.jpg"
-            ),
-            com.example.halalyticscompose.data.model.ProductInfo(
-                id = 4,
-                barcode = "8991001111166",
-                name = "Kopi Kapal Api Special",
-                brand = "Kapal Api",
-                category = "Drink",
-                image = "https://images.openfoodfacts.org/images/products/899/100/111/1166/front_id.7.400.jpg"
-            )
-        )
-    }
+    val recommendedProducts by historyViewModel.recommendedProducts.collectAsState()
     
+    // UI State for All Features Sheet
     var showAllFeaturesSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
 
     LaunchedEffect(Unit) {
         authViewModel.loadUserProfile()
@@ -148,7 +121,14 @@ fun HomeScreen(
                     bmi = bmi,
                     dailyIntake = dailyIntake?.dailyIntake,
                     targets = dailyIntake?.targets,
-                    onDetailsClick = { navController.navigate("user_stats") }
+                    onDetailsClick = { navController.navigate("health_monitor") }
+                )
+            }
+
+            item {
+                MedicalAiDisclaimerBanner(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    compact = true
                 )
             }
 
@@ -190,7 +170,7 @@ fun HomeScreen(
                     onProductClick = { product -> 
                         navController.navigate("product_detail/${product.barcode}")
                     },
-                    onViewAll = { navController.navigate("explore_products") }
+                    onViewAll = { navController.navigate("search_external") }
                 )
             }
 
@@ -210,14 +190,82 @@ fun HomeScreen(
             }
         }
 
+        // All Features Bottom Sheet
         if (showAllFeaturesSheet) {
-            AllFeaturesSheet(
-                onDismiss = { showAllFeaturesSheet = false },
-                onNavigate = { route ->
-                    showAllFeaturesSheet = false
-                    navController.navigate(route)
-                }
+            ModalBottomSheet(
+                onDismissRequest = { showAllFeaturesSheet = false },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.surface,
+                dragHandle = { BottomSheetDefaults.DragHandle() }
+            ) {
+                AllFeaturesSheetContent(
+                    navController = navController,
+                    onClose = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showAllFeaturesSheet = false
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AllFeaturesSheetContent(
+    navController: NavController,
+    onClose: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Semua Fitur",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
+            IconButton(onClick = onClose) {
+                Icon(Icons.Default.Close, contentDescription = "Close")
+            }
+        }
+
+        Box(modifier = Modifier.heightIn(max = 500.dp)) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+            ) {
+                Text(
+                    "Pilih layanan Halalytics lainnya untuk membantu gaya hidup sehat dan halal Anda.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
+                
+                Button(
+                    onClick = {
+                        onClose()
+                        navController.navigate("all_features")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Lihat Semua Layanan")
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }
@@ -313,9 +361,9 @@ fun GroceryHeader(
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             ) {
                 Icon(
-                    Icons.Default.Notifications,
+                    imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
             if (unreadCount > 0) {
@@ -337,9 +385,10 @@ fun GroceryHeader(
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .clickable { onProfileClick() }
         ) {
-            if (!imageUrl.isNullOrEmpty()) {
+            val profileImageUrl = ImageUtils.normalizeUrl(imageUrl)
+            if (profileImageUrl != null) {
                 AsyncImage(
-                    model = imageUrl,
+                    model = profileImageUrl,
                     contentDescription = "Profile",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -352,6 +401,7 @@ fun GroceryHeader(
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
+
         }
     }
 }
@@ -383,11 +433,12 @@ fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
             val banner = banners[page]
             Box(modifier = Modifier.fillMaxSize().clickable { onClick(banner) }) {
                 AsyncImage(
-                    model = banner.image,
+                    model = ImageUtils.normalizeUrl(banner.image),
                     contentDescription = banner.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -562,7 +613,7 @@ fun FeatureGridSection(
             Column(modifier = Modifier.padding(20.dp)) {
                 val features = listOf(
                     FeatureItemData(stringResource(R.string.feature_scan_halal), Icons.Default.QrCodeScanner, "scan", MaterialTheme.colorScheme.primary),
-                    FeatureItemData(stringResource(R.string.feature_cek_obat), Icons.Default.Medication, "drug_interaction", Color(0xFFD32F2F)),
+                    FeatureItemData(stringResource(R.string.feature_cek_obat), Icons.Default.MenuBook, "drug_interaction", Color(0xFFD32F2F)),
                     FeatureItemData(stringResource(R.string.feature_kosmetik), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF7B1FA2)),
                     FeatureItemData(stringResource(R.string.feature_bpom_id), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF0277BD)),
                     FeatureItemData(stringResource(R.string.feature_riwayat_id), Icons.Default.History, "history", MaterialTheme.colorScheme.secondary),
@@ -631,11 +682,12 @@ fun RecommendationSection(
                     Column {
                         Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
                             AsyncImage(
-                                model = product.image ?: "https://ui-avatars.com/api/?name=${product.name}&background=random",
+                                model = ImageUtils.normalizeUrl(product.image) ?: "https://ui-avatars.com/api/?name=${product.name}&background=random",
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
+
                         }
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
@@ -689,7 +741,7 @@ fun HealthArticlesSection(
                 )
             }
         } else {
-            articles.take(4).forEach { article ->
+            articles.take(8).forEach { article ->
                 ArticleCard(article = article, onClick = { onArticleClick(article) })
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -739,11 +791,12 @@ fun ArticleCard(article: HealthArticleItem, onClick: () -> Unit) {
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 AsyncImage(
-                    model = article.imageUrl,
+                    model = ImageUtils.normalizeUrl(article.imageUrl),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -790,86 +843,6 @@ fun SectionTitle(title: String, action: String?, onAction: (() -> Unit)?) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AllFeaturesSheet(onDismiss: () -> Unit, onNavigate: (String) -> Unit) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.outlineVariant) }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 48.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.all_features_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-
-            val features = listOf(
-                FeatureItemData(stringResource(R.string.feature_scan_halal), Icons.Default.QrCode2, "scan", MaterialTheme.colorScheme.primary),
-                FeatureItemData(stringResource(R.string.feature_bpom), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF0277BD)),
-                FeatureItemData(stringResource(R.string.feature_cosmetic), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF7B1FA2)),
-                FeatureItemData(stringResource(R.string.feature_check_medicine), Icons.Default.Medication, "drug_interaction", Color(0xFFD32F2F)),
-                FeatureItemData(stringResource(R.string.feature_bmi_calculator), Icons.Default.Calculate, "bmi_calculator", Color(0xFF00897B)),
-                FeatureItemData(stringResource(R.string.feature_medical_info), Icons.Default.Info, "medical_info", Color(0xFF5D4037)),
-                FeatureItemData(stringResource(R.string.feature_ai_assistant), Icons.Default.SmartToy, "health_assistant", Color(0xFF512DA8)),
-                FeatureItemData(stringResource(R.string.feature_recipe_ai), Icons.Default.MenuBook, "recipes", Color(0xFF6A1B9A)),
-                FeatureItemData(stringResource(R.string.feature_riwayat_id), Icons.Default.History, "history", MaterialTheme.colorScheme.secondary),
-                FeatureItemData(stringResource(R.string.feature_favorite_list), Icons.Default.Favorite, "favorites", Color(0xFFE91E63)),
-                FeatureItemData(stringResource(R.string.feature_halocode), Icons.Default.Chat, "halocode", Color(0xFF00695C)),
-                FeatureItemData(stringResource(R.string.feature_community), Icons.Default.Groups, "community", Color(0xFF1976D2)),
-                FeatureItemData(stringResource(R.string.feature_local_ai), Icons.Default.Psychology, "local_ai_chat", Color(0xFFE65100)),
-                FeatureItemData(stringResource(R.string.feature_lainnya_id), Icons.Default.GridView, "all_features", MaterialTheme.colorScheme.onSurfaceVariant)
-            )
-
-            features.chunked(4).forEach { rowItems ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    rowItems.forEach { item ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { onNavigate(item.route) }
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(CircleShape)
-                                    .background(item.color.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(item.icon, contentDescription = item.title, tint = item.color, modifier = Modifier.size(28.dp))
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = item.title,
-                                style = MaterialTheme.typography.labelSmall,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    if (rowItems.size < 4) {
-                        repeat(4 - rowItems.size) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun PulsatingFAB(onClick: () -> Unit) {

@@ -175,6 +175,9 @@
 
     <string name="health_assistant_welcome">Halo, saya asisten medis AI Anda. Ada keluhan apa hari ini? Ceritakan gejala Anda untuk diagnosis awal.</string>
     <string name="health_assistant_placeholder">Ceritakan keluhan Anda atau klik mic...</string>
+    <string name="medical_disclaimer_title">Informasi medis &amp; AI</string>
+    <string name="medical_disclaimer_body_short">Hasil AI bersifat edukasi, bukan diagnosis atau resep pengobatan. Konsultasikan ke tenaga kesehatan resmi.</string>
+    <string name="medical_disclaimer_body">Rekomendasi, skor, dan ringkasan AI di Halalytics bersifat informatif dan dapat salah. Ini bukan pengganti diagnosis, resep, atau nasihat dokter/ahli gizi. Untuk keputusan medis, obat, atau diet klinis, selalu hubungi fasilitas kesehatan resmi.</string>
     <string name="common_analyze">Analyze</string>
     
     
@@ -213,7 +216,7 @@
     <string name="register_error_email">Masukkan email</string>
     <string name="register_error_invalid_email">Masukkan email yang valid</string>
     <string name="register_error_password">Masukkan password</string>
-    <string name="register_error_password_short">Password minimal 6 karakter</string>
+    <string name="register_error_password_short">Password minimal 8 karakter</string>
     <string name="register_error_confirm_password">Konfirmasi password belum diisi</string>
     <string name="register_error_password_mismatch">Password tidak cocok</string>
     <string name="register_error_phone">Masukkan nomor telepon</string>
@@ -329,8 +332,6 @@
     <string name="feature_admin_panel">Admin Panel</string>
     <string name="feature_admin_notifications">Admin Notif</string>
     <string name="feature_privacy_policy">Kebijakan Privasi</string>
-    <string name="feature_local_ai">Local AI Chat</string>
-    <string name="feature_local_ai_desc">Bicara dengan AI lokal (Ollama)</string>
 
     <string name="history_title">Riwayat Scan</string>
     <string name="history_total">Total Scan</string>
@@ -550,8 +551,7 @@
     <string name="assistant_chat_doctor_desc">Bicara langsung dengan dokter/pakar kesehatan</string>
     <string name="assistant_chat_doctor_button">Chat Dokter Sekarang</string>
     <string name="common_send">Kirim</string>
-    <string name="local_ai_title">Halalytics Local AI</string>
-    <string name="local_ai_subtitle">Ollama Powered</string>
-    <string name="local_ai_clear_chat">Hapus Chat</string>
-    <string name="local_ai_input_placeholder">Tanya AI...</string>
+    <string name="bottom_nav_dashboard">Dasbor</string>
+    <string name="bottom_nav_consultations">Konsultasi</string>
+    <string name="bottom_nav_patients">Pasien</string>
 </resources>

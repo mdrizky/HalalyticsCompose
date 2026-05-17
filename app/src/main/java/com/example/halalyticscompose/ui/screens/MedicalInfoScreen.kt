@@ -40,9 +40,17 @@ private val TextLight = Color(0xFF9E9E9E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicalInfoScreen(navController: NavController) {
+fun MedicalInfoScreen(
+    navController: NavController,
+    viewModel: com.example.halalyticscompose.ui.viewmodel.MedicalInfoViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    
+    val profileData by viewModel.profileData.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
     var weightKg by remember { mutableStateOf("") }
     var heightCm by remember { mutableStateOf("") }
     var chronicDiseases by remember { mutableStateOf("") }
@@ -50,9 +58,30 @@ fun MedicalInfoScreen(navController: NavController) {
     var bloodType by remember { mutableStateOf("") }
     var additionalNotes by remember { mutableStateOf("") }
     val selectedAllergies = remember { mutableStateListOf<String>() }
+    
     var showAllergyModal by remember { mutableStateOf(false) }
-    var isSaving by remember { mutableStateOf(false) }
     var showSuccess by remember { mutableStateOf(false) }
+
+    // Load profile on start
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile()
+    }
+
+    // Update state when profile data is loaded
+    LaunchedEffect(profileData) {
+        profileData?.let { data ->
+            weightKg = (data["weight_kg"] ?: "").toString()
+            heightCm = (data["height_cm"] ?: "").toString()
+            chronicDiseases = (data["chronic_diseases"] ?: "").toString()
+            hasGerd = data["has_gerd"] as? Boolean
+            bloodType = (data["blood_type"] ?: "").toString()
+            additionalNotes = (data["additional_notes"] ?: "").toString()
+            
+            val allergies = data["drug_allergies"] as? List<*>
+            selectedAllergies.clear()
+            allergies?.forEach { it?.let { a -> selectedAllergies.add(a.toString()) } }
+        }
+    }
 
     // BMI Calculation
     val bmi = remember(weightKg, heightCm) {
@@ -480,42 +509,21 @@ fun MedicalInfoScreen(navController: NavController) {
                 // ── Submit Button ──
                 Button(
                     onClick = {
-                        isSaving = true
-                        showSuccess = false
-                        coroutineScope.launch(Dispatchers.IO) {
-                            try {
-                                val sessionManager = com.example.halalyticscompose.utils.SessionManager(context)
-                                val token = sessionManager.getBearerToken()
-                                
-                                if (!token.isNullOrBlank()) {
-                                    val apiService = com.example.halalyticscompose.data.network.ApiConfig.apiService
-                                    
-                                    val mergedHistory = mutableListOf<String>()
-                                    if (chronicDiseases.isNotBlank()) mergedHistory.add(chronicDiseases)
-                                    if (hasGerd == true) mergedHistory.add("GERD/Asam lambung")
-                                    val finalMedicalHistory = mergedHistory.joinToString(", ")
-
-                                    val response = apiService.updateProfile(
-                                        bearer = token,
-                                        height = heightCm.toDoubleOrNull(),
-                                        weight = weightKg.toDoubleOrNull(),
-                                        bloodType = bloodType.takeIf { it.isNotBlank() },
-                                        allergy = selectedAllergies.joinToString(", ").takeIf { it.isNotBlank() },
-                                        medicalHistory = finalMedicalHistory.takeIf { it.isNotBlank() }
-                                    )
-
-                                    kotlinx.coroutines.delay(800) // For slight UX feedback
-                                    isSaving = false
-                                    showSuccess = true
-                                    
-                                    kotlinx.coroutines.delay(3000)
-                                    showSuccess = false
-                                } else {
-                                    isSaving = false
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                isSaving = false
+                        val data = mapOf(
+                            "weight_kg" to (weightKg.toDoubleOrNull() ?: 0.0),
+                            "height_cm" to (heightCm.toDoubleOrNull() ?: 0.0),
+                            "blood_type" to bloodType,
+                            "chronic_diseases" to chronicDiseases,
+                            "has_gerd" to (hasGerd ?: false),
+                            "additional_notes" to additionalNotes,
+                            "drug_allergies" to selectedAllergies.toList()
+                        )
+                        
+                        viewModel.updateProfile(data) {
+                            showSuccess = true
+                            coroutineScope.launch {
+                                kotlinx.coroutines.delay(3000)
+                                showSuccess = false
                             }
                         }
                     },
@@ -524,9 +532,9 @@ fun MedicalInfoScreen(navController: NavController) {
                         .height(54.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = EmeraldDark),
-                    enabled = !isSaving
+                    enabled = !isLoading
                 ) {
-                    if (isSaving) {
+                    if (isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = Color.White
@@ -541,19 +549,19 @@ fun MedicalInfoScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
-    }
 
-    // Allergy Modal
-    if (showAllergyModal) {
-        DrugAllergyModalSheet(
-            selectedAllergies = selectedAllergies,
-            onDismiss = { showAllergyModal = false },
-            onSave = { allergies ->
-                selectedAllergies.clear()
-                selectedAllergies.addAll(allergies)
-                showAllergyModal = false
-            }
-        )
+        // Allergy Modal
+        if (showAllergyModal) {
+            DrugAllergyModalSheet(
+                selectedAllergies = selectedAllergies,
+                onDismiss = { showAllergyModal = false },
+                onSave = { allergies ->
+                    selectedAllergies.clear()
+                    selectedAllergies.addAll(allergies)
+                    showAllergyModal = false
+                }
+            )
+        }
     }
 }
 

@@ -261,7 +261,7 @@ fun EditProfileScreen(
                             Text("Ganti Password", fontWeight = FontWeight.Bold)
                             Text("Amankan akun Anda dengan password baru", fontSize = 12.sp, color = Color.Gray)
                         }
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.Gray)
+                        Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.Gray)
                     }
                 }
             }

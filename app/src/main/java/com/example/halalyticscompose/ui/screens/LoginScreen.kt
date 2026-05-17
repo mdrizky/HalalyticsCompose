@@ -37,22 +37,59 @@ import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import android.util.Log
+import androidx.fragment.app.FragmentActivity
+import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
+import com.example.halalyticscompose.utils.SessionManager
 
 @Composable
 fun LoginScreen(
     navController: NavController,
     prefillUsername: String = "",
-    prefillPassword: String = "",
     showRegisterSuccess: Boolean = false,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var username by remember { mutableStateOf(prefillUsername) }
-    var password by remember { mutableStateOf(prefillPassword) }
+    var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
 
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    val navigateAfterLogin: () -> Unit = {
+        val sm = SessionManager.getInstance(context)
+        val dest = when (sm.getRole()?.lowercase()) {
+            "nutritionist" -> "nutritionist_home"
+            else -> "home"
+        }
+        navController.navigate(dest) {
+            popUpTo("login") { inclusive = true }
+        }
+    }
+
+    val facebookCallbackManager = LocalFacebookCallbackManager.current
+
+    DisposableEffect(facebookCallbackManager) {
+        val fbCallback = object : FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult) {
+                viewModel.loginWithFacebook(result.accessToken.token) {
+                    navigateAfterLogin()
+                }
+            }
+
+            override fun onCancel() {
+                Log.d("LoginScreen", "Facebook login cancelled")
+            }
+
+            override fun onError(error: FacebookException) {
+                Log.e("LoginScreen", "Facebook login error", error)
+            }
+        }
+        LoginManager.getInstance().registerCallback(facebookCallbackManager, fbCallback)
+        onDispose {
+            LoginManager.getInstance().unregisterCallback(facebookCallbackManager)
+        }
+    }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -64,9 +101,7 @@ fun LoginScreen(
                 val idToken = account?.idToken
                 if (idToken != null) {
                     viewModel.loginWithGoogle(idToken) {
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
-                        }
+                        navigateAfterLogin()
                     }
                 }
             } catch (e: com.google.android.gms.common.api.ApiException) {
@@ -115,7 +150,7 @@ fun LoginScreen(
                 letterSpacing = (-1).sp
             )
             Text(
-                text = "Premium Health & Halal Intelligence",
+                text = "Kesehatan, halal, dan gizi dalam satu aplikasi",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -123,6 +158,25 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            if (showRegisterSuccess) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Text(
+                        text = "Registrasi berhasil. Silakan masuk dengan akun Anda.",
+                        modifier = Modifier.padding(14.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -136,7 +190,7 @@ fun LoginScreen(
                         .padding(18.dp)
                 ) {
                     Text(
-                        text = "Welcome back",
+                        text = "Selamat datang kembali",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -206,9 +260,7 @@ fun LoginScreen(
                             viewModel.login(
                                 com.example.halalyticscompose.data.model.LoginRequest(email = username, password = password),
                                 onSuccess = {
-                                    navController.navigate("home") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                    navigateAfterLogin()
                                 }
                             )
                         },
@@ -257,8 +309,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val callbackManager = remember { CallbackManager.Factory.create() }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -282,25 +332,15 @@ fun LoginScreen(
                 // Facebook Button
                 SocialLoginButton(
                     onClick = {
-                        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
-                            override fun onSuccess(result: LoginResult) {
-                                viewModel.loginWithFacebook(result.accessToken.token) {
-                                    navController.navigate("home") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                }
-                            }
-                            override fun onCancel() {
-                                Log.d("LoginScreen", "Facebook login cancelled")
-                            }
-                            override fun onError(error: FacebookException) {
-                                Log.e("LoginScreen", "Facebook login error", error)
-                            }
-                        })
-                        LoginManager.getInstance().logInWithReadPermissions(
-                            context as android.app.Activity,
-                            listOf("email", "public_profile")
-                        )
+                        val activity = context as? FragmentActivity
+                        if (activity != null) {
+                            LoginManager.getInstance().logInWithReadPermissions(
+                                activity,
+                                listOf("email", "public_profile")
+                            )
+                        } else {
+                            Log.e("LoginScreen", "Facebook login requires FragmentActivity context")
+                        }
                     },
                     icon = Icons.Default.Facebook,
                     text = "Facebook",

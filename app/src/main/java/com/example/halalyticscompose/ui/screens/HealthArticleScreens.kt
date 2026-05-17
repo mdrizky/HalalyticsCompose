@@ -3,6 +3,7 @@ package com.example.halalyticscompose.ui.screens
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,6 +64,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.halalyticscompose.data.model.HealthArticleItem
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 import com.example.halalyticscompose.ui.viewmodel.HealthArticleViewModel
 
 private data class HealthArticleLocal(
@@ -418,6 +421,8 @@ fun HealthArticleDetailScreen(
                         imageUrl = remoteArticle.imageUrl,
                         aiSummary = remoteArticle.aiSummary,
                         sourceUrl = remoteArticle.sourceUrl,
+                        sourceName = remoteArticle.source,
+                        publishedAt = remoteArticle.publishedAt,
                         recommendations = recommendations,
                         onRecommendationClick = { rec ->
                              val slug = rec.slug ?: rec.id.toString()
@@ -501,6 +506,8 @@ private fun ArticleDetailContent(
     imageUrl: String?,
     aiSummary: String? = null,
     sourceUrl: String? = null,
+    sourceName: String? = null,
+    publishedAt: String? = null,
     recommendations: List<HealthArticleItem> = emptyList(),
     onRecommendationClick: (HealthArticleItem) -> Unit = {}
 ) {
@@ -537,6 +544,13 @@ private fun ArticleDetailContent(
                     )
                 }
             }
+        }
+
+        item {
+            MedicalAiDisclaimerBanner(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                compact = true
+            )
         }
 
         if (!aiSummary.isNullOrBlank()) {
@@ -578,6 +592,7 @@ private fun ArticleDetailContent(
         }
 
         item {
+            val uriHandler = LocalUriHandler.current
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text(
                     text = title,
@@ -586,11 +601,51 @@ private fun ArticleDetailContent(
                     color = MaterialTheme.colorScheme.onSurface,
                     lineHeight = 34.sp
                 )
+
+                // Source attribution
+                if (!sourceName.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Description,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Sumber: $sourceName",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (!publishedAt.isNullOrBlank()) {
+                            Text(
+                                text = "  •  ${publishedAt.take(10)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(20.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(20.dp))
+
+                // Clean HTML entities from content
+                val cleanContent = content
+                    .replace("&nbsp;", " ")
+                    .replace("&amp;", "&")
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
+                    .replace("&quot;", "\"")
+                    .replace("&#39;", "'")
+                    .replace(Regex("<[^>]*>"), "") // Strip remaining HTML tags
+                    .trim()
+
                 Text(
-                    text = content,
+                    text = cleanContent,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     lineHeight = 26.sp,
@@ -599,10 +654,16 @@ private fun ArticleDetailContent(
                 if (!sourceUrl.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     androidx.compose.material3.Button(
-                        onClick = { /* Not used since WebView handles layout but just to be safe */ },
+                        onClick = {
+                            try {
+                                uriHandler.openUri(sourceUrl)
+                            } catch (_: Exception) { }
+                        },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
+                        Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Baca Sumber Asli", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }

@@ -46,3 +46,22 @@ data class AiAnalysisContent(
     @SerializedName("health_risk")
     val healthRisk: String = "safe" // safe, low, high
 )
+
+data class BmiAdviceRequest(
+    @SerializedName("weight_kg") val weightKg: Float,
+    @SerializedName("height_cm") val heightCm: Float
+)
+
+data class BmiAdviceResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("data") val data: BmiAdviceData? = null,
+    @SerializedName("message") val message: String? = null
+)
+
+data class BmiAdviceData(
+    @SerializedName("status_fisik") val statusFisik: String,
+    @SerializedName("target_2_bulan") val target2Bulan: String,
+    @SerializedName("saran_nutrisi") val saranNutrisi: List<String>,
+    @SerializedName("saran_olahraga") val saranOlahraga: List<String>,
+    @SerializedName("pesan_motivasi") val pesanMotivasi: String
+)

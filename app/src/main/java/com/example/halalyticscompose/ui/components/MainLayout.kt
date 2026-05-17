@@ -16,13 +16,18 @@ fun MainLayout(
     navController: NavController,
     showBottomNav: Boolean = false,
     isAdmin: Boolean = false,
+    isNutritionist: Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             if (showBottomNav) {
-                BottomNavBar(navController = navController, isAdmin = isAdmin)
+                BottomNavBar(
+                    navController = navController,
+                    isAdmin = isAdmin,
+                    isNutritionist = isNutritionist
+                )
             }
         },
         containerColor = MaterialTheme.colorScheme.background

@@ -358,6 +358,11 @@ interface ApiService {
     @DELETE("favorites/{id}")
     suspend fun deleteFavorite(@Header("Authorization") token: String, @Path("id") id: Int): Response<Unit>
 
+    @GET("nutritionist/dashboard")
+    suspend fun getNutritionistDashboard(
+        @Header("Authorization") bearer: String,
+    ): NutritionistDashboardResponse
+
     @FormUrlEncoded
     @PUT("favorites/{id}/notes")
     suspend fun updateFavoriteNotes(
@@ -426,6 +431,17 @@ interface ApiService {
 
     @GET("ai/daily-insight")
     suspend fun getAiDailyInsight(@Header("Authorization") bearer: String): Response<DailyInsightResponse>
+
+    @POST("ai/bmi-advice")
+    suspend fun getBmiAdvice(
+        @Header("Authorization") bearer: String,
+        @Body request: BmiAdviceRequest
+    ): Response<BmiAdviceResponse>
+
+    @GET("medical-reports")
+    suspend fun getMedicalReportsHistory(
+        @Header("Authorization") bearer: String
+    ): ApiResponse<List<com.example.halalyticscompose.ui.viewmodel.MedicalReportHistory>>
 
     @GET("health/score")
     suspend fun getHealthScore(@Header("Authorization") bearer: String): Response<HealthScoreResponse>

@@ -168,7 +168,7 @@ fun ReportIssueScreen(
                             Text("Dapatkan analisis kesehatan mendalam dari AI", style = MaterialTheme.typography.bodySmall)
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = HalalGreen)
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = HalalGreen)
                     }
                 }
                 

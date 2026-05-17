@@ -67,10 +67,10 @@ fun HealthSummarySection(
                         progress = { (bmiValue / 40f).coerceIn(0f, 1f) },
                         modifier = Modifier.size(100.dp),
                         color = when {
-                            bmiValue < 18.5 -> Color(0xFF42A5F5)
-                            bmiValue < 25 -> Color(0xFF66BB6A)
-                            bmiValue < 30 -> Color(0xFFFFA726)
-                            else -> Color(0xFFEF5350)
+                            bmiValue < 18.5 -> Color(0xFF42A5F5) // Blue for underweight
+                            bmiValue < 23 -> Color(0xFF66BB6A)  // Green for normal
+                            bmiValue < 25 -> Color(0xFFFFA726)  // Yellow for overweight
+                            else -> Color(0xFFEF5350)           // Red for obese
                         },
                         strokeWidth = 10.dp,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,

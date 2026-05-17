@@ -2,15 +2,21 @@ package com.example.halalyticscompose.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
+import androidx.work.WorkManager
 import com.example.halalyticscompose.data.api.ApiService
+import com.example.halalyticscompose.data.local.HalalyticsDatabase
 import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.utils.SessionManager
 import com.example.halalyticscompose.utils.PreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import android.util.Log
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -20,9 +26,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val apiService: ApiService,
     private val sessionManager: SessionManager,
-    private val preferenceManager: PreferenceManager
+    private val preferenceManager: PreferenceManager,
+    private val database: HalalyticsDatabase,
 ) : ViewModel() {
 
     private val _isLoggedIn = MutableStateFlow(sessionManager.isLoggedIn())
@@ -33,6 +41,11 @@ class AuthViewModel @Inject constructor(
 
     private val _isAdmin = MutableStateFlow(sessionManager.getRole()?.equals("admin", ignoreCase = true) == true)
     val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
+    private val _isNutritionist = MutableStateFlow(
+        sessionManager.getRole()?.equals("nutritionist", ignoreCase = true) == true
+    )
+    val isNutritionist: StateFlow<Boolean> = _isNutritionist.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -101,25 +114,30 @@ class AuthViewModel @Inject constructor(
         response: retrofit2.Response<LoginResponse>,
         onSuccess: (LoginResponse) -> Unit
     ) {
-        if (response.isSuccessful && response.body()?.success == true) {
-            val loginData = response.body()!!
-            val user = loginData.user
-            if (user != null) {
-                sessionManager.saveAuthToken(loginData.token ?: "")
-                sessionManager.saveUserId(user.id_user)
-                sessionManager.saveUser(user.full_name ?: user.username, user.email)
-                sessionManager.saveRole(user.role)
-                
-                _isLoggedIn.value = true
-                _accessToken.value = loginData.token
-                _isAdmin.value = user.role.equals("admin", ignoreCase = true)
-                _userData.value = user.toUser()
-                
-                onSuccess(loginData)
-            }
-        } else {
-            _errorMessage.value = response.body()?.message ?: "Autentikasi gagal."
+        val body = response.body()
+        val ok = response.isSuccessful && body != null && body.isSuccess && body.user != null
+        if (!ok) {
+            _errorMessage.value = body?.message ?: body?.errorMessage ?: "Autentikasi gagal."
+            return
         }
+        val loginData = body!!
+        val user = loginData.user!!
+        if (loginData.token.isNullOrBlank()) {
+            _errorMessage.value = "Token autentikasi tidak diterima dari server."
+            return
+        }
+        sessionManager.saveAuthToken(loginData.token)
+        sessionManager.saveUserId(user.id_user)
+        sessionManager.saveUser(user.full_name ?: user.username, user.email)
+        sessionManager.saveRole(user.role)
+
+        _isLoggedIn.value = true
+        _accessToken.value = loginData.token
+        _isAdmin.value = user.role.equals("admin", ignoreCase = true)
+        _isNutritionist.value = user.role.equals("nutritionist", ignoreCase = true)
+        _userData.value = user.toUser()
+
+        onSuccess(loginData)
     }
 
     fun register(request: RegisterRequest, onSuccess: (LoginResponse) -> Unit) {
@@ -128,9 +146,8 @@ class AuthViewModel @Inject constructor(
             _errorMessage.value = null
             try {
                 val response = apiService.register(request)
-                if (response.isSuccessful && response.body()?.success == true) {
-                    val loginData = response.body()!!
-                    onSuccess(loginData)
+                if (response.isSuccessful && response.body() != null) {
+                    handleAuthResponse(response, onSuccess)
                 } else {
                     _errorMessage.value = response.body()?.message ?: "Registrasi gagal."
                 }
@@ -154,6 +171,7 @@ class AuthViewModel @Inject constructor(
                     val user = response.body()?.data
                     _userData.value = user
                     _isAdmin.value = user?.role?.equals("admin", ignoreCase = true) == true
+                    _isNutritionist.value = user?.role?.equals("nutritionist", ignoreCase = true) == true
                     
                     // Sync with SessionManager to ensure AI analysis has latest data
                     user?.let {
@@ -271,7 +289,7 @@ class AuthViewModel @Inject constructor(
                     loadUserProfile() // Refresh local state from server
                     onSuccess()
                 } else {
-                    val errorMsg = response.errorBody()?.string() ?: "Gagal memperbarui profil"
+                    val errorMsg = response.errorMessage ?: "Gagal memperbarui profil"
                     onError(errorMsg)
                 }
             } catch (e: Exception) {
@@ -284,12 +302,30 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout(onComplete: () -> Unit) {
-        sessionManager.logout()
-        _isLoggedIn.value = false
-        _accessToken.value = null
-        _userData.value = null
-        _isAdmin.value = false
-        onComplete()
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    try {
+                        WorkManager.getInstance(appContext).cancelAllWork()
+                    } catch (_: Exception) {
+                    }
+                    try {
+                        database.clearAllTables()
+                    } catch (e: Exception) {
+                        Log.e("AuthViewModel", "clearAllTables failed", e)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "logout cleanup failed", e)
+            }
+            sessionManager.logout()
+            _isLoggedIn.value = false
+            _accessToken.value = null
+            _userData.value = null
+            _isAdmin.value = false
+            _isNutritionist.value = false
+            onComplete()
+        }
     }
 
     fun changePassword(
@@ -319,6 +355,31 @@ class AuthViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Change password failed", e)
                 onError(e.message ?: "Terjadi kesalahan")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun getBmiAdvice(weight: Float, height: Float, onResult: (BmiAdviceData?) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val token = _accessToken.value ?: ""
+                val response = apiService.getBmiAdvice(
+                    bearer = "Bearer $token",
+                    request = BmiAdviceRequest(weight, height)
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    onResult(response.body()?.data)
+                } else {
+                    _errorMessage.value = "Gagal mengambil saran AI: ${response.message()}"
+                    onResult(null)
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "BMI Advice error", e)
+                _errorMessage.value = "Kesalahan: ${e.message}"
+                onResult(null)
             } finally {
                 _isLoading.value = false
             }

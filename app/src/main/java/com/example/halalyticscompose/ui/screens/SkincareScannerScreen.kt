@@ -600,7 +600,7 @@ fun BeautyProductPremiumCard(product: BeautyProduct, onClick: () -> Unit) {
                 }
             }
             
-            Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurface.copy(0.2f))
+            Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurface.copy(0.2f))
         }
     }
 }

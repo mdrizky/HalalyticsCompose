@@ -51,7 +51,7 @@ fun AccountManagementScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navController.navigate("enhanced_profile") }) {
+                    IconButton(onClick = { navController.navigate("edit_profile") }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit Profile", tint = textColor)
                     }
                 },
@@ -172,7 +172,7 @@ fun AccountManagementScreen(
             AccountInfoItem(
                 label = "Activity Level",
                 value = userData?.activityLevel ?: "-",
-                icon = Icons.Default.DirectionsRun
+                icon = Icons.AutoMirrored.Filled.DirectionsRun
             )
             
             AccountInfoItem(

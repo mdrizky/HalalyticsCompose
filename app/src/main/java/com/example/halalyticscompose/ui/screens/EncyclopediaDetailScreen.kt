@@ -113,7 +113,7 @@ fun EncyclopediaDetailScreen(
                             )
                     ) {
                         Icon(
-                            if (isSpeaking) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                            if (isSpeaking) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                             "Read aloud",
                             tint = if (isSpeaking) typeColor else MaterialTheme.colorScheme.onSurface
                         )

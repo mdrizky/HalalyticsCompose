@@ -114,6 +114,15 @@ fun SimpleRegisterScreen(
                     modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = com.example.halalyticscompose.R.drawable.logo_halalytics),
+                        contentDescription = "Halalytics Logo",
+                        modifier = Modifier.size(100.dp),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
                     Text(
                         text = stringResource(R.string.register_create_account),
                         fontSize = 28.sp,
@@ -511,7 +520,7 @@ fun SimpleRegisterScreen(
                                 return@Button
                             }
                             
-                            if (password.length < 6) {
+                            if (password.length < 8) {
                                 errorMessage = passwordShortError
                                 return@Button
                             }
@@ -561,8 +570,8 @@ fun SimpleRegisterScreen(
                                     medicalHistory = medicalHistory
                                 ),
                                 onSuccess = {
-                                    navController.navigate("login?reg_user=$username&reg_pass=$password&reg_success=1") {
-                                        popUpTo("register") { inclusive = true }
+                                    navController.navigate("splash") {
+                                        popUpTo(0) { inclusive = true }
                                     }
                                 }
                             )

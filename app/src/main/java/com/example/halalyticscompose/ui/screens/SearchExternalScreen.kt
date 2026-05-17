@@ -581,7 +581,7 @@ private fun ProductItemCard(
             
             // Arrow
             Icon(
-                Icons.Default.ChevronRight,
+                Icons.Default.KeyboardArrowRight,
                 contentDescription = null,
                 tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)

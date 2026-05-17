@@ -48,4 +48,7 @@ interface ProductHistoryDao {
 
     @Query("UPDATE product_history SET isSynced = 1 WHERE barcode = :barcode")
     suspend fun markAsSynced(barcode: String)
+
+    @Query("DELETE FROM product_history")
+    suspend fun deleteAllProducts()
 }

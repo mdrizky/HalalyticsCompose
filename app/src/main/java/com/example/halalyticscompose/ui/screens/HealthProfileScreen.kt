@@ -416,7 +416,7 @@ fun HealthToolItem(
                 )
             }
             Icon(
-                Icons.Default.ChevronRight,
+                Icons.Default.KeyboardArrowRight,
                 contentDescription = null,
                 tint = color.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
@@ -429,9 +429,11 @@ fun getBMICategory(bmi: String): String {
     return try {
         val bmiValue = bmi.toFloatOrNull() ?: return "Tidak diketahui"
         when {
+            bmiValue < 17.0 -> "Sangat Kurus"
             bmiValue < 18.5 -> "Kurus"
-            bmiValue < 25 -> "Normal"
-            bmiValue < 30 -> "Berlebih"
+            bmiValue < 20.0 -> "Normal (Tipis)"
+            bmiValue < 23.0 -> "Normal (Ideal)"
+            bmiValue < 25.0 -> "Berlebih"
             else -> "Obesitas"
         }
     } catch (e: Exception) {

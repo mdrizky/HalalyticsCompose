@@ -48,6 +48,8 @@ android {
         buildConfigField("String", "REVERB_APP_KEY", "\"$reverbAppKey\"")
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
         buildConfigField("String", "FACEBOOK_APP_ID", "\"$facebookAppId\"")
+        // Facebook SDK ApplicationId (strings resource) — isi FACEBOOK_APP_ID di local.properties
+        resValue("string", "facebook_app_id", facebookAppId.ifBlank { "000000000000000" })
         
         // Default AI Keys (will be overridden in buildTypes)
         buildConfigField("String", "GEMINI_API_KEY", "\"YOUR_DEV_KEY\"")

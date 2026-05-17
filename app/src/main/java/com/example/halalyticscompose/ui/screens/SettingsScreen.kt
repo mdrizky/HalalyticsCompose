@@ -276,7 +276,7 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(stringResource(R.string.watchlist), fontWeight = FontWeight.Medium)
                         }
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 

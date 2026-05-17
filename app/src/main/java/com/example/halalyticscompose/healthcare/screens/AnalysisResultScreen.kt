@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.halalyticscompose.healthcare.model.*
 import com.example.halalyticscompose.healthcare.viewmodel.HealthScannerViewModel
+import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +50,7 @@ fun AnalysisResultScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                MedicalAiDisclaimerBanner(modifier = Modifier.padding(bottom = 8.dp), compact = true)
                 // Safety Indicator
                 Card(
                     modifier = Modifier.fillMaxWidth(),

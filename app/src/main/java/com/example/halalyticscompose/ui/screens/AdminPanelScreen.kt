@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -124,7 +124,7 @@ fun AdminPanelScreen(
                             Spacer(modifier = Modifier.width(16.dp))
                             Text("Manajemen User", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -141,7 +141,7 @@ fun AdminPanelScreen(
                             Spacer(modifier = Modifier.width(16.dp))
                             Text("System Health & Logs", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
                             Spacer(modifier = Modifier.weight(1f))
-                            Icon(androidx.compose.material.icons.Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.tertiary)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.tertiary)
                         }
                     }
                 }

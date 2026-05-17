@@ -70,6 +70,8 @@ import com.example.halalyticscompose.utils.toRelativeTime
 import android.widget.Toast
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import com.example.halalyticscompose.utils.ImageUtils
+
 
 // ═══════════════════════════════════════════════════════════════════
 // COLOR CONSTANTS — Emerald Forest
@@ -357,9 +359,10 @@ private fun HistoryCard(item: ScanHistoryItem, onClick: () -> Unit, onDelete: ()
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (!item.productImage.isNullOrBlank()) {
+                    val finalImageUrl = ImageUtils.normalizeUrl(item.productImage)
+                    if (finalImageUrl != null) {
                         AsyncImage(
-                            model = item.productImage,
+                            model = finalImageUrl,
                             contentDescription = item.productName,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -368,6 +371,7 @@ private fun HistoryCard(item: ScanHistoryItem, onClick: () -> Unit, onDelete: ()
                         Text("📦", fontSize = 20.sp)
                     }
                 }
+
                 Spacer(modifier = Modifier.size(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
