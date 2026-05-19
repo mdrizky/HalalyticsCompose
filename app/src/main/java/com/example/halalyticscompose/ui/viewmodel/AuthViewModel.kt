@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import com.example.halalyticscompose.data.api.ApiService
 import com.example.halalyticscompose.data.local.HalalyticsDatabase
 import com.example.halalyticscompose.data.model.*
+import com.example.halalyticscompose.utils.RoleHelper
 import com.example.halalyticscompose.utils.SessionManager
 import com.example.halalyticscompose.utils.PreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,12 +40,10 @@ class AuthViewModel @Inject constructor(
     private val _userData = MutableStateFlow<User?>(null)
     val userData: StateFlow<User?> = _userData.asStateFlow()
 
-    private val _isAdmin = MutableStateFlow(sessionManager.getRole()?.equals("admin", ignoreCase = true) == true)
+    private val _isAdmin = MutableStateFlow(RoleHelper.isAdmin(sessionManager.getRole()))
     val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
 
-    private val _isNutritionist = MutableStateFlow(
-        sessionManager.getRole()?.equals("nutritionist", ignoreCase = true) == true
-    )
+    private val _isNutritionist = MutableStateFlow(RoleHelper.isNutritionist(sessionManager.getRole()))
     val isNutritionist: StateFlow<Boolean> = _isNutritionist.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -133,8 +132,8 @@ class AuthViewModel @Inject constructor(
 
         _isLoggedIn.value = true
         _accessToken.value = loginData.token
-        _isAdmin.value = user.role.equals("admin", ignoreCase = true)
-        _isNutritionist.value = user.role.equals("nutritionist", ignoreCase = true)
+        _isAdmin.value = RoleHelper.isAdmin(user.role)
+        _isNutritionist.value = RoleHelper.isNutritionist(user.role)
         _userData.value = user.toUser()
 
         onSuccess(loginData)
@@ -170,8 +169,8 @@ class AuthViewModel @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     val user = response.body()?.data
                     _userData.value = user
-                    _isAdmin.value = user?.role?.equals("admin", ignoreCase = true) == true
-                    _isNutritionist.value = user?.role?.equals("nutritionist", ignoreCase = true) == true
+                    _isAdmin.value = RoleHelper.isAdmin(user?.role)
+                    _isNutritionist.value = RoleHelper.isNutritionist(user?.role)
                     
                     // Sync with SessionManager to ensure AI analysis has latest data
                     user?.let {

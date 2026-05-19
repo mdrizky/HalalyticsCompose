@@ -551,7 +551,4 @@
     <string name="assistant_chat_doctor_desc">Bicara langsung dengan dokter/pakar kesehatan</string>
     <string name="assistant_chat_doctor_button">Chat Dokter Sekarang</string>
     <string name="common_send">Kirim</string>
-    <string name="bottom_nav_dashboard">Dasbor</string>
-    <string name="bottom_nav_consultations">Konsultasi</string>
-    <string name="bottom_nav_patients">Pasien</string>
 </resources>

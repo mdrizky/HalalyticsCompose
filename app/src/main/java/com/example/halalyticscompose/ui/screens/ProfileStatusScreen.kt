@@ -107,7 +107,7 @@ fun ProfileStatusScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         LinearProgressIndicator(
-                            progress = completionPercent / 100f,
+                            progress = { completionPercent / 100f },
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(modifier = Modifier.height(12.dp))

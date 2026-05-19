@@ -351,14 +351,14 @@ class MedicalRepository @Inject constructor() {
             Log.e(TAG, "JSON parse error: ${e.message}", e)
             // Return a helpful fallback instead of crashing
             SymptomsAnalysis(
-                ringkasan_keluhan = "Keluhan berhasil diterima tetapi format analisis AI sedang tidak stabil.",
-                condition = "Analisis Tersedia Sebagian",
+                ringkasan_keluhan = "Keluhan Anda telah dicatat. Respons AI perlu diulang karena format data tidak lengkap.",
+                condition = "Perlu verifikasi ulang",
                 severity = "mild",
                 severity_label = "Ringan",
-                why_it_happened = "AI berhasil merespons tetapi format data tidak sesuai. Silakan coba lagi.",
-                possible_causes = listOf("Gangguan format respons AI"),
-                recommendation = "Coba ulangi analisis atau konsultasikan ke dokter",
-                tldr = "Analisis sementara tersedia sebagian. Jika gejala memburuk, segera konsultasi ke dokter.",
+                why_it_happened = "Sistem AI mengembalikan data yang tidak dapat diproses sepenuhnya. Ini bisa terjadi saat koneksi tidak stabil.",
+                possible_causes = listOf("Gangguan parsing respons AI", "Koneksi tidak stabil"),
+                recommendation = "Tekan analisis ulang, atau konsultasikan ke dokter jika gejala berlanjut atau memburuk.",
+                tldr = "Ulangi analisis gejala. Jika demam tinggi, sesak napas, nyeri dada, atau penurunan kesadaran — segera ke fasilitas kesehatan.",
                 should_seek_doctor = false
             )
         }

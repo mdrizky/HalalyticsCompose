@@ -323,15 +323,8 @@ class MainActivity : FragmentActivity() {
                      }
                 }
                 
-                // ⚠️ DYNAMIC START DESTINATION - Optimized for quick redirect
-                val startDestination = remember {
-                    when {
-                        !sessionManager.isLoggedIn() -> "splash"
-                        sessionManager.getRole()?.equals("admin", ignoreCase = true) == true -> "home"
-                        sessionManager.getRole()?.equals("nutritionist", ignoreCase = true) == true -> "nutritionist_home"
-                        else -> "home"
-                    }
-                }
+                // Always show splash first for consistent session + role routing
+                val startDestination = remember { "splash" }
                 
                 NavHost(
                     navController = navController,
@@ -413,7 +406,12 @@ class MainActivity : FragmentActivity() {
                     
                     // Home Screen
                     composable("home") {
-                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
+                        MainLayout(
+                            navController = navController,
+                            showBottomNav = true,
+                            isAdmin = isAdmin,
+                            isNutritionist = isNutritionist
+                        ) { paddingValues ->
                             when {
                                 isAdmin -> AdminPanelScreen(navController = navController)
                                 isNutritionist -> NutritionistHomeScreen(navController = navController)
@@ -426,7 +424,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                     composable("nutritionist_home") {
-                        MainLayout(navController = navController, showBottomNav = true, isAdmin = false) { paddingValues ->
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = false, isNutritionist = true) { paddingValues ->
                             NutritionistHomeScreen(navController = navController)
                         }
                     }
@@ -1309,11 +1307,52 @@ class MainActivity : FragmentActivity() {
                         OnboardingScreen(
                             navController = navController,
                             onFinish = {
+                                sessionManager.setOnboardingCompleted()
                                 navController.navigate("login") {
                                     popUpTo("onboarding") { inclusive = true }
                                 }
                             }
                         )
+                    }
+
+                    composable("donations") {
+                        MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin, isNutritionist = isNutritionist) {
+                            com.example.halalyticscompose.ui.screens.donation.DonationScreen(navController = navController)
+                        }
+                    }
+                    composable(
+                        "donation_detail/{campaignId}",
+                        arguments = listOf(navArgument("campaignId") { type = NavType.LongType })
+                    ) { entry ->
+                        val campaignId = entry.arguments?.getLong("campaignId") ?: 0L
+                        com.example.halalyticscompose.ui.screens.donation.DonationDetailScreen(
+                            campaignId = campaignId,
+                            navController = navController
+                        )
+                    }
+                    composable(
+                        "donation_form/{campaignId}",
+                        arguments = listOf(navArgument("campaignId") { type = NavType.LongType })
+                    ) { entry ->
+                        val campaignId = entry.arguments?.getLong("campaignId") ?: 0L
+                        com.example.halalyticscompose.ui.screens.donation.DonationFormScreen(
+                            campaignId = campaignId,
+                            navController = navController
+                        )
+                    }
+                    composable("donation_payment") {
+                        com.example.halalyticscompose.ui.screens.donation.DonationPaymentScreen(navController = navController)
+                    }
+                    composable("donation_success") {
+                        com.example.halalyticscompose.ui.screens.donation.DonationSuccessScreen(navController = navController)
+                    }
+                    composable("donation_history") {
+                        com.example.halalyticscompose.ui.screens.donation.DonationHistoryScreen(navController = navController)
+                    }
+                    composable("ai_chat") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) {
+                            AiChatScreen(navController = navController)
+                        }
                     }
 
 

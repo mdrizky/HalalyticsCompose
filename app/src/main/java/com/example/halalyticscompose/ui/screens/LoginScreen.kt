@@ -39,6 +39,7 @@ import com.facebook.login.LoginResult
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
+import com.example.halalyticscompose.utils.RoleHelper
 import com.example.halalyticscompose.utils.SessionManager
 
 @Composable
@@ -58,10 +59,7 @@ fun LoginScreen(
 
     val navigateAfterLogin: () -> Unit = {
         val sm = SessionManager.getInstance(context)
-        val dest = when (sm.getRole()?.lowercase()) {
-            "nutritionist" -> "nutritionist_home"
-            else -> "home"
-        }
+        val dest = RoleHelper.homeRoute(sm.getRole())
         navController.navigate(dest) {
             popUpTo("login") { inclusive = true }
         }

@@ -463,7 +463,7 @@ fun BloodTypeDropdown(selected: String, onSelected: (String) -> Unit, modifier: 
             leadingIcon = { Icon(Icons.Default.WaterDrop, null, modifier = Modifier.size(20.dp), tint = Color.Red) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
             )

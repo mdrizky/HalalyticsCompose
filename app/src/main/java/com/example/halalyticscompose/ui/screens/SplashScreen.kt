@@ -58,7 +58,10 @@ import com.example.halalyticscompose.R
 import com.example.halalyticscompose.ui.theme.MintAccent
 import com.example.halalyticscompose.ui.theme.Navy
 import com.example.halalyticscompose.ui.theme.NavyDark
+import com.example.halalyticscompose.utils.RoleHelper
 import com.example.halalyticscompose.utils.SessionManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -70,8 +73,8 @@ private val SplashTaglineGray = Color(0xFFB8C4BE)
 private data class SplashCategoryChip(val icon: ImageVector, val label: String)
 
 /**
- * Splash premium 5,8–7 detik sebelum [login] / home.
- * Menggunakan aset [R.drawable.logo_halalytics] (logo resmi Halalytics).
+ * Splash 2,5–3 detik → cek sesi & role → login / home / nutritionist_home.
+ * Logo: [R.drawable.logo_halalytics].
  */
 @Composable
 fun SplashScreen(
@@ -103,8 +106,8 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         val splashStart = SystemClock.elapsedRealtime()
-        val targetMs = 6_200L
-        val maxMs = 7_000L
+        val targetMs = 2_500L
+        val maxMs = 3_000L
 
         coroutineScope {
             launch {
@@ -159,35 +162,18 @@ fun SplashScreen(
 
         onSplashComplete()
 
-        try {
-            val sm = SessionManager.getInstance(context)
-            val currentlyLoggedIn = sm.isLoggedIn()
-            android.util.Log.d("HalalyticsNav", "Splash screen complete. isLoggedIn = $currentlyLoggedIn, role = ${sm.getRole()}")
-            
-            if (currentlyLoggedIn) {
-                val dest = when (sm.getRole()?.lowercase()) {
-                    "nutritionist" -> "nutritionist_home"
-                    else -> "home"
-                }
-                android.util.Log.d("HalalyticsNav", "Navigating to home route: $dest")
-                navController.navigate(dest) {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                }
-            } else {
-                android.util.Log.d("HalalyticsNav", "Navigating to login route")
-                navController.navigate("login") {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("HalalyticsNav", "Navigation error from Splash Screen", e)
-            try {
-                navController.navigate("login") {
-                    popUpTo(0) { inclusive = true }
-                }
-            } catch (fallbackEx: Exception) {
-                android.util.Log.e("HalalyticsNav", "Fallback navigation failed", fallbackEx)
-            }
+        val sm = SessionManager.getInstance(context)
+        val loggedIn = isLoggedIn && sm.isLoggedIn() && !sm.getAuthToken().isNullOrBlank()
+        val hasNetwork = context.isNetworkAvailable()
+
+        val dest = when {
+            !loggedIn && !sm.hasCompletedOnboarding() -> "onboarding"
+            !loggedIn -> "login"
+            else -> RoleHelper.homeRoute(sm.getRole())
+        }
+
+        navController.navigate(dest) {
+            popUpTo("splash") { inclusive = true }
         }
     }
 
@@ -328,4 +314,12 @@ fun SplashScreen(
             }
         }
     }
+}
+
+private fun android.content.Context.isNetworkAvailable(): Boolean {
+    val cm = getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        ?: return true
+    val network = cm.activeNetwork ?: return false
+    val caps = cm.getNetworkCapabilities(network) ?: return false
+    return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }

@@ -172,7 +172,7 @@ fun AccountManagementScreen(
             AccountInfoItem(
                 label = "Activity Level",
                 value = userData?.activityLevel ?: "-",
-                icon = Icons.AutoMirrored.Filled.DirectionsRun
+                icon = Icons.Default.DirectionsRun
             )
             
             AccountInfoItem(

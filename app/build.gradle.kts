@@ -230,6 +230,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("com.google.accompanist:accompanist-permissions:0.37.2")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // 🔹 QR Code Generation (Zxing)
     implementation("com.google.zxing:core:3.5.3")

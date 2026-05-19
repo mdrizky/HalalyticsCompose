@@ -2,16 +2,26 @@ package com.example.halalyticscompose.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 
 /**
  * SessionManager - Handles user session and preferences persistence
  */
 class SessionManager(private val context: Context) {
     
-    private val prefs: SharedPreferences = context.getSharedPreferences(
-        PREF_NAME, 
-        Context.MODE_PRIVATE
-    )
+    private val prefs: SharedPreferences = try {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        EncryptedSharedPreferences.create(
+            PREF_NAME,
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
 
     fun getContext(): Context = context
     
@@ -64,6 +74,7 @@ class SessionManager(private val context: Context) {
         private const val KEY_AUTO_LOGOUT_ENABLED = "auto_logout_enabled"
         private const val KEY_AUTO_LOGOUT_MINUTES = "auto_logout_minutes"
         private const val KEY_LAST_BACKGROUND_TS = "last_background_ts"
+        private const val KEY_ONBOARDING_DONE = "onboarding_done"
         
         // Location keys
         private const val KEY_ADDRESS = "address"
@@ -343,6 +354,12 @@ class SessionManager(private val context: Context) {
     }
 
     fun getLastBackgroundTimestamp(): Long = prefs.getLong(KEY_LAST_BACKGROUND_TS, 0L)
+
+    fun hasCompletedOnboarding(): Boolean = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+
+    fun setOnboardingCompleted(completed: Boolean = true) {
+        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, completed).apply()
+    }
     
     // ========================================
     // Logout / Clear Session

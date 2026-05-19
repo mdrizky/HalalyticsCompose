@@ -105,6 +105,7 @@ fun AiAnalysisScreen(
                 }
                 "Success" -> {
                     val result = uiState.analysisResult!!
+                    val analysisText = result.analysis.ifBlank { result.ringkasan.orEmpty() }
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -189,7 +190,7 @@ fun AiAnalysisScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                                 
                                 Text(
-                                    result.analysis,
+                                    analysisText,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = color.onSurface.copy(0.8f),
                                     textAlign = TextAlign.Center,

@@ -38,7 +38,10 @@ data class AiAnalysisContent(
     val confidence: Int = 0,
     
     @SerializedName("analysis")
-    val analysis: String, // Detailed explanation
+    val analysis: String = "", // Detailed explanation
+
+    @SerializedName("ringkasan")
+    val ringkasan: String? = null,
     
     @SerializedName("red_flags")
     val redFlags: List<String> = emptyList(),

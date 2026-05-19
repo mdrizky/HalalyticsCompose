@@ -25,8 +25,6 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MonitorHeart
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.automirrored.outlined.Chat
 
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Info
@@ -63,6 +61,7 @@ sealed class BottomNavItem(
     val unselectedIcon: ImageVector
 ) {
     object Home : BottomNavItem("home", R.string.home, Icons.Filled.Home, Icons.Outlined.Home)
+    object NutritionistHome : BottomNavItem("nutritionist_home", R.string.home, Icons.Filled.Home, Icons.Outlined.Home)
     object Health : BottomNavItem("health_suite_hub", R.string.bottom_nav_health, Icons.Filled.MonitorHeart, Icons.Default.MonitorHeart)
     object Community : BottomNavItem("community_hub", R.string.feature_community, Icons.Filled.Groups, Icons.Default.Groups)
     object Profile : BottomNavItem("profile", R.string.profile, Icons.Filled.Person, Icons.Outlined.Person)
@@ -72,11 +71,6 @@ sealed class BottomNavItem(
     object AdminDashboard : BottomNavItem("home", R.string.admin_panel_title, Icons.Filled.Build, Icons.Outlined.Build)
     object AdminUsers : BottomNavItem("admin_users", R.string.admin_panel_users, Icons.Filled.Person, Icons.Outlined.Person)
     object AdminNotifications : BottomNavItem("admin_notifications_app", R.string.notification_title, Icons.Filled.Notifications, Icons.Outlined.Notifications)
-
-    // Nutritionist Items
-    object NutriHome : BottomNavItem("nutritionist_home", R.string.bottom_nav_dashboard, Icons.Filled.MonitorHeart, Icons.Default.MonitorHeart)
-    object NutriConsult : BottomNavItem("consultations", R.string.bottom_nav_consultations, Icons.AutoMirrored.Filled.Chat, Icons.AutoMirrored.Outlined.Chat)
-    object NutriPatients : BottomNavItem("community_hub", R.string.bottom_nav_patients, Icons.Filled.Groups, Icons.Default.Groups)
 }
 
 @Composable
@@ -86,20 +80,22 @@ fun BottomNavBar(
     isNutritionist: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val items = when {
-        isAdmin -> listOf(
+    val items = if (isAdmin) {
+        listOf(
             BottomNavItem.AdminDashboard,
             BottomNavItem.AdminUsers,
             BottomNavItem.AdminNotifications,
             BottomNavItem.Profile
         )
-        isNutritionist -> listOf(
-            BottomNavItem.NutriHome,
-            BottomNavItem.NutriConsult,
-            BottomNavItem.NutriPatients,
+    } else if (isNutritionist) {
+        listOf(
+            BottomNavItem.NutritionistHome,
+            BottomNavItem.Health,
+            BottomNavItem.Community,
             BottomNavItem.Profile
         )
-        else -> listOf(
+    } else {
+        listOf(
             BottomNavItem.Home,
             BottomNavItem.Health,
             BottomNavItem.Community,
@@ -137,16 +133,17 @@ fun BottomNavBar(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val homePopRoute = if (isNutritionist) "nutritionist_home" else "home"
                     NavItem(items[0], currentRoute == items[0].route) {
                         if (currentRoute != items[0].route) navController.navigate(items[0].route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(homePopRoute) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     }
                     NavItem(items[1], currentRoute == items[1].route) {
                         if (currentRoute != items[1].route) navController.navigate(items[1].route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(homePopRoute) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -161,14 +158,14 @@ fun BottomNavBar(
                             (currentRoute?.startsWith("community_") == true)
                     ) {
                         if (currentRoute != items[2].route) navController.navigate(items[2].route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(homePopRoute) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     }
                     NavItem(items[3], currentRoute == items[3].route) {
                         if (currentRoute != items[3].route) navController.navigate(items[3].route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(homePopRoute) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }

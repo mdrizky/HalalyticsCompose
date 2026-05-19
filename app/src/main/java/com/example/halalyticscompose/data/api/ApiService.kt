@@ -407,6 +407,29 @@ interface ApiService {
         @Query("category") category: String
     ): RecommendationsResponse
 
+    // ==================== DONATIONS ====================
+    @GET("donations/campaigns")
+    suspend fun getDonationCampaigns(
+        @Header("Authorization") bearer: String
+    ): Response<com.example.halalyticscompose.data.model.DonationCampaignsResponse>
+
+    @POST("donations/create")
+    suspend fun createDonation(
+        @Header("Authorization") bearer: String,
+        @Body request: com.example.halalyticscompose.data.model.DonationCreateRequest
+    ): Response<com.example.halalyticscompose.data.model.DonationCreateResponse>
+
+    @GET("donations/history")
+    suspend fun getDonationHistory(
+        @Header("Authorization") bearer: String
+    ): Response<com.example.halalyticscompose.data.model.DonationHistoryResponse>
+
+    @POST("ai/chat")
+    suspend fun sendAiChat(
+        @Header("Authorization") bearer: String,
+        @Body request: com.example.halalyticscompose.data.model.AiChatRequest
+    ): Response<com.example.halalyticscompose.data.model.AiChatResponse>
+
     // ==================== AI ASSISTANT ====================
     @POST("ai/analyze")
     suspend fun analyzeIngredients(
