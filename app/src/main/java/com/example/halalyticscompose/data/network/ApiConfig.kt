@@ -165,15 +165,15 @@ object ApiConfig {
     }
 
     /**
-     * Get OpenBeautyFacts API Service
+     * Get OpenBeautyFacts API Service (public OpenBeautyFacts endpoints)
      */
-    fun getOpenBeautyFactsApiService(): com.example.halalyticscompose.data.network.ExternalApiService {
+    fun getOpenBeautyFactsApiService(): com.example.halalyticscompose.data.api.OpenBeautyFactsApiService {
         val retrofitOpenBeautyFacts = Retrofit.Builder()
             .baseUrl("https://world.openbeautyfacts.org/")
             .client(provideOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        return retrofitOpenBeautyFacts.create(com.example.halalyticscompose.data.network.ExternalApiService::class.java)
+        return retrofitOpenBeautyFacts.create(com.example.halalyticscompose.data.api.OpenBeautyFactsApiService::class.java)
     }
 
     /**

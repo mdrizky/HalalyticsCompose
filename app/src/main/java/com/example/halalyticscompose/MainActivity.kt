@@ -775,9 +775,9 @@ class MainActivity : FragmentActivity() {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val barcode = backStackEntry.arguments?.getString("barcode")
                             ProductDetailScreen(
-                                navController = navController,
-                                barcode = barcode ?: "",
-                                mainViewModel = mainViewModel
+                                navController,
+                                barcode ?: "",
+                                mainViewModel
                             )
                         }
                     }
@@ -1185,9 +1185,9 @@ class MainActivity : FragmentActivity() {
                     composable("compare_products") {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             CompareScreen(
-                                navController = navController,
-                                mainViewModel = mainViewModel,
-                                viewModel = compareViewModel
+                                navController,
+                                mainViewModel,
+                                compareViewModel
                             )
                         }
                     }

@@ -166,14 +166,21 @@ fun SplashScreen(
         val loggedIn = isLoggedIn && sm.isLoggedIn() && !sm.getAuthToken().isNullOrBlank()
         val hasNetwork = context.isNetworkAvailable()
 
-        val dest = when {
+        var dest = when {
             !loggedIn && !sm.hasCompletedOnboarding() -> "onboarding"
             !loggedIn -> "login"
-            else -> RoleHelper.homeRoute(sm.getRole())
+            else -> RoleHelper.homeRoute(sm.getRole()) ?: ""
         }
 
-        navController.navigate(dest) {
-            popUpTo("splash") { inclusive = true }
+        if (dest.isBlank() || dest == "splash") {
+            dest = "login"
+        }
+
+        val currentRoute = navController.currentBackStackEntry?.destination?.route
+        if (currentRoute != dest) {
+            navController.navigate(dest) {
+                popUpTo("splash") { inclusive = true }
+            }
         }
     }
 
