@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.halalyticscompose.feature.expansion.ui
 
 import android.content.Context

@@ -114,7 +114,7 @@ fun EditProfileScreen(
 
     fun handleSave() {
         if (fullName.isBlank()) {
-            Toast.makeText(context, "Nama lengkap tidak boleh kosong", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.edit_profile_name_empty), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -148,11 +148,11 @@ fun EditProfileScreen(
             birthDate = birthDate,
             image = imageFile,
             onSuccess = {
-                Toast.makeText(context, "Profil berhasil diperbarui ✨", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.edit_profile_success), Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
             },
             onError = { msg ->
-                Toast.makeText(context, "Gagal simpan: $msg", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.edit_profile_failed, msg), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -167,7 +167,7 @@ fun EditProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profil", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.edit_profile_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
@@ -184,7 +184,7 @@ fun EditProfileScreen(
                         if (isLoadingVM) {
                             CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
                         } else {
-                            Text("Simpan")
+                            Text(stringResource(R.string.edit_profile_save))
                         }
                     }
                 },
@@ -210,43 +210,43 @@ fun EditProfileScreen(
 
             // --- PERSONAL INFO SECTION ---
             item {
-                SectionHeader("Informasi Pribadi", Icons.Default.Person)
+                SectionHeader(stringResource(R.string.edit_profile_personal_info), Icons.Default.Person)
                 EditCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        EditTextField(value = fullName, onValueChange = { fullName = it }, label = "Nama Lengkap", icon = Icons.Default.Badge)
-                        EditTextField(value = email, onValueChange = { }, label = "Email", icon = Icons.Default.Email, enabled = false)
-                        EditTextField(value = phone, onValueChange = { phone = it }, label = "Nomor HP", icon = Icons.Default.Phone, keyboardType = KeyboardType.Phone)
-                        EditTextField(value = birthDate, onValueChange = { birthDate = it }, label = "Tanggal Lahir", icon = Icons.Default.Cake, placeholder = "YYYY-MM-DD")
-                        EditTextField(value = address, onValueChange = { address = it }, label = "Alamat", icon = Icons.Default.Home)
-                        EditTextField(value = bio, onValueChange = { bio = it }, label = "Bio", icon = Icons.Default.EditNote, singleLine = false, minLines = 2)
+                        EditTextField(value = fullName, onValueChange = { fullName = it }, label = stringResource(R.string.edit_profile_full_name), icon = Icons.Default.Badge)
+                        EditTextField(value = email, onValueChange = { }, label = stringResource(R.string.edit_profile_email), icon = Icons.Default.Email, enabled = false)
+                        EditTextField(value = phone, onValueChange = { phone = it }, label = stringResource(R.string.edit_profile_phone), icon = Icons.Default.Phone, keyboardType = KeyboardType.Phone)
+                        EditTextField(value = birthDate, onValueChange = { birthDate = it }, label = stringResource(R.string.edit_profile_birthdate), icon = Icons.Default.Cake, placeholder = "YYYY-MM-DD")
+                        EditTextField(value = address, onValueChange = { address = it }, label = stringResource(R.string.edit_profile_address), icon = Icons.Default.Home)
+                        EditTextField(value = bio, onValueChange = { bio = it }, label = stringResource(R.string.edit_profile_bio), icon = Icons.Default.EditNote, singleLine = false, minLines = 2)
                     }
                 }
             }
 
             // --- HEALTH PROFILE SECTION ---
             item {
-                SectionHeader("Profil Kesehatan", Icons.Default.HealthAndSafety)
+                SectionHeader(stringResource(R.string.edit_profile_health_profile), Icons.Default.HealthAndSafety)
                 EditCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            EditTextField(value = height, onValueChange = { height = it }, label = "Tinggi (cm)", icon = Icons.Default.Height, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
-                            EditTextField(value = weight, onValueChange = { weight = it }, label = "Berat (kg)", icon = Icons.Default.Scale, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                            EditTextField(value = height, onValueChange = { height = it }, label = stringResource(R.string.edit_profile_height), icon = Icons.Default.Height, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                            EditTextField(value = weight, onValueChange = { weight = it }, label = stringResource(R.string.edit_profile_weight), icon = Icons.Default.Scale, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            EditTextField(value = age, onValueChange = { age = it }, label = "Umur", icon = Icons.Default.CalendarToday, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
+                            EditTextField(value = age, onValueChange = { age = it }, label = stringResource(R.string.edit_profile_age), icon = Icons.Default.CalendarToday, modifier = Modifier.weight(1f), keyboardType = KeyboardType.Number)
                             BloodTypeDropdown(selected = bloodType, onSelected = { bloodType = it }, modifier = Modifier.weight(1f))
                         }
                         GenderSelector(selected = gender, onSelected = { gender = it })
-                        EditTextField(value = emergencyContact, onValueChange = { emergencyContact = it }, label = "Kontak Darurat", icon = Icons.Default.ContactPhone, keyboardType = KeyboardType.Phone)
-                        EditTextField(value = allergy, onValueChange = { allergy = it }, label = "Alergi", icon = Icons.Default.Warning, placeholder = "Kacang, Seafood, dll")
-                        EditTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = "Riwayat Medis", icon = Icons.Default.History, singleLine = false, minLines = 2)
+                        EditTextField(value = emergencyContact, onValueChange = { emergencyContact = it }, label = stringResource(R.string.edit_profile_emergency), icon = Icons.Default.ContactPhone, keyboardType = KeyboardType.Phone)
+                        EditTextField(value = allergy, onValueChange = { allergy = it }, label = stringResource(R.string.edit_profile_allergy), icon = Icons.Default.Warning, placeholder = stringResource(R.string.edit_profile_allergy_placeholder))
+                        EditTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = stringResource(R.string.edit_profile_medical_history), icon = Icons.Default.History, singleLine = false, minLines = 2)
                     }
                 }
             }
 
             // --- SECURITY SECTION ---
             item {
-                SectionHeader("Keamanan", Icons.Default.Security)
+                SectionHeader(stringResource(R.string.edit_profile_security), Icons.Default.Security)
                 EditCard {
                     Row(
                         modifier = Modifier
@@ -258,10 +258,10 @@ fun EditProfileScreen(
                         Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Ganti Password", fontWeight = FontWeight.Bold)
-                            Text("Amankan akun Anda dengan password baru", fontSize = 12.sp, color = Color.Gray)
+                            Text(stringResource(R.string.edit_profile_change_password), fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.edit_profile_change_password_desc), fontSize = 12.sp, color = Color.Gray)
                         }
-                        Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.Gray)
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.Gray)
                     }
                 }
             }
@@ -279,16 +279,16 @@ fun EditProfileScreen(
             onDismiss = { showPasswordDialog = false },
             onSubmit = {
                 if (newPassword != confirmPassword) {
-                    Toast.makeText(context, "Konfirmasi password tidak cocok", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.edit_profile_password_mismatch), Toast.LENGTH_SHORT).show()
                 } else if (newPassword.length < 6) {
-                    Toast.makeText(context, "Password minimal 6 karakter", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.edit_profile_password_too_short), Toast.LENGTH_SHORT).show()
                 } else {
                     viewModel.changePassword(
                         current = currentPassword,
                         new = newPassword,
                         confirm = confirmPassword,
                         onSuccess = {
-                            Toast.makeText(context, "Password berhasil diganti! 🔐", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.edit_profile_password_success), Toast.LENGTH_SHORT).show()
                             showPasswordDialog = false
                             currentPassword = ""
                             newPassword = ""
@@ -459,7 +459,7 @@ fun BloodTypeDropdown(selected: String, onSelected: (String) -> Unit, modifier: 
             value = selected,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Gol. Darah") },
+            label = { Text(stringResource(R.string.edit_profile_blood_type)) },
             leadingIcon = { Icon(Icons.Default.WaterDrop, null, modifier = Modifier.size(20.dp), tint = Color.Red) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = RoundedCornerShape(12.dp),
@@ -488,18 +488,18 @@ fun BloodTypeDropdown(selected: String, onSelected: (String) -> Unit, modifier: 
 @Composable
 fun GenderSelector(selected: String, onSelected: (String) -> Unit) {
     Column {
-        Text("Jenis Kelamin", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+        Text(stringResource(R.string.edit_profile_gender), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(
                 selected = selected == "Male",
                 onClick = { onSelected("Male") },
-                label = { Text("Laki-laki") },
+                label = { Text(stringResource(R.string.edit_profile_gender_male)) },
                 leadingIcon = { if (selected == "Male") Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
             )
             FilterChip(
                 selected = selected == "Female",
                 onClick = { onSelected("Female") },
-                label = { Text("Perempuan") },
+                label = { Text(stringResource(R.string.edit_profile_gender_female)) },
                 leadingIcon = { if (selected == "Female") Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp)) }
             )
         }
@@ -524,27 +524,27 @@ fun ChangePasswordDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ganti Password", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.edit_profile_change_password), fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 PasswordTextField(
                     value = currentPassword,
                     onValueChange = onCurrentChange,
-                    label = "Password Saat Ini",
+                    label = stringResource(R.string.edit_profile_current_password),
                     isVisible = showCurrent,
                     onToggleVisibility = { showCurrent = !showCurrent }
                 )
                 PasswordTextField(
                     value = newPassword,
                     onValueChange = onNewChange,
-                    label = "Password Baru",
+                    label = stringResource(R.string.edit_profile_new_password),
                     isVisible = showNew,
                     onToggleVisibility = { showNew = !showNew }
                 )
                 PasswordTextField(
                     value = confirmPassword,
                     onValueChange = onConfirmChange,
-                    label = "Konfirmasi Password Baru",
+                    label = stringResource(R.string.edit_profile_confirm_password),
                     isVisible = showConfirm,
                     onToggleVisibility = { showConfirm = !showConfirm }
                 )
@@ -557,11 +557,11 @@ fun ChangePasswordDialog(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                else Text("Simpan Password")
+                else Text(stringResource(R.string.edit_profile_change_password))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Batal") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.edit_profile_cancel)) }
         },
         shape = RoundedCornerShape(24.dp)
     )

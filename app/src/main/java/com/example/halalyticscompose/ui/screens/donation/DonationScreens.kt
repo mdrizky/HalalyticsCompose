@@ -25,7 +25,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 private fun formatIdr(value: Double): String {
-    return NumberFormat.getCurrencyInstance(Locale("id", "ID")).format(value)
+    return NumberFormat.getCurrencyInstance(Locale.Builder().setLanguage("id").setRegion("ID").build()).format(value)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

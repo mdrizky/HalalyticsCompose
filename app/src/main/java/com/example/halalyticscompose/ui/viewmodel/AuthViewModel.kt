@@ -113,8 +113,24 @@ class AuthViewModel @Inject constructor(
         response: retrofit2.Response<LoginResponse>,
         onSuccess: (LoginResponse) -> Unit
     ) {
+        if (!response.isSuccessful) {
+            val errorBodyString = response.errorBody()?.string()
+            val parsedMessage = try {
+                if (!errorBodyString.isNullOrEmpty()) {
+                    val json = org.json.JSONObject(errorBodyString)
+                    json.optString("message", json.optString("error", "Autentikasi gagal."))
+                } else {
+                    "Autentikasi gagal."
+                }
+            } catch (e: Exception) {
+                "Autentikasi gagal."
+            }
+            _errorMessage.value = parsedMessage
+            return
+        }
+
         val body = response.body()
-        val ok = response.isSuccessful && body != null && body.isSuccess && body.user != null
+        val ok = body != null && body.isSuccess && body.user != null
         if (!ok) {
             _errorMessage.value = body?.message ?: body?.errorMessage ?: "Autentikasi gagal."
             return
@@ -125,10 +141,52 @@ class AuthViewModel @Inject constructor(
             _errorMessage.value = "Token autentikasi tidak diterima dari server."
             return
         }
-        sessionManager.saveAuthToken(loginData.token)
-        sessionManager.saveUserId(user.id_user)
-        sessionManager.saveUser(user.full_name ?: user.username, user.email)
-        sessionManager.saveRole(user.role)
+        sessionManager.saveCompleteSession(
+            token = loginData.token,
+            userId = user.id_user,
+            username = user.username,
+            fullName = user.full_name,
+            email = user.email,
+            role = user.role,
+            phone = user.phone,
+            bloodType = user.blood_type,
+            allergy = user.allergy,
+            medicalHistory = user.medical_history,
+            imageUrl = user.image
+        )
+
+        // Save health profile
+        sessionManager.saveHealthProfile(
+            age = user.age,
+            height = user.height?.toFloat(),
+            weight = user.weight?.toFloat(),
+            bmi = user.bmi?.toFloat(),
+            activityLevel = user.activity_level,
+            dietPreference = user.diet_preference,
+            goal = user.goal,
+            gender = user.gender
+        )
+
+        // Save stats
+        sessionManager.saveStats(
+            totalScans = user.total_scan,
+            halalCount = user.halal_count,
+            syubhatCount = user.syubhat_count,
+            streak = user.streak
+        )
+
+        // Save preferences
+        sessionManager.savePreferences(
+            darkMode = user.dark_mode ?: false,
+            notifEnabled = user.notif_enabled ?: true,
+            language = user.language ?: "id"
+        )
+        
+        sessionManager.saveLocation(
+            address = user.address,
+            city = null,
+            province = null
+        )
 
         _isLoggedIn.value = true
         _accessToken.value = loginData.token
@@ -145,11 +203,7 @@ class AuthViewModel @Inject constructor(
             _errorMessage.value = null
             try {
                 val response = apiService.register(request)
-                if (response.isSuccessful && response.body() != null) {
-                    handleAuthResponse(response, onSuccess)
-                } else {
-                    _errorMessage.value = response.body()?.message ?: "Registrasi gagal."
-                }
+                handleAuthResponse(response, onSuccess)
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Register error", e)
                 _errorMessage.value = "Koneksi bermasalah: ${e.message}"
@@ -168,12 +222,19 @@ class AuthViewModel @Inject constructor(
                 val response = apiService.getProfile("Bearer $token")
                 if (response.isSuccessful && response.body()?.success == true) {
                     val user = response.body()?.data
-                    _userData.value = user
-                    _isAdmin.value = RoleHelper.isAdmin(user?.role)
-                    _isNutritionist.value = RoleHelper.isNutritionist(user?.role)
+                    // Bust Coil cache by appending a timestamp query parameter to the image URL
+                    val processedUser = user?.let {
+                        val ts = System.currentTimeMillis()
+                        val bustedImage = it.image?.let { img -> if (img.contains("?")) "$img&v=$ts" else "$img?v=$ts" }
+                        it.copy(image = bustedImage)
+                    }
+
+                    _userData.value = processedUser
+                    _isAdmin.value = RoleHelper.isAdmin(processedUser?.role)
+                    _isNutritionist.value = RoleHelper.isNutritionist(processedUser?.role)
                     
                     // Sync with SessionManager to ensure AI analysis has latest data
-                    user?.let {
+                    processedUser?.let {
                         sessionManager.saveUserData(
                             userId = it.idUser,
                             username = it.username,

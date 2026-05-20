@@ -3,7 +3,7 @@ package com.example.halalyticscompose.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 
 /**
  * SessionManager - Handles user session and preferences persistence
@@ -11,15 +11,17 @@ import androidx.security.crypto.MasterKeys
 class SessionManager(private val context: Context) {
     
     private val prefs: SharedPreferences = try {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
         EncryptedSharedPreferences.create(
-            PREF_NAME,
-            masterKeyAlias,
             context,
+            PREF_NAME,
+            masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
@@ -299,6 +301,15 @@ class SessionManager(private val context: Context) {
         }
     }
     
+    fun savePreferences(darkMode: Boolean, notifEnabled: Boolean, language: String) {
+        prefs.edit().apply {
+            putBoolean(KEY_DARK_MODE, darkMode)
+            putBoolean(KEY_NOTIF_ENABLED, notifEnabled)
+            putString(KEY_LANGUAGE, language)
+            apply()
+        }
+    }
+    
     fun isGlutenFree(): Boolean = prefs.getBoolean(KEY_GLUTEN_FREE, false)
     fun hasNutAllergy(): Boolean = prefs.getBoolean(KEY_NUT_ALLERGY, false)
     fun isStrictHalal(): Boolean = prefs.getBoolean(KEY_STRICT_HALAL, true)
@@ -311,7 +322,7 @@ class SessionManager(private val context: Context) {
         prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
     }
     
-    fun isDarkMode(): Boolean = prefs.getBoolean(KEY_DARK_MODE, true)
+    fun isDarkMode(): Boolean = prefs.getBoolean(KEY_DARK_MODE, false)
     
     fun saveNotifEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_NOTIF_ENABLED, enabled).apply()

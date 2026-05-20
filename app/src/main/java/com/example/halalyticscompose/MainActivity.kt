@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.halalyticscompose
 
 import android.os.Bundle
@@ -52,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @Composable
@@ -179,7 +182,16 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        
+        // Cek dan tampilkan log jika ada crash sebelumnya
+        val lastCrash = com.example.halalyticscompose.utils.CrashReporter.getLastCrash(this)
+        if (lastCrash != null) {
+            Log.e("HALALYTICS_CRASH", "PREVIOUS CRASH DETECTED:\n$lastCrash")
+            android.widget.Toast.makeText(this, "App crashed previously. Check Logcat (HALALYTICS_CRASH).", android.widget.Toast.LENGTH_LONG).show()
+            com.example.halalyticscompose.utils.CrashReporter.clearLastCrash(this)
+        }
 
         setContent {
             val mainViewModel: MainViewModel = hiltViewModel()
@@ -317,7 +329,7 @@ class MainActivity : FragmentActivity() {
                      if (token.isNotEmpty()) {
                          notificationViewModel.loadNotifications(token, userId)
                          // Sync with MySQL if Firebase user is present
-                         com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.let { firebaseUser ->
+                         try { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser } catch (e: Throwable) { null }?.let { firebaseUser ->
                              mainViewModel.syncWithMySQL(firebaseUser, token)
                          }
                      }
@@ -424,8 +436,14 @@ class MainActivity : FragmentActivity() {
                     }
 
                     composable("nutritionist_home") {
-                        MainLayout(navController = navController, showBottomNav = true, isAdmin = false, isNutritionist = true) { paddingValues ->
-                            NutritionistHomeScreen(navController = navController)
+                        if (isNutritionist) {
+                            MainLayout(navController = navController, showBottomNav = true, isAdmin = false, isNutritionist = true) { paddingValues ->
+                                NutritionistHomeScreen(navController = navController)
+                            }
+                        } else {
+                            LaunchedEffect(Unit) {
+                                navController.popBackStack()
+                            }
                         }
                     }
 

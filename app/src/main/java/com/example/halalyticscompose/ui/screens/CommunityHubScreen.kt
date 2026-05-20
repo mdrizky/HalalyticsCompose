@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -108,7 +109,7 @@ fun CommunityHubScreen(navController: NavController) {
                         modifier = Modifier.weight(1f),
                         title = "Diskusi",
                         subtitle = "Tanya & Jawab",
-                        icon = Icons.Default.Chat,
+                        icon = Icons.AutoMirrored.Filled.Chat,
                         color = Color(0xFFE8F5E9),
                         iconColor = primaryColor,
                         onClick = { navController.navigate("community") }

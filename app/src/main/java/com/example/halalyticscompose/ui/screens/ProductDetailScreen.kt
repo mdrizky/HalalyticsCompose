@@ -46,6 +46,8 @@ import com.example.halalyticscompose.ui.components.InfoRow
 import com.example.halalyticscompose.ui.components.ConfidenceBadge
 import com.example.halalyticscompose.ui.components.MedicalAiDisclaimerBanner
 import com.example.halalyticscompose.utils.ImageUtils
+import androidx.compose.ui.res.stringResource
+import com.example.halalyticscompose.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +74,7 @@ fun ProductDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Product Intelligence", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(stringResource(R.string.product_detail_title), style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }, modifier = Modifier.padding(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSurface.copy(0.05f))) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onSurface)
@@ -119,7 +121,7 @@ fun ProductDetailScreen(
                         },
                         onAddToCompare = { 
                             compareViewModel.addToCompare(state.product.barcode)
-                            android.widget.Toast.makeText(context, "Added to Contrast Analysis ⚖️", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(context, context.getString(R.string.product_added_to_compare), android.widget.Toast.LENGTH_SHORT).show()
                         },
                         compareCount = compareQueue.size,
                         onViewComparison = { navController.navigate("compare_products") },
@@ -162,14 +164,14 @@ fun ProductNotFoundFallback(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "Produk belum ada di database",
+                stringResource(R.string.product_not_found_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                if (message.isNotBlank()) message else "Silakan kirim pengaduan agar admin bisa verifikasi.",
+                if (message.isNotBlank()) message else stringResource(R.string.product_not_found_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -177,7 +179,7 @@ fun ProductNotFoundFallback(
             Spacer(Modifier.height(6.dp))
             if (barcode.isNotBlank()) {
                 Text(
-                    "Barcode: $barcode",
+                    stringResource(R.string.product_barcode_label, barcode),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -188,7 +190,7 @@ fun ProductNotFoundFallback(
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Laporkan & Verifikasi Admin")
+                Text(stringResource(R.string.product_report_admin))
             }
             Spacer(Modifier.height(10.dp))
             OutlinedButton(
@@ -196,11 +198,11 @@ fun ProductNotFoundFallback(
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Buka OCR (Foto Depan & Belakang)")
+                Text(stringResource(R.string.product_open_ocr))
             }
             Spacer(Modifier.height(10.dp))
             TextButton(onClick = onRetry) {
-                Text("Coba Lagi")
+                Text(stringResource(R.string.product_try_again))
             }
         }
     }
@@ -222,7 +224,7 @@ fun ProductDetailContentPremium(
     val familyProfiles by mainViewModel.familyProfiles.collectAsState()
     val selectedProfile by mainViewModel.selectedFamilyProfile.collectAsState()
     val currentAllergies = selectedProfile?.allergies ?: ""
-    val currentHealthName = selectedProfile?.name ?: "Myself"
+    val currentHealthName = selectedProfile?.name ?: stringResource(R.string.product_profile_myself)
     
     val allergyList = currentAllergies.split(",").map { it.trim() }.filter { it.isNotEmpty() }
     val foundAllergens = allergyList.filter { allergy ->
@@ -282,10 +284,10 @@ fun ProductDetailContentPremium(
         // Profile Context & Allergies
         item {
             Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
-                Text("ANALYSIS CONTEXT", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.product_analysis_context), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(12.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { ProfileChipPremium("Myself", selectedProfile == null) { mainViewModel.selectFamilyProfile(null) } }
+                    item { ProfileChipPremium(stringResource(R.string.product_profile_myself), selectedProfile == null) { mainViewModel.selectFamilyProfile(null) } }
                     items(familyProfiles) { profile ->
                         ProfileChipPremium(profile.name, selectedProfile?.id == profile.id) { mainViewModel.selectFamilyProfile(profile) }
                     }
@@ -324,7 +326,7 @@ fun ProductDetailContentPremium(
         // Science & Health Section
         item {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text("SCIENCE & HEALTH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.product_science_health), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(16.dp))
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -334,7 +336,7 @@ fun ProductDetailContentPremium(
                 
                 Spacer(Modifier.height(24.dp))
                 if (product.halalInfo?.source != null) {
-                    ConfidenceBadge(score = 0.9, level = "high", message = "Validated via ${product.halalInfo?.source?.replace("_", " ")}")
+                    ConfidenceBadge(score = 0.9, level = "high", message = stringResource(R.string.product_validated_via, product.halalInfo?.source?.replace("_", " ") ?: ""))
                 }
             }
         }
@@ -348,7 +350,7 @@ fun ProductDetailContentPremium(
 
         // Ingredients Breakdown
         item {
-            IngredientsCardPremium(product.ingredientsText ?: "Ingredients data unavailable.")
+            IngredientsCardPremium(product.ingredientsText ?: stringResource(R.string.product_ingredients_unavailable))
         }
 
         // AI Alternatives
@@ -365,9 +367,9 @@ fun ProductDetailContentPremium(
 @Composable
 fun HalalStatusBadgePremium(status: HalalStatus, modifier: Modifier = Modifier) {
     val (color, label, textColor) = when (status) {
-        HalalStatus.HALAL -> Triple(MaterialTheme.colorScheme.primary, "HALAL CERTIFIED", MaterialTheme.colorScheme.onPrimary)
-        HalalStatus.NON_HALAL -> Triple(MaterialTheme.colorScheme.error, "HARAM / NON-HALAL", MaterialTheme.colorScheme.onError)
-        else -> Triple(MushboohYellow, "SYUBHAT / UNKNOWN", Color.Black)
+        HalalStatus.HALAL -> Triple(MaterialTheme.colorScheme.primary, stringResource(R.string.product_halal_certified), MaterialTheme.colorScheme.onPrimary)
+        HalalStatus.NON_HALAL -> Triple(MaterialTheme.colorScheme.error, stringResource(R.string.product_haram_non_halal), MaterialTheme.colorScheme.onError)
+        else -> Triple(MushboohYellow, stringResource(R.string.product_syubhat_unknown), Color.Black)
     }
     Box(
         modifier = modifier.clip(RoundedCornerShape(12.dp)).background(color).padding(horizontal = 16.dp, vertical = 8.dp)
@@ -385,8 +387,8 @@ fun AllergyAlertPremium(name: String, allergens: List<String>) {
             Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error)
             Spacer(Modifier.width(16.dp))
             Column {
-                Text("ALLERGY DETECTED", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Black)
-                Text("$name is allergic to: ${allergens.joinToString(", ")}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(R.string.product_allergy_detected), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.product_is_allergic_to, name, allergens.joinToString(", ")), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -422,14 +424,14 @@ fun DetailActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, la
 @Composable
 fun NutrientLevelSuitePremium(levels: NutrientLevels) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)) {
-        Text("NUTRIENT LEVELS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+        Text(stringResource(R.string.product_nutrient_levels), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
         Spacer(Modifier.height(16.dp))
         Box(modifier = Modifier.clip(RoundedCornerShape(28.dp)).background(MaterialTheme.colorScheme.surface).border(1.dp, MaterialTheme.colorScheme.onSurface.copy(0.05f), RoundedCornerShape(28.dp)).padding(24.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                levels.fat?.let { fatVal -> NutrientProgressPremium("Fat", fatVal) }
-                levels.saturatedFat?.let { satFatVal -> NutrientProgressPremium("Saturated Fat", satFatVal) }
-                levels.sugars?.let { sugarVal -> NutrientProgressPremium("Sugars", sugarVal) }
-                levels.salt?.let { saltVal -> NutrientProgressPremium("Salt", saltVal) }
+                levels.fat?.let { fatVal -> NutrientProgressPremium(stringResource(R.string.product_nutrient_fat), fatVal) }
+                levels.saturatedFat?.let { satFatVal -> NutrientProgressPremium(stringResource(R.string.product_nutrient_saturated_fat), satFatVal) }
+                levels.sugars?.let { sugarVal -> NutrientProgressPremium(stringResource(R.string.product_nutrient_sugars), sugarVal) }
+                levels.salt?.let { saltVal -> NutrientProgressPremium(stringResource(R.string.product_nutrient_salt), saltVal) }
             }
         }
     }
@@ -458,7 +460,7 @@ fun NutrientProgressPremium(label: String, level: NutrientLevel) {
 @Composable
 fun IngredientsCardPremium(ingredients: String) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
-        Text("INGREDIENTS BREAKDOWN", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+        Text(stringResource(R.string.product_ingredients_breakdown), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
         Spacer(Modifier.height(16.dp))
         Box(modifier = Modifier.clip(RoundedCornerShape(28.dp)).background(MaterialTheme.colorScheme.surface).border(1.dp, MaterialTheme.colorScheme.onSurface.copy(0.05f), RoundedCornerShape(28.dp)).padding(24.dp)) {
             Text(ingredients, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(0.7f), lineHeight = 24.sp)
@@ -475,7 +477,7 @@ fun AlternativesSectionPremium(state: AlternativesUiState) {
         ) {
             Icon(Icons.Default.Science, contentDescription = "AI", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(8.dp))
-            Text("AI HALAL ALTERNATIVES", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
+            Text(stringResource(R.string.product_ai_alternatives), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
         }
         Spacer(Modifier.height(16.dp))
 
@@ -491,7 +493,7 @@ fun AlternativesSectionPremium(state: AlternativesUiState) {
                 // Show reasoning
                 Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.error.copy(0.1f)).border(1.dp, MaterialTheme.colorScheme.error.copy(0.3f), RoundedCornerShape(16.dp)).padding(16.dp)) {
                     Column {
-                        Text("Concern detected:", color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.product_ai_concern), color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         Text(response.problematic_ingredients_reason, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
                     }
                 }
@@ -522,7 +524,7 @@ fun AlternativesSectionPremium(state: AlternativesUiState) {
             }
             is AlternativesUiState.Error -> {
                 Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.onSurface.copy(0.05f)).padding(16.dp)) {
-                    Text("Could not load AI alternatives: ${state.message}", color = MaterialTheme.colorScheme.onSurface.copy(0.6f), fontSize = 12.sp)
+                    Text(stringResource(R.string.product_ai_error, state.message), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), fontSize = 12.sp)
                 }
             }
             else -> {}

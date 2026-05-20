@@ -1,122 +1,19 @@
-package com.example.halalyticscompose.ui.screens
+import re
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.navigation.NavController
-import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
-import com.example.halalyticscompose.data.model.LoginRequest
-import com.example.halalyticscompose.R
-import com.example.halalyticscompose.BuildConfig
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
-import com.facebook.login.LoginManager
-import com.facebook.login.LoginResult
-import android.util.Log
-import androidx.fragment.app.FragmentActivity
-import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
-import com.example.halalyticscompose.utils.RoleHelper
-import com.example.halalyticscompose.utils.SessionManager
+with open('app/src/main/java/com/example/halalyticscompose/ui/screens/LoginScreen.kt', 'r') as f:
+    content = f.read()
 
-@Composable
-fun LoginScreen(
-    navController: NavController,
-    prefillUsername: String = "",
-    showRegisterSuccess: Boolean = false,
-    viewModel: AuthViewModel = hiltViewModel()
-) {
-    var username by remember { mutableStateOf(prefillUsername) }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
+# We want to replace from `    Box(` (around line 119) to the end of the `LoginScreen` function (around line 403), and then replace the `SocialLoginButton` function.
+# Let's just use regular expressions to extract everything up to `    val googleSignInLauncher = ... }` and append the new UI.
 
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
+match = re.search(r'(.*?    val googleSignInLauncher.*?^    \})', content, re.MULTILINE | re.DOTALL)
+if match:
+    prefix = match.group(1)
+else:
+    print("Failed to match prefix")
+    exit(1)
 
-    val navigateAfterLogin: () -> Unit = {
-        val sm = SessionManager.getInstance(context)
-        val dest = RoleHelper.homeRoute(sm.getRole())
-        navController.navigate(dest) {
-            popUpTo("login") { inclusive = true }
-        }
-    }
-
-    val facebookCallbackManager = LocalFacebookCallbackManager.current
-
-    DisposableEffect(facebookCallbackManager) {
-        val fbCallback = object : FacebookCallback<LoginResult> {
-            override fun onSuccess(result: LoginResult) {
-                viewModel.loginWithFacebook(result.accessToken.token) {
-                    navigateAfterLogin()
-                }
-            }
-
-            override fun onCancel() {
-                Log.d("LoginScreen", "Facebook login cancelled")
-            }
-
-            override fun onError(error: FacebookException) {
-                Log.e("LoginScreen", "Facebook login error", error)
-            }
-        }
-        try {
-            LoginManager.getInstance().registerCallback(facebookCallbackManager, fbCallback)
-        } catch (e: Exception) {
-            Log.e("LoginScreen", "Facebook SDK registerCallback failed: ${e.message}")
-        }
-        onDispose {
-            try {
-                LoginManager.getInstance().unregisterCallback(facebookCallbackManager)
-            } catch (e: Exception) {
-                Log.e("LoginScreen", "Facebook SDK unregisterCallback failed: ${e.message}")
-            }
-        }
-    }
-
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-                val idToken = account?.idToken
-                if (idToken != null) {
-                    viewModel.loginWithGoogle(idToken) {
-                        navigateAfterLogin()
-                    }
-                }
-            } catch (e: com.google.android.gms.common.api.ApiException) {
-                Log.e("LoginScreen", "Google sign in failed", e)
-            }
-        }
-    }
-
+new_ui = """
     androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .fillMaxSize()
@@ -150,7 +47,7 @@ fun LoginScreen(
             ) {
                 androidx.compose.foundation.Image(
                     painter = androidx.compose.ui.res.painterResource(id = com.example.halalyticscompose.R.drawable.logo_halalytics),
-                    contentDescription = stringResource(R.string.app_name),
+                    contentDescription = "Halalytics Logo",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit
                 )
@@ -159,22 +56,16 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = stringResource(R.string.login_title),
+                text = "Halalytics",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = com.example.halalyticscompose.ui.theme.Emerald
             )
             Text(
-                text = stringResource(R.string.login_subtitle),
+                text = "Intelligent Halal Healthcare",
                 fontSize = 14.sp,
                 color = com.example.halalyticscompose.ui.theme.Slate600,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Text(
-                text = stringResource(R.string.login_description),
-                fontSize = 12.sp,
-                color = com.example.halalyticscompose.ui.theme.Slate500,
-                modifier = Modifier.padding(top = 8.dp, bottom = 28.dp)
+                modifier = Modifier.padding(top = 4.dp, bottom = 32.dp)
             )
 
             // Glassmorphism Login Card
@@ -185,7 +76,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(R.string.login_welcome_back),
+                        text = "Welcome Back",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = com.example.halalyticscompose.ui.theme.Slate900,
@@ -195,8 +86,8 @@ fun LoginScreen(
                     com.example.halalyticscompose.ui.components.TextInputField(
                         value = username,
                         onValueChange = { username = it },
-                        label = stringResource(R.string.login_label_email_username),
-                        placeholder = stringResource(R.string.login_placeholder_email_username)
+                        label = "Email / Username",
+                        placeholder = "Enter your email"
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -204,8 +95,8 @@ fun LoginScreen(
                     com.example.halalyticscompose.ui.components.TextInputField(
                         value = password,
                         onValueChange = { password = it },
-                        label = stringResource(R.string.login_label_password),
-                        placeholder = stringResource(R.string.login_placeholder_password),
+                        label = "Password",
+                        placeholder = "Enter your password",
                         isPassword = true
                     )
 
@@ -225,28 +116,28 @@ fun LoginScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(stringResource(R.string.login_demo_label), fontSize = 12.sp, color = com.example.halalyticscompose.ui.theme.Slate500)
+                        Text("Demo Login:", fontSize = 12.sp, color = com.example.halalyticscompose.ui.theme.Slate500)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             com.example.halalyticscompose.ui.components.SecondaryButton(
-                                text = stringResource(R.string.login_demo_admin),
+                                text = "Admin",
                                 onClick = { username = "admin"; password = "admin123" },
-                                modifier = Modifier.height(28.dp).width(62.dp)
+                                modifier = Modifier.height(28.dp).width(60.dp)
                             )
                             com.example.halalyticscompose.ui.components.SecondaryButton(
-                                text = stringResource(R.string.login_demo_pengguna),
+                                text = "User",
                                 onClick = { username = "daffa"; password = "12345678" },
-                                modifier = Modifier.height(28.dp).width(78.dp)
+                                modifier = Modifier.height(28.dp).width(60.dp)
                             )
                             com.example.halalyticscompose.ui.components.SecondaryButton(
-                                text = stringResource(R.string.login_demo_pakar),
+                                text = "Pakar",
                                 onClick = { username = "nutritionist"; password = "12345678" },
-                                modifier = Modifier.height(28.dp).width(62.dp)
+                                modifier = Modifier.height(28.dp).width(60.dp)
                             )
                         }
                     }
 
                     com.example.halalyticscompose.ui.components.PrimaryButton(
-                        text = stringResource(R.string.login_button),
+                        text = "Sign In",
                         onClick = {
                             if (username.isBlank() || password.isBlank()) return@PrimaryButton
                             viewModel.login(
@@ -263,10 +154,10 @@ fun LoginScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         TextButton(onClick = { navController.navigate("forgot_password") }) {
-                            Text(stringResource(R.string.login_forgot_password), color = com.example.halalyticscompose.ui.theme.Teal)
+                            Text("Forgot Password?", color = com.example.halalyticscompose.ui.theme.Teal)
                         }
                         TextButton(onClick = { navController.navigate("register") }) {
-                            Text(stringResource(R.string.login_register), color = com.example.halalyticscompose.ui.theme.Emerald)
+                            Text("Register", color = com.example.halalyticscompose.ui.theme.Emerald)
                         }
                     }
                 }
@@ -275,7 +166,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = stringResource(R.string.login_or_continue_with),
+                text = "Or continue with",
                 fontSize = 12.sp,
                 color = com.example.halalyticscompose.ui.theme.Slate500,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -296,7 +187,7 @@ fun LoginScreen(
                         googleSignInLauncher.launch(googleSignInClient.signInIntent)
                     },
                     iconRes = R.drawable.ic_google,
-                    text = stringResource(R.string.login_google),
+                    text = "Google",
                     modifier = Modifier.weight(1f),
                     isLoading = isLoading
                 )
@@ -317,7 +208,7 @@ fun LoginScreen(
                         }
                     },
                     icon = Icons.Default.Facebook,
-                    text = stringResource(R.string.login_facebook),
+                    text = "Facebook",
                     modifier = Modifier.weight(1f),
                     isLoading = isLoading
                 )
@@ -370,3 +261,9 @@ fun SocialLoginButton(
         }
     }
 }
+"""
+
+with open('app/src/main/java/com/example/halalyticscompose/ui/screens/LoginScreen.kt', 'w') as f:
+    f.write(prefix + "\n" + new_ui)
+
+print("Rewrite successful")

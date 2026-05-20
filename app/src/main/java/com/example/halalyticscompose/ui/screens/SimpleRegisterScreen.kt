@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.halalyticscompose.R
+import com.example.halalyticscompose.ui.components.PrimaryButton
 import com.example.halalyticscompose.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +56,6 @@ fun SimpleRegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
     var bloodType by remember { mutableStateOf("") }
     var allergy by remember { mutableStateOf("") }
     var medicalHistory by remember { mutableStateOf("") }
@@ -285,31 +285,6 @@ fun SimpleRegisterScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Phone Number
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = { phone = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.register_phone_number)) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Phone,
-                                contentDescription = stringResource(R.string.register_phone_number),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Phone
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f)
-                        )
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
                     // Blood Type
                     var bloodTypeExpanded by remember { mutableStateOf(false) }
                     val bloodTypes = listOf("A", "B", "AB", "O")
@@ -368,15 +343,15 @@ fun SimpleRegisterScreen(
                     // Allergies
                     var allergyExpanded by remember { mutableStateOf(false) }
                     val allergies = listOf(
-                        "None",
-                        "Sakit gula",
-                        "Seafood",
-                        "Peanuts",
-                        "Dairy",
-                        "Eggs",
-                        "Soy",
-                        "Wheat",
-                        "Other"
+                        "Tidak ada",
+                        "Diabetes",
+                        "Makanan laut",
+                        "Kacang tanah",
+                        "Susu",
+                        "Telur",
+                        "Kedelai",
+                        "Gandum",
+                        "Lainnya"
                     )
                     
                     ExposedDropdownMenuBox(
@@ -483,13 +458,13 @@ fun SimpleRegisterScreen(
                     val passwordShortError = stringResource(R.string.register_error_password_short)
                     val confirmPasswordError = stringResource(R.string.register_error_confirm_password)
                     val passwordMismatchError = stringResource(R.string.register_error_password_mismatch)
-                    val phoneError = stringResource(R.string.register_error_phone)
                     val bloodTypeError = stringResource(R.string.register_error_blood_type)
                     val allergyError = stringResource(R.string.register_error_allergy)
                     val medicalHistoryError = stringResource(R.string.register_error_medical_history)
 
                     // Register button
-                    Button(
+                    PrimaryButton(
+                        text = stringResource(R.string.register_create_account),
                         onClick = {
                             // Clear previous error
                             errorMessage = ""
@@ -497,62 +472,57 @@ fun SimpleRegisterScreen(
                             // Validate all required fields
                             if (fullName.isEmpty()) {
                                 errorMessage = fullNameError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (username.isEmpty()) {
                                 errorMessage = usernameError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (email.isEmpty()) {
                                 errorMessage = emailError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (!email.contains("@")) {
                                 errorMessage = invalidEmailError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (password.isEmpty()) {
                                 errorMessage = passwordError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (password.length < 8) {
                                 errorMessage = passwordShortError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (confirmPassword.isEmpty()) {
                                 errorMessage = confirmPasswordError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (password != confirmPassword) {
                                 errorMessage = passwordMismatchError
-                                return@Button
-                            }
-                            
-                            if (phone.isEmpty()) {
-                                errorMessage = phoneError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (bloodType.isEmpty()) {
                                 errorMessage = bloodTypeError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (allergy.isEmpty()) {
                                 errorMessage = allergyError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             if (medicalHistory.isEmpty()) {
                                 errorMessage = medicalHistoryError
-                                return@Button
+                                return@PrimaryButton
                             }
                             
                             errorMessage = ""
@@ -564,7 +534,7 @@ fun SimpleRegisterScreen(
                                     email = email,
                                     password = password,
                                     passwordConfirmation = confirmPassword,
-                                    phone = phone,
+                                    phone = null,
                                     bloodType = bloodType,
                                     allergy = allergy,
                                     medicalHistory = medicalHistory
@@ -576,43 +546,11 @@ fun SimpleRegisterScreen(
                                 }
                             )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF667EEA)
-                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        isLoading = isLoading,
+                        fullWidth = true,
                         enabled = !isLoading
-                    ) {
-                        if (isLoading) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                                
-                                Spacer(modifier = Modifier.width(12.dp))
-                                
-                                Text(
-                                    text = stringResource(R.string.register_creating_account),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-                        } else {
-                            Text(
-                                text = stringResource(R.string.register_create_account),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    }
+                    )
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
@@ -623,18 +561,19 @@ fun SimpleRegisterScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Already have an account? ",
+                            text = "Sudah punya akun? ",
                             color = Color.Gray,
                             fontSize = 14.sp
                         )
                         
                         Text(
-                            text = "Sign In",
+                            text = "Masuk",
                             modifier = Modifier
                                 .clickable {
                                     navController.navigate("login")
-                                },
-                            color = Color(0xFF667EEA),
+                                }
+                                .padding(start = 4.dp),
+                            color = Emerald,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )

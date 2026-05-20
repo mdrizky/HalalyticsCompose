@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import com.example.halalyticscompose.ui.theme.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,10 +38,10 @@ fun HealthSummarySection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(horizontal = HalalyticsDimensions.paddingLarge),
+        shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = HalalyticsShadows.elevation2)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -49,12 +50,13 @@ fun HealthSummarySection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Ringkasan Kesehatan",
+                    text = "Health Summary",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Slate900
                 )
                 IconButton(onClick = onDetailsClick) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Default.Info, contentDescription = null, tint = Emerald)
                 }
             }
 
@@ -67,10 +69,10 @@ fun HealthSummarySection(
                         progress = { (bmiValue / 40f).coerceIn(0f, 1f) },
                         modifier = Modifier.size(100.dp),
                         color = when {
-                            bmiValue < 18.5 -> Color(0xFF42A5F5) // Blue for underweight
-                            bmiValue < 23 -> Color(0xFF66BB6A)  // Green for normal
-                            bmiValue < 25 -> Color(0xFFFFA726)  // Yellow for overweight
-                            else -> Color(0xFFEF5350)           // Red for obese
+                            bmiValue < 18.5 -> Teal         // Underweight
+                            bmiValue < 23 -> Emerald        // Normal
+                            bmiValue < 25 -> Mint           // Overweight
+                            else -> Error                   // Obese
                         },
                         strokeWidth = 10.dp,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -100,7 +102,7 @@ fun HealthSummarySection(
                         target = "${targets?.calorieLimit ?: 2000}",
                         progress = calorieProgress,
                         unit = "kkal",
-                        color = Color(0xFFFFA726)
+                        color = Emerald
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -108,19 +110,19 @@ fun HealthSummarySection(
                         MiniNutrientStat(
                             label = "Karb",
                             value = "${dailyIntake?.totalCarbsG ?: 0}g",
-                            color = Color(0xFF42A5F5),
+                            color = Teal,
                             modifier = Modifier.weight(1f)
                         )
                         MiniNutrientStat(
                             label = "Prot",
                             value = "${dailyIntake?.totalProteinG ?: 0}g",
-                            color = Color(0xFFEF5350),
+                            color = Mint,
                             modifier = Modifier.weight(1f)
                         )
                         MiniNutrientStat(
                             label = "Lemak",
                             value = "${dailyIntake?.totalFatG ?: 0}g",
-                            color = Color(0xFF66BB6A),
+                            color = Error,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -132,15 +134,15 @@ fun HealthSummarySection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                    .clip(RoundedCornerShape(HalalyticsDimensions.radiusLarge))
+                    .background(EmeraldLight.copy(alpha = 0.2f))
                     .padding(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.ElectricBolt,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = Emerald,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))

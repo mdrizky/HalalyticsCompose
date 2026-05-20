@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.FavoritesViewModel
-import com.example.halalyticscompose.ui.components.SwipeableProductCard
+import com.example.halalyticscompose.ui.components.*
 import androidx.compose.ui.res.stringResource
 import com.example.halalyticscompose.R
 
@@ -152,9 +152,13 @@ fun FavoritesScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        ListEmptyState(
-                            searchQuery = searchQuery
-                        )
+                        if (searchQuery.isEmpty()) {
+                            EmptyFavoritesView(
+                                onBrowse = { navController.navigate("home") }
+                            )
+                        } else {
+                            EmptySearchView()
+                        }
                     }
                 }
                 
@@ -169,7 +173,7 @@ fun FavoritesScreen(
                         ) { product ->
                             SwipeableProductCard(
                                 product = product,
-                                onDelete = { viewModel.deleteProduct(it.barcode) },
+                                onDelete = { viewModel.deleteProduct(product.barcode) },
                                 onFavoriteClick = { viewModel.toggleFavorite(product.barcode) },
                                 onCardClick = { 
                                     navController.navigate("product_detail/${product.barcode}")
@@ -180,26 +184,5 @@ fun FavoritesScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ListEmptyState(searchQuery: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = if (searchQuery.isEmpty()) stringResource(R.string.favorites_empty_title)
-            else stringResource(R.string.favorites_search_empty_title),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = if (searchQuery.isEmpty()) stringResource(R.string.favorites_empty_desc)
-            else stringResource(R.string.favorites_search_empty_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }

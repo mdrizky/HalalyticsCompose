@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.halalyticscompose.ui.components
 
 import androidx.compose.animation.*

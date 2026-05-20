@@ -78,13 +78,13 @@ fun SearchExternalScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Global Search",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Black,
                     color = colors.onBackground
                 )
                 
@@ -94,13 +94,13 @@ fun SearchExternalScreen(
                 if (totalCount > 0) {
                     Box(
                         modifier = Modifier
-                            .background(colors.primary, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .background(colors.primary, RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = "$totalCount found",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Black,
                             color = colors.onPrimary
                         )
                     }
@@ -113,13 +113,14 @@ fun SearchExternalScreen(
                 onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .height(54.dp),
+                    .padding(horizontal = 24.dp)
+                    .height(56.dp),
                 placeholder = {
                     Text(
                         "Search products worldwide...",
-                        color = colors.onSurfaceVariant,
-                        fontSize = 14.sp
+                        color = colors.onSurfaceVariant.copy(0.7f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 },
                 leadingIcon = {
@@ -441,13 +442,14 @@ private fun ProductItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Product Image
@@ -498,8 +500,8 @@ private fun ProductItemCard(
             ) {
                 Text(
                     text = product.getDisplayName(),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
                     color = colors.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -581,7 +583,7 @@ private fun ProductItemCard(
             
             // Arrow
             Icon(
-                Icons.Default.KeyboardArrowRight,
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)

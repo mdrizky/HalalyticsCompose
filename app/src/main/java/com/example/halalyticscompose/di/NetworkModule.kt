@@ -33,7 +33,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(languageInterceptor: LanguageInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        languageInterceptor: LanguageInterceptor
+    ): OkHttpClient {
         val requestMetricsInterceptor = Interceptor { chain ->
             val original = chain.request()
             val requestId = UUID.randomUUID().toString().take(8)
@@ -82,6 +85,7 @@ object NetworkModule {
             }
         }
         val builder = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(languageInterceptor)
             .addInterceptor(requestMetricsInterceptor)
             .addInterceptor(loggingInterceptor)

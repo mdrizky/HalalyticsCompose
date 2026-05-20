@@ -58,6 +58,7 @@ import com.example.halalyticscompose.R
 import com.example.halalyticscompose.ui.theme.MintAccent
 import com.example.halalyticscompose.ui.theme.Navy
 import com.example.halalyticscompose.ui.theme.NavyDark
+import com.example.halalyticscompose.ui.theme.SplashGreenGlow
 import com.example.halalyticscompose.utils.RoleHelper
 import com.example.halalyticscompose.utils.SessionManager
 import android.net.ConnectivityManager
@@ -67,7 +68,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val SplashBlack = Color(0xFF000000)
-private val SplashGreenGlow = Color(0xFF0E6F59)
+private val SplashEmeraldDark = Color(0xFF064E3B)
+private val SplashEmerald = Color(0xFF10B981)
+private val SplashEmeraldLight = Color(0xFF34D399)
 private val SplashTaglineGray = Color(0xFFB8C4BE)
 
 private data class SplashCategoryChip(val icon: ImageVector, val label: String)
@@ -83,6 +86,18 @@ fun SplashScreen(
     onSplashComplete: () -> Unit
 ) {
     val context = LocalContext.current
+    val sm = remember { SessionManager.getInstance(context) }
+    val isDark = remember { sm.isDarkMode() }
+
+    val bgColor1 = if (isDark) SplashEmeraldDark else SplashEmeraldLight
+    val bgColor2 = if (isDark) SplashBlack else SplashEmerald
+    val bgColor3 = if (isDark) SplashEmeraldDark else SplashEmeraldDark
+
+    val textColorPrimary = if (isDark) Color.White else Color(0xFF1E2824)
+    val textColorSecondary = if (isDark) Color.White.copy(alpha = 0.75f) else Color(0xFF4A5A53)
+    val textColorTertiary = if (isDark) Color.White.copy(alpha = 0.65f) else Color(0xFF6C7C75)
+    val taglineColor = if (isDark) SplashTaglineGray else Color(0xFF53635C)
+    val progressTrackColor = if (isDark) Color.White.copy(alpha = 0.12f) else Color(0xFFE2EBE6)
 
     val logoAlpha = remember { Animatable(0f) }
     val logoScale = remember { Animatable(0.82f) }
@@ -162,14 +177,14 @@ fun SplashScreen(
 
         onSplashComplete()
 
-        val sm = SessionManager.getInstance(context)
-        val loggedIn = isLoggedIn && sm.isLoggedIn() && !sm.getAuthToken().isNullOrBlank()
+        val smObj = SessionManager.getInstance(context)
+        val loggedIn = isLoggedIn && smObj.isLoggedIn() && !smObj.getAuthToken().isNullOrBlank()
         val hasNetwork = context.isNetworkAvailable()
 
         var dest = when {
-            !loggedIn && !sm.hasCompletedOnboarding() -> "onboarding"
+            !loggedIn && !smObj.hasCompletedOnboarding() -> "onboarding"
             !loggedIn -> "login"
-            else -> RoleHelper.homeRoute(sm.getRole()) ?: ""
+            else -> RoleHelper.homeRoute(smObj.getRole()) ?: ""
         }
 
         if (dest.isBlank() || dest == "splash") {
@@ -188,14 +203,8 @@ fun SplashScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.radialGradient(
-                    colors = listOf(SplashGreenGlow.copy(alpha = 0.35f), SplashBlack),
-                    radius = 900f
-                )
-            )
-            .background(
                 Brush.verticalGradient(
-                    colors = listOf(NavyDark, SplashBlack, Navy)
+                    colors = listOf(bgColor1, bgColor2, bgColor3)
                 )
             ),
         contentAlignment = Alignment.Center
@@ -213,9 +222,9 @@ fun SplashScreen(
                             width = 1.dp,
                             brush = Brush.linearGradient(
                             colors = listOf(
-                                MintAccent.copy(alpha = 0.15f),
-                                MintAccent.copy(alpha = 0.55f),
-                                MintAccent.copy(alpha = 0.15f)
+                                Color.White.copy(alpha = 0.15f),
+                                Color.White.copy(alpha = 0.55f),
+                                Color.White.copy(alpha = 0.15f)
                             )
                         ),
                             shape = CircleShape
@@ -224,6 +233,7 @@ fun SplashScreen(
                 Image(
                     painter = painterResource(id = R.drawable.logo_halalytics),
                     contentDescription = "Halalytics",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                     modifier = Modifier
                         .size(220.dp)
                         .scale(logoScale.value * pulse)
@@ -235,10 +245,10 @@ fun SplashScreen(
 
             Text(
                 text = "VERIFY · AMAN · TERPERCAYA",
-                color = SplashTaglineGray,
+                color = Color.White.copy(alpha = 0.9f),
                 fontSize = 11.sp,
                 letterSpacing = 2.2.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Black,
                 modifier = Modifier.alpha(taglineAlpha.value),
                 textAlign = TextAlign.Center
             )
@@ -287,7 +297,7 @@ fun SplashScreen(
                         Text(
                             text = chip.label,
                             fontSize = 10.sp,
-                            color = Color.White.copy(alpha = 0.75f),
+                            color = textColorSecondary,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -305,7 +315,7 @@ fun SplashScreen(
                 Text(
                     text = "Menyiapkan pengalaman Halalytics…",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.65f),
+                    color = textColorTertiary,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -316,7 +326,7 @@ fun SplashScreen(
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp)),
                     color = MintAccent,
-                    trackColor = Color.White.copy(alpha = 0.12f)
+                    trackColor = progressTrackColor
                 )
             }
         }

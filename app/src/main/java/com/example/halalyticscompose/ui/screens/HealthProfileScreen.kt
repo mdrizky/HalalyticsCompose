@@ -22,6 +22,8 @@ import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
 import com.example.halalyticscompose.ui.viewmodel.HistoryViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.example.halalyticscompose.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +55,7 @@ fun HealthProfileScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Profil Kesehatan", 
+                        stringResource(R.string.health_profile_title), 
                         fontWeight = FontWeight.Bold,
                         color = color.onBackground
                     ) 
@@ -93,7 +95,7 @@ fun HealthProfileScreen(
         ) {
             // BMI Card
             HealthCard(
-                title = "Indeks Massa Tubuh (BMI)",
+                title = stringResource(R.string.health_profile_bmi_title),
                 icon = Icons.Default.MonitorWeight,
                 accentColor = Color(0xFF3B82F6)
             ) {
@@ -105,7 +107,7 @@ fun HealthProfileScreen(
                         color = color.onSurface
                     )
                     Text(
-                        text = getBMICategory(bmi),
+                        text = getLocalizedBMICategory(bmi),
                         fontSize = 14.sp,
                         color = color.onSurfaceVariant
                     )
@@ -123,20 +125,20 @@ fun HealthProfileScreen(
                             containerColor = Color(0xFF3B82F6)
                         )
                     ) {
-                        Text("Hitung Ulang BMI")
+                        Text(stringResource(R.string.health_profile_bmi_recalculate))
                     }
                 }
             }
 
             // Activity Level Card
             HealthCard(
-                title = "Tingkat Aktivitas",
+                title = stringResource(R.string.health_profile_activity_title),
                 icon = Icons.AutoMirrored.Filled.DirectionsRun,
                 accentColor = Color(0xFF10B981)
             ) {
                 Column {
                     Text(
-                        text = activityLevel,
+                        text = getLocalizedActivityLevel(activityLevel),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = color.onSurface
@@ -154,14 +156,14 @@ fun HealthProfileScreen(
                             containerColor = Color(0xFF10B981)
                         )
                     ) {
-                        Text("Ubah Aktivitas")
+                        Text(stringResource(R.string.health_profile_activity_change))
                     }
                 }
             }
 
             // Scan Statistics Card
             HealthCard(
-                title = "Statistik Scan",
+                title = stringResource(R.string.health_profile_scan_stats),
                 icon = Icons.Default.QrCodeScanner,
                 accentColor = Color(0xFF8B5CF6)
             ) {
@@ -170,8 +172,8 @@ fun HealthProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        StatItem("Total Scan", totalScans.toString())
-                        StatItem("Produk Halal", halalProducts.toString())
+                        StatItem(stringResource(R.string.health_profile_scan_total), totalScans.toString())
+                        StatItem(stringResource(R.string.health_profile_scan_halal), halalProducts.toString())
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))
@@ -185,14 +187,14 @@ fun HealthProfileScreen(
                             containerColor = Color(0xFF8B5CF6)
                         )
                     ) {
-                        Text("Lihat Riwayat")
+                        Text(stringResource(R.string.health_profile_view_history))
                     }
                 }
             }
 
             // Health Tools Card
             HealthCard(
-                title = "Alat Kesehatan",
+                title = stringResource(R.string.health_profile_tools_title),
                 icon = Icons.Default.HealthAndSafety,
                 accentColor = Color(0xFF0EA5E9)
             ) {
@@ -200,22 +202,22 @@ fun HealthProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     HealthToolItem(
-                        title = "Scanner Makanan",
-                        description = "Scan kesehatan makanan",
+                        title = stringResource(R.string.health_profile_tool_food_scanner),
+                        description = stringResource(R.string.health_profile_tool_food_scanner_desc),
                         icon = Icons.Default.CameraAlt,
                         onClick = { navController.navigate("scan") }
                     )
                     
                     HealthToolItem(
-                        title = "AI Meal Scanner",
-                        description = "Analisis makanan dengan AI",
+                        title = stringResource(R.string.health_profile_tool_meal_scanner),
+                        description = stringResource(R.string.health_profile_tool_meal_scanner_desc),
                         icon = Icons.Default.Restaurant,
                         onClick = { navController.navigate("meal_scan") }
                     )
                     
                     HealthToolItem(
-                        title = "Asisten Kesehatan AI",
-                        description = "Konsultasi dengan AI",
+                        title = stringResource(R.string.health_profile_tool_assistant),
+                        description = stringResource(R.string.health_profile_tool_assistant_desc),
                         icon = Icons.Default.MedicalInformation,
                         onClick = { navController.navigate("health_assistant") }
                     )
@@ -227,19 +229,19 @@ fun HealthProfileScreen(
     if (showBmiDialog) {
         AlertDialog(
             onDismissRequest = { showBmiDialog = false },
-            title = { Text("Hitung BMI") },
+            title = { Text(stringResource(R.string.health_profile_bmi_dialog_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = heightInput,
                         onValueChange = { heightInput = it },
-                        label = { Text("Tinggi (cm)") },
+                        label = { Text(stringResource(R.string.edit_profile_height)) },
                         singleLine = true
                     )
                     OutlinedTextField(
                         value = weightInput,
                         onValueChange = { weightInput = it },
-                        label = { Text("Berat (kg)") },
+                        label = { Text(stringResource(R.string.edit_profile_weight)) },
                         singleLine = true
                     )
                 }
@@ -257,11 +259,11 @@ fun HealthProfileScreen(
                         }
                         showBmiDialog = false
                     }
-                ) { Text("Simpan") }
+                ) { Text(stringResource(R.string.edit_profile_save)) }
             },
             dismissButton = {
                 TextButton(onClick = { showBmiDialog = false }) {
-                    Text("Batal")
+                    Text(stringResource(R.string.edit_profile_cancel))
                 }
             }
         )
@@ -271,7 +273,7 @@ fun HealthProfileScreen(
         val activityOptions = listOf("Rendah", "Sedang", "Tinggi", "Sangat Tinggi")
         AlertDialog(
             onDismissRequest = { showActivityDialog = false },
-            title = { Text("Pilih Tingkat Aktivitas") },
+            title = { Text(stringResource(R.string.health_profile_activity_dialog_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     activityOptions.forEach { option ->
@@ -287,7 +289,7 @@ fun HealthProfileScreen(
                                 onClick = { selectedActivity = option }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(option)
+                            Text(getLocalizedActivityLevel(option))
                         }
                     }
                 }
@@ -298,11 +300,11 @@ fun HealthProfileScreen(
                         authViewModel.updateProfile(activityLevel = selectedActivity)
                         showActivityDialog = false
                     }
-                ) { Text("Simpan") }
+                ) { Text(stringResource(R.string.edit_profile_save)) }
             },
             dismissButton = {
                 TextButton(onClick = { showActivityDialog = false }) {
-                    Text("Batal")
+                    Text(stringResource(R.string.edit_profile_cancel))
                 }
             }
         )
@@ -416,7 +418,7 @@ fun HealthToolItem(
                 )
             }
             Icon(
-                Icons.Default.KeyboardArrowRight,
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = color.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
@@ -425,18 +427,26 @@ fun HealthToolItem(
     }
 }
 
-fun getBMICategory(bmi: String): String {
-    return try {
-        val bmiValue = bmi.toFloatOrNull() ?: return "Tidak diketahui"
-        when {
-            bmiValue < 17.0 -> "Sangat Kurus"
-            bmiValue < 18.5 -> "Kurus"
-            bmiValue < 20.0 -> "Normal (Tipis)"
-            bmiValue < 23.0 -> "Normal (Ideal)"
-            bmiValue < 25.0 -> "Berlebih"
-            else -> "Obesitas"
-        }
-    } catch (e: Exception) {
-        "Tidak diketahui"
+@Composable
+fun getLocalizedBMICategory(bmi: String): String {
+    val bmiValue = bmi.toFloatOrNull() ?: return stringResource(R.string.unknown) // Unknown fallback
+    return when {
+        bmiValue < 17.0 -> "Sangat Kurus" // Underweight (severe)
+        bmiValue < 18.5 -> "Kurus" // Underweight
+        bmiValue < 20.0 -> "Normal (Tipis)"
+        bmiValue < 23.0 -> "Normal (Ideal)" // Normal
+        bmiValue < 25.0 -> "Berlebih" // Overweight
+        else -> "Obesitas" // Obese
+    }
+}
+
+@Composable
+fun getLocalizedActivityLevel(level: String): String {
+    return when (level.lowercase()) {
+        "low", "rendah" -> "Rendah"
+        "medium", "sedang" -> "Sedang"
+        "high", "tinggi" -> "Tinggi"
+        "very high", "sangat tinggi" -> "Sangat Tinggi"
+        else -> level
     }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.halalyticscompose.ui.screens
 
 import androidx.compose.animation.core.*

@@ -46,11 +46,11 @@ class LocalizationManager(private val context: Context) {
         sharedPreferences.edit().putString(PREF_LANGUAGE, language).apply()
 
         // Change Locale
-        val locale = Locale(language)
+        val locale = Locale.forLanguageTag(language)
         Locale.setDefault(locale)
 
         val configuration = Configuration(context.resources.configuration)
-        configuration.locale = locale
+        configuration.setLocale(locale)
 
         // Untuk Android 7.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -106,6 +106,6 @@ class LocalizationManager(private val context: Context) {
      * Dapatkan Locale object
      */
     fun getLocale(language: String = getCurrentLanguage()): Locale {
-        return Locale(language)
+        return Locale.forLanguageTag(language)
     }
 }

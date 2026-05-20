@@ -224,6 +224,57 @@
     <string name="register_error_allergy">Pilih status alergi</string>
     <string name="register_error_medical_history">Masukkan riwayat medis</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_title_scan">Scan &amp; Cek Halal</string>
+    <string name="onboarding_desc_scan">Scan produk dengan cepat, lihat status halal, bahan, dan rekomendasi nutrisi dalam sekali sentuh.</string>
+    <string name="onboarding_title_ai">AI Kesehatan Pintar</string>
+    <string name="onboarding_desc_ai">Konsultasi gejala, cek interaksi obat, dan dapatkan panduan nutrisi halal dari AI.</string>
+    <string name="onboarding_title_db">Database Nutrisi Lengkap</string>
+    <string name="onboarding_desc_db">Akses data bahan, label halal, dan informasi gizi dari ribuan produk terpercaya.</string>
+    <string name="onboarding_title_start">Mulai Perjalanan Halalmu</string>
+    <string name="onboarding_desc_start">Gabung dengan komunitas yang memilih gaya hidup sehat, halal, dan berenergi.</string>
+    <string name="onboarding_button_start">Mulai Sekarang</string>
+    <string name="onboarding_button_demo">Coba Demo Akun</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_next">Selanjutnya</string>
+    <string name="onboarding_have_account">Sudah punya akun? Masuk</string>
+
+    <!-- Login -->
+    <string name="login_title">Halalytics</string>
+    <string name="login_subtitle">Kesehatan Halal Pintar</string>
+    <string name="login_description">Akses rekomendasi nutrisi halal dan sehat untuk gaya hidup modern.</string>
+    <string name="login_welcome_back">Selamat Datang Kembali</string>
+    <string name="login_label_email_username">Email / Username</string>
+    <string name="login_placeholder_email_username">Masukkan email atau username</string>
+    <string name="login_label_password">Password</string>
+    <string name="login_placeholder_password">Masukkan password</string>
+    <string name="login_demo_label">Demo akun:</string>
+    <string name="login_demo_admin">Admin</string>
+    <string name="login_demo_pengguna">Pengguna</string>
+    <string name="login_demo_pakar">Pakar</string>
+    <string name="login_button">Masuk</string>
+    <string name="login_forgot_password">Lupa Password?</string>
+    <string name="login_register">Daftar</string>
+    <string name="login_or_continue_with">Atau lanjut dengan</string>
+    <string name="login_google">Google</string>
+    <string name="login_facebook">Facebook</string>
+
+    <!-- Forgot password -->
+    <string name="forgot_label_email">Alamat Email</string>
+    <string name="forgot_error_empty_email">Silakan masukkan alamat email Anda</string>
+    <string name="forgot_error_invalid_email">Masukkan alamat email yang valid</string>
+    <string name="forgot_sending">Mengirim...</string>
+    <string name="forgot_send_button">Kirim Link Reset</string>
+    <string name="forgot_sent_success">Email Berhasil Dikirim!</string>
+    <string name="forgot_check_inbox">Periksa kotak masuk Anda untuk link reset</string>
+    <string name="forgot_resend_available">Kirim ulang tersedia dalam %1$d detik</string>
+    <string name="forgot_resend_button">Kirim Ulang Email</string>
+    <string name="forgot_back_prompt">Ingat kata sandi Anda? </string>
+    <string name="forgot_back_action">Masuk</string>
+    <string name="forgot_title_reset">Reset Kata Sandi</string>
+    <string name="forgot_desc_reset">Masukkan alamat email Anda dan kami akan mengirim link untuk mereset kata sandi.</string>
+    <string name="forgot_desc_sent">Kami telah mengirim link reset ke email Anda. Periksa kotak masuk dan ikuti instruksi.</string>
+
     
     <string name="health_suite_item_assistant_desc">Chatbot konsultasi gejala dan tindakan awal.</string>
     <string name="health_suite_item_analysis_title">AI Analysis</string>
@@ -551,4 +602,106 @@
     <string name="assistant_chat_doctor_desc">Bicara langsung dengan dokter/pakar kesehatan</string>
     <string name="assistant_chat_doctor_button">Chat Dokter Sekarang</string>
     <string name="common_send">Kirim</string>
+    <!-- Profile Additional Strings -->
+    <string name="profile_total_scan_label">Total Scan</string>
+    <string name="profile_halal_stats">Halal Stats</string>
+    <string name="profile_streak_value">%d hari</string>
+    <string name="profile_health_profile">Profil Kesehatan</string>
+    <string name="profile_age">Umur</string>
+    <string name="profile_age_value">%s thn</string>
+    <string name="profile_height">Tinggi</string>
+    <string name="profile_height_value">%s cm</string>
+    <string name="profile_weight">Berat</string>
+    <string name="profile_weight_value">%s kg</string>
+    <string name="profile_bmi">BMI</string>
+    <string name="profile_blood_type">Gol. Darah</string>
+    <string name="profile_allergy">Alergi</string>
+    <string name="profile_allergy_none">Tidak ada</string>
+    <string name="profile_contributor_title">Ayo Jadi Kontributor!</string>
+    <string name="profile_contributor_desc">Bantu sesama Muslim menemukan produk Halal.</string>
+    <!-- Product Detail Strings -->
+    <string name="product_detail_title">Analisis Produk</string>
+    <string name="product_not_found_title">Produk belum ada di database</string>
+    <string name="product_not_found_desc">Silakan kirim pengaduan agar admin bisa verifikasi.</string>
+    <string name="product_barcode_label">Barcode: %s</string>
+    <string name="product_report_admin">Laporkan &amp; Verifikasi Admin</string>
+    <string name="product_open_ocr">Buka OCR (Foto Kemasan)</string>
+    <string name="product_try_again">Coba Lagi</string>
+    <string name="product_analysis_context">KONTEKS ANALISIS</string>
+    <string name="product_profile_myself">Diri Sendiri</string>
+    <string name="product_science_health">SAINS &amp; KESEHATAN</string>
+    <string name="product_validated_via">Divalidasi via %s</string>
+    <string name="product_nutrient_levels">TINGKAT NUTRISI</string>
+    <string name="product_nutrient_fat">Lemak</string>
+    <string name="product_nutrient_saturated_fat">Lemak Jenuh</string>
+    <string name="product_nutrient_sugars">Gula</string>
+    <string name="product_nutrient_salt">Garam</string>
+    <string name="product_ingredients_breakdown">RINCIAN KOMPOSISI</string>
+    <string name="product_ingredients_unavailable">Data komposisi tidak tersedia.</string>
+    <string name="product_ai_alternatives">ALTERNATIF HALAL AI</string>
+    <string name="product_ai_concern">Masalah Terdeteksi:</string>
+    <string name="product_ai_error">Gagal memuat alternatif AI: %s</string>
+    <string name="product_halal_certified">BERSERTIFIKAT HALAL</string>
+    <string name="product_haram_non_halal">HARAM / NON-HALAL</string>
+    <string name="product_syubhat_unknown">SYUBHAT / TIDAK DIKETAHUI</string>
+    <string name="product_allergy_detected">ALERGI TERDETEKSI</string>
+    <string name="product_is_allergic_to">%1$s alergi terhadap: %2$s</string>
+    <string name="product_added_to_compare">Ditambahkan ke Analisis Perbandingan ⚖️</string>
+    
+    <!-- Edit Profile Screen -->
+    <string name="edit_profile_title">Edit Profil</string>
+    <string name="edit_profile_save">Simpan</string>
+    <string name="edit_profile_name_empty">Nama lengkap tidak boleh kosong</string>
+    <string name="edit_profile_success">Profil berhasil diperbarui ✨</string>
+    <string name="edit_profile_failed">Gagal simpan: %s</string>
+    <string name="edit_profile_personal_info">Informasi Pribadi</string>
+    <string name="edit_profile_full_name">Nama Lengkap</string>
+    <string name="edit_profile_email">Email</string>
+    <string name="edit_profile_phone">Nomor HP</string>
+    <string name="edit_profile_birthdate">Tanggal Lahir</string>
+    <string name="edit_profile_address">Alamat</string>
+    <string name="edit_profile_bio">Bio</string>
+    <string name="edit_profile_health_profile">Profil Kesehatan</string>
+    <string name="edit_profile_height">Tinggi (cm)</string>
+    <string name="edit_profile_weight">Berat (kg)</string>
+    <string name="edit_profile_age">Umur</string>
+    <string name="edit_profile_blood_type">Gol. Darah</string>
+    <string name="edit_profile_gender">Jenis Kelamin</string>
+    <string name="edit_profile_gender_male">Laki-laki</string>
+    <string name="edit_profile_gender_female">Perempuan</string>
+    <string name="edit_profile_emergency">Kontak Darurat</string>
+    <string name="edit_profile_allergy">Alergi</string>
+    <string name="edit_profile_allergy_placeholder">Kacang, Seafood, dll</string>
+    <string name="edit_profile_medical_history">Riwayat Medis</string>
+    <string name="edit_profile_security">Keamanan</string>
+    <string name="edit_profile_change_password">Ganti Password</string>
+    <string name="edit_profile_change_password_desc">Amankan akun Anda dengan password baru</string>
+    <string name="edit_profile_password_mismatch">Konfirmasi password tidak cocok</string>
+    <string name="edit_profile_password_too_short">Password minimal 6 karakter</string>
+    <string name="edit_profile_password_success">Password berhasil diganti! 🔐</string>
+    <string name="edit_profile_cancel">Batal</string>
+    <string name="edit_profile_current_password">Password Saat Ini</string>
+    <string name="edit_profile_new_password">Password Baru</string>
+    <string name="edit_profile_confirm_password">Konfirmasi Password Baru</string>
+
+    <!-- Health Profile Screen -->
+    <string name="health_profile_title">Profil Kesehatan</string>
+    <string name="health_profile_bmi_title">Indeks Massa Tubuh (BMI)</string>
+    <string name="health_profile_bmi_recalculate">Hitung Ulang BMI</string>
+    <string name="health_profile_activity_title">Tingkat Aktivitas</string>
+    <string name="health_profile_activity_change">Ubah Aktivitas</string>
+    <string name="health_profile_scan_stats">Statistik Scan</string>
+    <string name="health_profile_scan_total">Total Scan</string>
+    <string name="health_profile_scan_halal">Produk Halal</string>
+    <string name="health_profile_view_history">Lihat Riwayat</string>
+    <string name="health_profile_tools_title">Alat Kesehatan</string>
+    <string name="health_profile_tool_food_scanner">Scanner Makanan</string>
+    <string name="health_profile_tool_food_scanner_desc">Scan kesehatan makanan</string>
+    <string name="health_profile_tool_meal_scanner">AI Meal Scanner</string>
+    <string name="health_profile_tool_meal_scanner_desc">Analisis makanan dengan AI</string>
+    <string name="health_profile_tool_assistant">Asisten Kesehatan AI</string>
+    <string name="health_profile_tool_assistant_desc">Konsultasi dengan AI</string>
+    <string name="health_profile_bmi_dialog_title">Hitung BMI</string>
+    <string name="health_profile_activity_dialog_title">Pilih Tingkat Aktivitas</string>
+    <string name="unknown">Tidak diketahui</string>
 </resources>

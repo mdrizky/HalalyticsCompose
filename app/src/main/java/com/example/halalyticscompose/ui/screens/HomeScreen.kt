@@ -44,6 +44,7 @@ import com.example.halalyticscompose.ui.viewmodel.*
 import com.example.halalyticscompose.utils.ImageUtils
 
 import com.example.halalyticscompose.ui.components.*
+import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.components.HealthSummarySection
 import com.example.halalyticscompose.data.model.CategoryItem
 import com.example.halalyticscompose.data.model.HealthArticleItem
@@ -282,126 +283,143 @@ fun GroceryHeader(
     val calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val timeGreeting = when (hour) {
-        in 4..10 -> "Selamat Pagi"
-        in 11..14 -> "Selamat Siang"
-        in 15..18 -> "Selamat Sore"
-        else -> "Selamat Malam"
+        in 4..10 -> "Good Morning"
+        in 11..14 -> "Good Afternoon"
+        in 15..18 -> "Good Evening"
+        else -> "Good Night"
     }
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        com.example.halalyticscompose.ui.theme.EmeraldLight.copy(alpha = 0.5f),
+                        Color.White
+                    )
+                )
+            )
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(top = 16.dp, bottom = 8.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .padding(6.dp),
-                    contentAlignment = Alignment.Center
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Profile Avatar & Welcome
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = com.example.halalyticscompose.R.drawable.logo_halalytics),
-                        contentDescription = "Logo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        letterSpacing = 1.sp
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.LocationOn,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(com.example.halalyticscompose.ui.theme.TealLight)
+                            .border(2.dp, Color.White, CircleShape)
+                            .clickable { onProfileClick() }
+                    ) {
+                        val profileImageUrl = ImageUtils.normalizeUrl(imageUrl)
+                        if (profileImageUrl != null) {
+                            AsyncImage(
+                                model = profileImageUrl,
+                                contentDescription = "Profile",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = "Profile",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                tint = com.example.halalyticscompose.ui.theme.TealDark
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
                         Text(
-                            text = location ?: "Indonesia",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            text = timeGreeting,
+                            fontSize = 12.sp,
+                            color = com.example.halalyticscompose.ui.theme.Slate500,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = name,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = com.example.halalyticscompose.ui.theme.Slate900,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Selamat Datang, $name",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "$timeGreeting, mau cek apa hari ini?",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                fontWeight = FontWeight.Medium
-            )
-        }
 
-        Box {
-            IconButton(
-                onClick = onNotificationClick,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            if (unreadCount > 0) {
-                Badge(
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (-4).dp, y = 4.dp),
-                    containerColor = MaterialTheme.colorScheme.error
+                // Notification & Settings
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(if (unreadCount > 9) "9+" else unreadCount.toString())
+                    // Location Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White)
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = com.example.halalyticscompose.ui.theme.Emerald
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = location ?: "Indonesia",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = com.example.halalyticscompose.ui.theme.Slate700
+                            )
+                        }
+                    }
+
+                    Box {
+                        IconButton(
+                            onClick = onNotificationClick,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notifications",
+                                modifier = Modifier.size(20.dp),
+                                tint = com.example.halalyticscompose.ui.theme.Slate700
+                            )
+                        }
+                        if (unreadCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 2.dp, y = (-2).dp)
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(com.example.halalyticscompose.ui.theme.Error)
+                                    .border(2.dp, Color.White, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                            }
+                        }
+                    }
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .clickable { onProfileClick() }
-        ) {
-            val profileImageUrl = ImageUtils.normalizeUrl(imageUrl)
-            if (profileImageUrl != null) {
-                AsyncImage(
-                    model = profileImageUrl,
-                    contentDescription = "Profile",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Profile",
-                    modifier = Modifier.fillMaxSize().padding(8.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-
         }
     }
 }
@@ -605,21 +623,23 @@ fun FeatureGridSection(
         SectionTitle(stringResource(R.string.home_quick_action), null, null)
         Spacer(modifier = Modifier.height(16.dp))
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(HalalyticsShadows.elevation2, RoundedCornerShape(HalalyticsDimensions.radius2XLarge)),
+            shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 val features = listOf(
-                    FeatureItemData(stringResource(R.string.feature_scan_halal), Icons.Default.QrCodeScanner, "scan", MaterialTheme.colorScheme.primary),
-                    FeatureItemData(stringResource(R.string.feature_cek_obat), Icons.Default.MenuBook, "drug_interaction", Color(0xFFD32F2F)),
+                    FeatureItemData(stringResource(R.string.feature_scan_halal), Icons.Default.QrCodeScanner, "scan", Emerald),
+                    FeatureItemData(stringResource(R.string.feature_cek_obat), Icons.AutoMirrored.Filled.MenuBook, "drug_interaction", HaramRed),
                     FeatureItemData(stringResource(R.string.feature_kosmetik), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF7B1FA2)),
                     FeatureItemData(stringResource(R.string.feature_bpom_id), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF0277BD)),
-                    FeatureItemData(stringResource(R.string.feature_riwayat_id), Icons.Default.History, "history", MaterialTheme.colorScheme.secondary),
-                    FeatureItemData(stringResource(R.string.feature_bmi_calculator), Icons.Default.Calculate, "bmi_calculator", Color(0xFF00897B)),
+                    FeatureItemData(stringResource(R.string.feature_riwayat_id), Icons.Default.History, "history", Teal),
+                    FeatureItemData(stringResource(R.string.feature_bmi_calculator), Icons.Default.Calculate, "bmi_calculator", TealDark),
                     FeatureItemData(stringResource(R.string.feature_ai_assistant), Icons.Default.SmartToy, "health_assistant", Color(0xFF512DA8)),
-                    FeatureItemData(stringResource(R.string.feature_lainnya_id), Icons.Default.GridView, "all_features", MaterialTheme.colorScheme.onSurfaceVariant)
+                    FeatureItemData(stringResource(R.string.feature_lainnya_id), Icons.Default.GridView, "all_features", Slate500)
                 )
 
                 features.chunked(4).forEach { row ->
@@ -645,7 +665,7 @@ fun FeatureGridSection(
                                     text = item.title,
                                     style = MaterialTheme.typography.labelSmall,
                                     textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = Slate900,
                                     maxLines = 1
                                 )
                             }
@@ -664,7 +684,7 @@ fun RecommendationSection(
     onViewAll: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle("Rekomendasi Halal", stringResource(R.string.home_see_all), onViewAll)
+        SectionTitle("Rekomendasi Premium", stringResource(R.string.home_see_all), onViewAll)
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             contentPadding = PaddingValues(horizontal = 20.dp),
@@ -674,10 +694,13 @@ fun RecommendationSection(
                 Card(
                     modifier = Modifier
                         .width(160.dp)
-                        .clickable { onProductClick(product) },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        .clickable { onProductClick(product) }
+                        .shadow(
+                            elevation = com.example.halalyticscompose.ui.theme.HalalyticsShadows.elevation2,
+                            shape = RoundedCornerShape(com.example.halalyticscompose.ui.theme.HalalyticsDimensions.radius2XLarge)
+                        ),
+                    shape = RoundedCornerShape(com.example.halalyticscompose.ui.theme.HalalyticsDimensions.radius2XLarge),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column {
                         Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
@@ -700,7 +723,7 @@ fun RecommendationSection(
                             Text(
                                 text = product.brand ?: "Local Brand",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = com.example.halalyticscompose.ui.theme.Slate500,
                                 maxLines = 1
                             )
                         }
@@ -751,20 +774,31 @@ fun HealthArticlesSection(
 
 @Composable
 fun ArticleSkeleton() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(80.dp).clip(RoundedCornerShape(12.dp)).background(Color.LightGray.copy(alpha = 0.3f)))
+            Box(modifier = Modifier.size(80.dp).clip(RoundedCornerShape(12.dp)).background(Color.LightGray.copy(alpha = alpha)))
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Box(modifier = Modifier.width(60.dp).height(10.dp).background(Color.LightGray.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.width(60.dp).height(10.dp).background(Color.LightGray.copy(alpha = alpha)))
                 Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.fillMaxWidth().height(16.dp).background(Color.LightGray.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.fillMaxWidth().height(16.dp).background(Color.LightGray.copy(alpha = alpha)))
                 Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.width(150.dp).height(16.dp).background(Color.LightGray.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.width(150.dp).height(16.dp).background(Color.LightGray.copy(alpha = alpha)))
             }
         }
     }

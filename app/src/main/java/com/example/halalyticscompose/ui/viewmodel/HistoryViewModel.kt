@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import android.util.Log
 import java.text.SimpleDateFormat
@@ -65,7 +66,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun loadBanners() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getBanners()
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -85,7 +86,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun fetchRecommendations(token: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 // Fetch for a default category, or general
                 val response = apiService.getRecommendations("Bearer $token", "food")
@@ -100,7 +101,7 @@ class HistoryViewModel @Inject constructor(
 
     fun startRealtimeSync() {
         syncJob?.cancel()
-        syncJob = viewModelScope.launch {
+        syncJob = viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 val token = sessionManager.getAuthToken()
                 if (!token.isNullOrBlank()) {
@@ -113,7 +114,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun fetchHistory(token: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getRealtimeScanHistory("Bearer $token")
                 if (response.success) {
@@ -126,7 +127,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun fetchUserStats(token: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getUserStats("Bearer $token")
                 if (response.responseCode == 200) {

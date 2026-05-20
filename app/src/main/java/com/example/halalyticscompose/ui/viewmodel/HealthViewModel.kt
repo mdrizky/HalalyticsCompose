@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -61,7 +62,7 @@ class HealthViewModel @Inject constructor(
     }
 
     fun updateDailyIntakeFromLocal() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                 val userId = sessionManager.getUserId() ?: 0
@@ -98,7 +99,7 @@ class HealthViewModel @Inject constructor(
 
     fun loadDailyIntake() {
         val token = sessionManager.getAuthToken() ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             try {
                 val response = apiService.getDailyIntake("Bearer $token")
@@ -119,7 +120,7 @@ class HealthViewModel @Inject constructor(
 
     fun fetchAiDailyInsight() {
         val token = sessionManager.getAuthToken() ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getAiDailyInsight("Bearer $token")
                 if (response.isSuccessful && response.body()?.status == "success") {
@@ -133,7 +134,7 @@ class HealthViewModel @Inject constructor(
 
     fun fetchHealthScore() {
         val token = sessionManager.getAuthToken() ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getHealthScore("Bearer $token")
                 if (response.isSuccessful && response.body()?.status == "success") {
@@ -146,7 +147,7 @@ class HealthViewModel @Inject constructor(
     }
 
     fun recordConsumption(productName: String, sugar: Double, sodium: Double, isHalal: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             val userId = sessionManager.getUserId() ?: 0
             consumptionDao.insertConsumption(
@@ -163,7 +164,7 @@ class HealthViewModel @Inject constructor(
         }
     }
     fun fetchCategories() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = apiService.getCategories()
                 if (response.isSuccessful && response.body()?.success == true) {

@@ -11,7 +11,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -421,7 +421,7 @@ fun InternationalMedicineScreen(navController: NavController) {
                                                 )
                                             }
                                             Icon(
-                                                Icons.Default.KeyboardArrowRight,
+                                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                                 contentDescription = "Detail",
                                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )

@@ -12,7 +12,7 @@ object LanguageManager {
     }
 
     fun applyLanguageIfNeeded(activity: Activity, languageCode: String) {
-        val supportedLocales = listOf("id", "en", "ms", "ar")
+        val supportedLocales = listOf("id", "en")
         val normalized = if (supportedLocales.contains(languageCode.lowercase())) languageCode.lowercase() else "id"
         if (currentLanguage(activity) == normalized) return
 

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.halalyticscompose.ui.screens
 
 import android.content.Intent
@@ -10,8 +12,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -379,7 +381,7 @@ fun EncyclopediaDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Outlined.OpenInNew, null,
+                        Icons.AutoMirrored.Outlined.OpenInNew, null,
                         tint = MaterialTheme.colorScheme.onSurface.copy(0.4f),
                         modifier = Modifier.size(14.dp)
                     )

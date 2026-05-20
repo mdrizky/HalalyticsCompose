@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
 import com.example.halalyticscompose.ui.viewmodel.HistoryViewModel
 import androidx.navigation.NavController
+import com.example.halalyticscompose.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +45,8 @@ fun BasicProfileScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF667EEA),
-                        Color(0xFF764BA2)
+                        Emerald,
+                        TealDark
                     )
                 )
             )
@@ -114,7 +115,7 @@ fun BasicProfileScreen(
                         modifier = Modifier
                             .size(100.dp)
                             .background(
-                                Color(0xFF667EEA).copy(alpha = 0.1f),
+                                Emerald.copy(alpha = 0.1f),
                                 RoundedCornerShape(50.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -122,7 +123,7 @@ fun BasicProfileScreen(
                         Icon(
                             Icons.Default.Person,
                             contentDescription = "Profile",
-                            tint = Color(0xFF667EEA),
+                            tint = Emerald,
                             modifier = Modifier.size(48.dp)
                         )
                     }
@@ -156,11 +157,11 @@ fun BasicProfileScreen(
                             modifier = Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
+                             Text(
                                 text = totalScans.toString(),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF667EEA)
+                                color = Emerald
                             )
                             
                             Spacer(modifier = Modifier.height(4.dp))
@@ -200,7 +201,7 @@ fun BasicProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4F46E5)
+                            containerColor = Emerald
                         )
                     ) {
                         Text(
@@ -242,13 +243,13 @@ fun BasicProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Button(
-                            onClick = { navController.navigate("history") },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF667EEA)
-                            )
-                        ) {
+                             onClick = { navController.navigate("history") },
+                             modifier = Modifier.weight(1f),
+                             shape = RoundedCornerShape(12.dp),
+                             colors = ButtonDefaults.buttonColors(
+                                 containerColor = Emerald
+                             )
+                         ) {
                             Text(
                                 text = "History",
                                 color = Color.White

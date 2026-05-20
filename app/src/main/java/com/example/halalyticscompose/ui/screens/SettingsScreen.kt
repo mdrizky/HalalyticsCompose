@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -118,10 +118,6 @@ fun SettingsScreen(
                         LanguageOption("id", "Indonesia", "🇮🇩", appLanguage) { viewModel.setAppLanguage("id") }
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
                         LanguageOption("en", "English", "🇺🇸", appLanguage) { viewModel.setAppLanguage("en") }
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
-                        LanguageOption("ms", "Melayu", "🇲🇾", appLanguage) { viewModel.setAppLanguage("ms") }
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
-                        LanguageOption("ar", "العربية", "🇸🇦", appLanguage) { viewModel.setAppLanguage("ar") }
                     }
                 }
 
@@ -276,7 +272,7 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(stringResource(R.string.watchlist), fontWeight = FontWeight.Medium)
                         }
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 

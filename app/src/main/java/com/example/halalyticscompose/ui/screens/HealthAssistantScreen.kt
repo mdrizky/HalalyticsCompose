@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -427,7 +428,7 @@ fun HealthAssistantScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                if (isSpeaking) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                                if (isSpeaking) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                                 contentDescription = "TTS",
                                 tint = if (isSpeaking) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface.copy(0.5f),
                                 modifier = Modifier.size(22.dp)
@@ -466,7 +467,7 @@ fun HealthAssistantScreen(
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.VolumeUp, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(14.dp))
+                        Icon(Icons.AutoMirrored.Filled.VolumeUp, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(stringResource(R.string.assistant_tts_reading), fontSize = 11.sp, color = MaterialTheme.colorScheme.secondary)
                     }
@@ -1051,7 +1052,7 @@ fun HealthAssistantScreen(
                             }
 
                             if (analysis.follow_up_questions.isNotEmpty()) {
-                                SectionTitle(stringResource(R.string.assistant_follow_up_questions), Icons.Outlined.HelpOutline, MaterialTheme.colorScheme.primary)
+                                SectionTitle(stringResource(R.string.assistant_follow_up_questions), Icons.AutoMirrored.Outlined.HelpOutline, MaterialTheme.colorScheme.primary)
                                 BulletListCard(items = analysis.follow_up_questions)
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
@@ -1117,7 +1118,7 @@ fun HealthAssistantScreen(
                                                     onClick = { navController.navigate("halocode") },
                                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                                                 ) {
-                                                    Icon(Icons.Default.Chat, null)
+                                                    Icon(Icons.AutoMirrored.Filled.Chat, null)
                                                     Spacer(modifier = Modifier.width(6.dp))
                                                     Text(stringResource(R.string.assistant_chat_expert))
                                                 }
@@ -1129,7 +1130,7 @@ fun HealthAssistantScreen(
                                                 }
                                                 
                                                 OutlinedButton(onClick = { navController.navigate("halocode") }) {
-                                                    Icon(Icons.Default.Chat, null)
+                                                    Icon(Icons.AutoMirrored.Filled.Chat, null)
                                                     Spacer(modifier = Modifier.width(6.dp))
                                                     Text(stringResource(R.string.assistant_ask_expert))
                                                 }

@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +31,9 @@ import coil.compose.AsyncImage
 import com.example.halalyticscompose.R
 import com.example.halalyticscompose.ui.viewmodel.*
 import com.example.halalyticscompose.utils.ImageUtils
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import com.example.halalyticscompose.ui.theme.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,24 +133,25 @@ fun ProfileHeader(
     halalProducts: Int,
     currentStreak: Int
 ) {
-    val headerColor = MaterialTheme.colorScheme.primary
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp))
             .background(
                 Brush.verticalGradient(
-                    listOf(headerColor, headerColor.copy(alpha = 0.85f))
+                    listOf(Emerald, TealDark)
                 )
             )
             .statusBarsPadding()
-            .padding(top = 32.dp, bottom = 48.dp, start = 24.dp, end = 24.dp)
+            .padding(top = 24.dp, bottom = 36.dp, start = 24.dp, end = 24.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(108.dp)
+                    .border(3.dp, Color.White.copy(alpha = 0.8f), CircleShape)
+                    .padding(3.dp)
+                    .shadow(12.dp, CircleShape)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.2f))
             ) {
@@ -170,57 +174,78 @@ fun ProfileHeader(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = userData?.fullName ?: userData?.username ?: stringResource(R.string.account_default_user),
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            )
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = userData?.fullName ?: userData?.username ?: stringResource(R.string.account_default_user),
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    letterSpacing = (-0.5).sp
+                )
+                if (totalScans > 10) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        Icons.Default.Verified,
+                        contentDescription = "Premium Member",
+                        tint = Mint,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
                 Icon(
                     Icons.Default.LocationOn,
                     contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = Color.White.copy(alpha = 0.7f)
+                    modifier = Modifier.size(12.dp),
+                    tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = userData?.address ?: "Batam, Indonesia",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 13.sp
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
             
             if (!userData?.bio.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = userData?.bio ?: "",
                     color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 32.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
             
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.White.copy(alpha = 0.12f))
-                    .padding(vertical = 18.dp),
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
+                    .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatItem("Total Scan", totalScans.toString())
-                Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color.White.copy(alpha = 0.25f)))
-                StatItem("Halal Stats", halalProducts.toString())
-                Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color.White.copy(alpha = 0.25f)))
-                StatItem("Streak", "$currentStreak hari")
+                StatItem(stringResource(R.string.profile_total_scan_label), totalScans.toString())
+                Box(modifier = Modifier.width(1.dp).height(28.dp).background(Color.White.copy(alpha = 0.25f)))
+                StatItem(stringResource(R.string.profile_halal_stats), halalProducts.toString())
+                Box(modifier = Modifier.width(1.dp).height(28.dp).background(Color.White.copy(alpha = 0.25f)))
+                StatItem(stringResource(R.string.streak), stringResource(R.string.profile_streak_value, currentStreak))
             }
         }
     }
@@ -232,56 +257,79 @@ private fun StatItem(label: String, value: String) {
         Text(
             text = value,
             color = Color.White,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            fontSize = 24.sp,
             style = MaterialTheme.typography.titleLarge
         )
         Text(
             text = label.uppercase(),
-            color = Color.White.copy(alpha = 0.75f),
-            fontSize = 10.sp,
+            color = Color.White.copy(alpha = 0.8f),
+            fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 0.5.sp
+            letterSpacing = 0.8.sp
         )
     }
 }
 
 @Composable
 fun HealthProfileCard(userData: com.example.halalyticscompose.data.model.User?) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Text(
-            text = "Health Profile",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+            text = stringResource(R.string.profile_health_profile).uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Emerald,
+            letterSpacing = 1.2.sp,
+            modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
         )
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(2.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(HalalyticsShadows.elevation2, RoundedCornerShape(HalalyticsDimensions.radius2XLarge)),
+            shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
-                modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                HealthInfoItem("Age", "${userData?.age ?: "-"} yrs", Icons.Default.Cake)
-                HealthInfoItem("Height", "${userData?.height ?: "-"} cm", Icons.Default.Height)
-                HealthInfoItem("Weight", "${userData?.weight ?: "-"} kg", Icons.Default.Scale)
-                HealthInfoItem("BMI", String.format("%.1f", userData?.bmi ?: 0.0), Icons.Default.Calculate)
+                HealthInfoItem(stringResource(R.string.profile_age), stringResource(R.string.profile_age_value, userData?.age?.toString() ?: "-"), Icons.Default.Cake)
+                HealthInfoItem(stringResource(R.string.profile_height), stringResource(R.string.profile_height_value, userData?.height?.toString() ?: "-"), Icons.Default.Height)
+                HealthInfoItem(stringResource(R.string.profile_weight), stringResource(R.string.profile_weight_value, userData?.weight?.toString() ?: "-"), Icons.Default.Scale)
+                HealthInfoItem(stringResource(R.string.profile_bmi), String.format("%.1f", userData?.bmi ?: 0.0), Icons.Default.Calculate)
             }
             
             if (userData?.bloodType != null || userData?.allergy != null) {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                Row(modifier = Modifier.padding(20.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Blood Type", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(userData?.bloodType ?: "-", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = Slate200)
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(), 
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(HalalyticsDimensions.radiusLarge))
+                            .background(EmeraldLight.copy(alpha = 0.1f))
+                            .padding(vertical = 12.dp)
+                    ) {
+                        Text(stringResource(R.string.profile_blood_type), style = MaterialTheme.typography.labelSmall, color = Slate500, fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(userData?.bloodType ?: "-", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, color = Error)
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Allergy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(userData?.allergy ?: "None", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(HalalyticsDimensions.radiusLarge))
+                            .background(TealLight.copy(alpha = 0.15f))
+                            .padding(vertical = 12.dp)
+                    ) {
+                        Text(stringResource(R.string.profile_allergy), style = MaterialTheme.typography.labelSmall, color = Slate500, fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(userData?.allergy ?: stringResource(R.string.profile_allergy_none), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = Teal, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -291,51 +339,135 @@ fun HealthProfileCard(userData: com.example.halalyticscompose.data.model.User?) 
 
 @Composable
 fun HealthInfoItem(label: String, value: String, icon: ImageVector) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Card(
+        modifier = Modifier.width(76.dp),
+        shape = RoundedCornerShape(HalalyticsDimensions.radiusLarge),
+        colors = CardDefaults.cardColors(containerColor = EmeraldLight.copy(alpha = 0.08f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp).fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Emerald.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = Emerald, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = value, 
+                style = MaterialTheme.typography.bodyMedium, 
+                fontWeight = FontWeight.Black,
+                color = Slate900,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = label, 
+                style = MaterialTheme.typography.labelSmall, 
+                color = Slate500,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
 @Composable
 fun MenuSection(title: String, items: List<MenuItem>) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Text(
+            text = title.uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Emerald,
+            letterSpacing = 1.2.sp,
+            modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
+        )
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(2.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(HalalyticsShadows.elevation2, RoundedCornerShape(HalalyticsDimensions.radius2XLarge)),
+            shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column {
                 items.forEachIndexed { index, item ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().clickable { item.onClick() }.padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { item.onClick() }
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
-                            modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(item.color?.copy(alpha = 0.1f) ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(HalalyticsDimensions.radiusMedium))
+                                .background(item.color?.copy(alpha = 0.1f) ?: EmeraldLight.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(item.icon, contentDescription = null, tint = item.color ?: MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                            Icon(
+                                imageVector = item.icon, 
+                                contentDescription = null, 
+                                tint = item.color ?: Emerald, 
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(item.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = item.title, 
+                            modifier = Modifier.weight(1f), 
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Slate900
+                        )
                         
                         if (item.badge != null) {
-                            Badge(containerColor = MaterialTheme.colorScheme.error) { Text(item.badge) }
+                            Badge(
+                                containerColor = Error,
+                                modifier = Modifier.padding(end = 4.dp)
+                            ) { 
+                                Text(
+                                    text = item.badge,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ) 
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                         }
                         
                         if (item.isSwitch) {
-                            Switch(checked = item.switchState, onCheckedChange = { item.onClick() })
+                            Switch(
+                                checked = item.switchState, 
+                                onCheckedChange = { item.onClick() },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = Emerald
+                                )
+                            )
                         } else {
-                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, 
+                                contentDescription = null, 
+                                tint = Slate400, 
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
-                    if (index < items.size - 1) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    if (index < items.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 20.dp), 
+                            color = Slate100
+                        )
+                    }
                 }
             }
         }
@@ -356,35 +488,46 @@ fun ProfileBanner() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(EmeraldLight.copy(alpha = 0.3f), TealLight.copy(alpha = 0.4f))
+                    )
+                )
+                .padding(20.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF2E7D32)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Celebration, null, tint = Color.White)
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Ayo Jadi Kontributor!",
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1B5E20)
-                )
-                Text(
-                    text = "Bantu sesama Muslim menemukan produk Halal.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1B5E20).copy(alpha = 0.7f)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Emerald),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Celebration, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = stringResource(R.string.profile_contributor_title),
+                        fontWeight = FontWeight.Bold,
+                        color = TealDark,
+                        fontSize = 15.sp
+                    )
+                    Text(
+                        text = stringResource(R.string.profile_contributor_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Slate600,
+                        lineHeight = 18.sp
+                    )
+                }
             }
         }
     }

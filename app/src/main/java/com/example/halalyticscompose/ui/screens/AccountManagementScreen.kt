@@ -172,7 +172,7 @@ fun AccountManagementScreen(
             AccountInfoItem(
                 label = "Activity Level",
                 value = userData?.activityLevel ?: "-",
-                icon = Icons.Default.DirectionsRun
+                icon = Icons.AutoMirrored.Filled.DirectionsRun
             )
             
             AccountInfoItem(
@@ -214,16 +214,6 @@ fun AccountManagementScreen(
                             selected = appLanguage == "en",
                             onClick = { viewModel.setAppLanguage("en") },
                             label = { Text("English") }
-                        )
-                        FilterChip(
-                            selected = appLanguage == "ms",
-                            onClick = { viewModel.setAppLanguage("ms") },
-                            label = { Text("Melayu") }
-                        )
-                        FilterChip(
-                            selected = appLanguage == "ar",
-                            onClick = { viewModel.setAppLanguage("ar") },
-                            label = { Text("العربية") }
                         )
                     }
                 }

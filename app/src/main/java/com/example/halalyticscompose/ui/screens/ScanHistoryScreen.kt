@@ -71,6 +71,7 @@ import android.widget.Toast
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import com.example.halalyticscompose.utils.ImageUtils
+import com.example.halalyticscompose.ui.components.*
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -184,7 +185,7 @@ fun ScanHistoryScreen(
                 }
             } else if (filteredHistory.isEmpty()) {
                 item {
-                    EmptyHistoryCard()
+                    EmptyHistoryView(onScan = { navController.navigate("scan") })
                 }
             } else {
                 items(filteredHistory) { item ->
@@ -418,46 +419,4 @@ private fun HistoryCard(item: ScanHistoryItem, onClick: () -> Unit, onDelete: ()
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// EMPTY STATE
-// ═══════════════════════════════════════════════════════════════════
 
-@Composable
-private fun EmptyHistoryCard() {
-    Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.QrCodeScanner,
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(14.dp))
-            Text(stringResource(R.string.history_empty_title), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                stringResource(R.string.history_empty_desc),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 13.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-        }
-    }
-}
