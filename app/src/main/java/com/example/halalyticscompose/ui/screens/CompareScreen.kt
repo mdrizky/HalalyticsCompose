@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,12 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.halalyticscompose.ui.theme.HalalGreen
+import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.viewmodel.CompareViewModel
 import com.example.halalyticscompose.ui.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("DEPRECATION")
 @Composable
 fun CompareScreen(
     navController: NavController,
@@ -37,33 +37,30 @@ fun CompareScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val result by viewModel.comparisonResult.collectAsState()
-    
     val familyProfiles by mainViewModel.familyProfiles.collectAsState()
     val selectedProfile by mainViewModel.selectedFamilyProfile.collectAsState()
 
-    // Redirect to result screen if analysis is finished
     LaunchedEffect(result) {
-        if (result != null) {
-            navController.navigate("comparison_result")
-        }
+        if (result != null) navController.navigate("comparison_result")
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bandingkan Produk", fontWeight = FontWeight.Bold) },
+                title = { Text("Bandingkan Produk", fontWeight = FontWeight.Bold, color = Slate900) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Slate800)
                     }
                 },
                 actions = {
                     if (queue.isNotEmpty()) {
                         TextButton(onClick = { viewModel.clearQueue() }) {
-                            Text("Bersihkan", color = Color.Red)
+                            Text("Bersihkan", color = Error)
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
         bottomBar = {
@@ -71,7 +68,7 @@ fun CompareScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 8.dp,
-                    color = MaterialTheme.colorScheme.surface
+                    color = Color.White
                 ) {
                     Button(
                         onClick = { viewModel.startComparison(selectedProfile?.id) },
@@ -79,14 +76,14 @@ fun CompareScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                             .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = HalalGreen),
-                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Emerald),
+                        shape = RoundedCornerShape(28.dp),
                         enabled = !isLoading
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Icon(Icons.Default.Compare, contentDescription = null)
+                            Icon(Icons.Default.Compare, null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Mulai Perbandingan (${queue.size})", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
@@ -102,21 +99,15 @@ fun CompareScreen(
                 .padding(16.dp)
         ) {
             // Profile Selector
-            Text(
-                text = "Pilih profil kesehatan untuk perbandingan:",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            
-            androidx.compose.foundation.lazy.LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-            ) {
+            Text("Pilih profil kesehatan:", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Slate700)
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                 item {
                     FilterChip(
                         selected = selectedProfile == null,
                         onClick = { mainViewModel.selectFamilyProfile(null) },
-                        label = { Text("Saya") }
+                        label = { Text("Saya") },
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = EmeraldLight.copy(alpha = 0.3f), selectedLabelColor = Emerald)
                     )
                 }
                 items(familyProfiles.size) { index ->
@@ -124,7 +115,8 @@ fun CompareScreen(
                     FilterChip(
                         selected = selectedProfile?.id == profile.id,
                         onClick = { mainViewModel.selectFamilyProfile(profile) },
-                        label = { Text(profile.name) }
+                        label = { Text(profile.name) },
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = EmeraldLight.copy(alpha = 0.3f), selectedLabelColor = Emerald)
                     )
                 }
             }
@@ -132,90 +124,57 @@ fun CompareScreen(
             if (queue.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.CompareArrows,
-                            contentDescription = null,
-                            modifier = Modifier.size(80.dp),
-                            tint = Color.LightGray
-                        )
+                        Icon(Icons.AutoMirrored.Filled.CompareArrows, null, modifier = Modifier.size(80.dp), tint = Slate300)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            "Belum ada produk yang dipilih",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Gray
-                        )
-                        Text(
-                            "Tambahkan produk dari detail produk atau cari barcode.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        Text("Belum ada produk dipilih", style = MaterialTheme.typography.titleMedium, color = Slate600)
+                        Text("Tambahkan dari detail produk atau cari barcode", style = MaterialTheme.typography.bodySmall, color = Slate500)
                         Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            onClick = { navController.navigate("manual_input") },
-                            colors = ButtonDefaults.buttonColors(containerColor = HalalGreen)
-                        ) {
+                        Button(onClick = { navController.navigate("manual_input") }, colors = ButtonDefaults.buttonColors(containerColor = Emerald)) {
                             Text("Cari Produk")
                         }
                     }
                 }
             } else {
-                Text(
-                    text = "Produk Terpilih (${queue.size}/5)",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                Text("Produk Terpilih (${queue.size}/5)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Slate900, modifier = Modifier.padding(bottom = 16.dp))
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(queue) { barcode ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(20.dp),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
                             Row(
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .fillMaxWidth(),
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(Color.LightGray.copy(alpha = 0.3f)),
+                                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(EmeraldLight.copy(alpha = 0.2f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Default.QrCode, contentDescription = null, tint = Color.Gray)
+                                    Icon(Icons.Default.QrCode, null, tint = Emerald, modifier = Modifier.size(28.dp))
                                 }
-                                
                                 Spacer(modifier = Modifier.width(16.dp))
-                                
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = "Produk barcode", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                                    Text(text = barcode, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                    Text("Kode Produk", style = MaterialTheme.typography.labelSmall, color = Slate500)
+                                    Text(barcode, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge, color = Slate900)
                                 }
-                                
                                 IconButton(onClick = { viewModel.removeFromCompare(barcode) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red.copy(alpha = 0.6f))
+                                    Icon(Icons.Default.Delete, null, tint = Error.copy(alpha = 0.7f))
                                 }
                             }
                         }
                     }
-                    
                     if (queue.size < 5) {
                         item {
                             OutlinedButton(
                                 onClick = { navController.navigate("search_hub") },
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray)
+                                shape = RoundedCornerShape(28.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Slate300)
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = null)
+                                Icon(Icons.Default.Add, null, tint = Emerald)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Tambah Produk Lain")
+                                Text("Tambah Produk Lain", color = Slate700)
                             }
                         }
                     }
@@ -226,12 +185,13 @@ fun CompareScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Error.copy(alpha = 0.1f))
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
+                        Icon(Icons.Default.Error, null, tint = Error)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(errorMessage!!, color = Color.Red, fontSize = 14.sp)
+                        Text(errorMessage!!, color = Error, fontSize = 14.sp)
                     }
                 }
             }

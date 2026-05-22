@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -26,11 +27,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import com.example.halalyticscompose.R
+import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.viewmodel.MainViewModel
 import com.example.halalyticscompose.utils.BiometricAuthHelper
 import com.example.halalyticscompose.utils.CrashReporter
-
-// Settings Screen Implementation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,23 +53,23 @@ fun SettingsScreen(
 
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = Slate50,
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
                             stringResource(R.string.settings_title),
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                             fontSize = 18.sp
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = Color.White)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Emerald)
                 )
             }
         ) { paddingValues ->
@@ -84,31 +84,14 @@ fun SettingsScreen(
                 // ── Appearance Section ──
                 SettingsSectionTitle(stringResource(R.string.dark_mode))
                 SettingsCard {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(stringResource(R.string.dark_mode), fontWeight = FontWeight.Medium)
-                        }
-                        Switch(
-                            checked = isDarkMode,
-                            onCheckedChange = { viewModel.toggleDarkMode() }
-                        )
-                    }
+                    SettingsSwitchRow(
+                        title = stringResource(R.string.dark_mode),
+                        icon = Icons.Default.DarkMode,
+                        iconBg = EmeraldLight.copy(alpha = 0.2f),
+                        iconTint = Emerald,
+                        checked = isDarkMode,
+                        onCheckedChange = { viewModel.toggleDarkMode() }
+                    )
                 }
 
                 // ── Language Section ──
@@ -116,7 +99,7 @@ fun SettingsScreen(
                 SettingsCard {
                     Column(modifier = Modifier.padding(8.dp)) {
                         LanguageOption("id", "Indonesia", "🇮🇩", appLanguage) { viewModel.setAppLanguage("id") }
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), color = Slate100, thickness = 1.dp)
                         LanguageOption("en", "English", "🇺🇸", appLanguage) { viewModel.setAppLanguage("en") }
                     }
                 }
@@ -124,31 +107,14 @@ fun SettingsScreen(
                 // ── Notifications Section ──
                 SettingsSectionTitle(stringResource(R.string.notifications))
                 SettingsCard {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(20.dp))
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(stringResource(R.string.notifications), fontWeight = FontWeight.Medium)
-                        }
-                        Switch(
-                            checked = isNotifEnabled,
-                            onCheckedChange = { viewModel.setNotifEnabled(it) }
-                        )
-                    }
+                    SettingsSwitchRow(
+                        title = stringResource(R.string.notifications),
+                        icon = Icons.Default.Notifications,
+                        iconBg = EmeraldLight.copy(alpha = 0.2f),
+                        iconTint = Emerald,
+                        checked = isNotifEnabled,
+                        onCheckedChange = { viewModel.setNotifEnabled(it) }
+                    )
                 }
 
                 // ── Security Section ──
@@ -158,17 +124,17 @@ fun SettingsScreen(
                         SettingsSwitchRow(
                             title = stringResource(R.string.settings_privacy_mode),
                             icon = Icons.Default.Shield,
-                            iconBg = MaterialTheme.colorScheme.tertiaryContainer,
-                            iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            iconBg = EmeraldLight.copy(alpha = 0.2f),
+                            iconTint = Emerald,
                             checked = privacyModeEnabled,
                             onCheckedChange = viewModel::setPrivacyModeEnabled
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), color = Slate100, thickness = 1.dp)
                         SettingsSwitchRow(
                             title = stringResource(R.string.settings_biometric_lock),
                             icon = Icons.Default.Fingerprint,
-                            iconBg = MaterialTheme.colorScheme.primaryContainer,
-                            iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            iconBg = EmeraldLight.copy(alpha = 0.2f),
+                            iconTint = Emerald,
                             checked = biometricLockEnabled,
                             onCheckedChange = { enabled ->
                                 if (!enabled) {
@@ -205,17 +171,17 @@ fun SettingsScreen(
                         biometricNotice?.let {
                             Text(
                                 text = it,
-                                modifier = Modifier.padding(horizontal = 12.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Slate500
                             )
                         }
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), thickness = 0.5.dp)
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), color = Slate100, thickness = 1.dp)
                         SettingsSwitchRow(
                             title = stringResource(R.string.settings_auto_logout),
                             icon = Icons.Default.Timer,
-                            iconBg = MaterialTheme.colorScheme.errorContainer,
-                            iconTint = MaterialTheme.colorScheme.onErrorContainer,
+                            iconBg = EmeraldLight.copy(alpha = 0.2f),
+                            iconTint = Emerald,
                             checked = autoLogoutEnabled,
                             onCheckedChange = viewModel::setAutoLogoutEnabled
                         )
@@ -226,7 +192,7 @@ fun SettingsScreen(
                                 text = stringResource(R.string.settings_timeout_minutes),
                                 modifier = Modifier.padding(horizontal = 12.dp),
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Slate500
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
@@ -239,7 +205,11 @@ fun SettingsScreen(
                                     FilterChip(
                                         selected = autoLogoutMinutes == minutes,
                                         onClick = { viewModel.setAutoLogoutMinutes(minutes) },
-                                        label = { Text("$minutes mnt") }
+                                        label = { Text("$minutes mnt", color = if (autoLogoutMinutes == minutes) Color.White else Slate700) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Emerald,
+                                            containerColor = Slate100
+                                        )
                                     )
                                 }
                             }
@@ -264,15 +234,15 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    .background(EmeraldLight.copy(alpha = 0.2f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.RemoveRedEye, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.RemoveRedEye, contentDescription = null, tint = Emerald, modifier = Modifier.size(20.dp))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(stringResource(R.string.watchlist), fontWeight = FontWeight.Medium)
+                            Text(stringResource(R.string.watchlist), fontWeight = FontWeight.Medium, color = Slate900)
                         }
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Slate400)
                     }
                 }
 
@@ -280,11 +250,11 @@ fun SettingsScreen(
                 SettingsSectionTitle(stringResource(R.string.section_about))
                 SettingsCard {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(stringResource(R.string.settings_app_version), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.settings_app_version), fontWeight = FontWeight.Bold, color = Emerald)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(stringResource(R.string.settings_app_desc), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.settings_app_desc), fontSize = 14.sp, color = Slate600)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.settings_copyright), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        Text(stringResource(R.string.settings_copyright), fontSize = 12.sp, color = Slate400)
                     }
                 }
 
@@ -295,19 +265,19 @@ fun SettingsScreen(
                         if (crashInfo.isNullOrBlank()) {
                             Text(
                                 text = stringResource(R.string.settings_no_crash),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Slate500
                             )
                         } else {
                             Text(
                                 text = stringResource(R.string.settings_last_crash),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = Slate600,
                                 fontSize = 12.sp
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = crashInfo!!.take(650),
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = Slate900,
                                 maxLines = 12
                             )
                             Spacer(modifier = Modifier.height(10.dp))
@@ -317,7 +287,7 @@ fun SettingsScreen(
                                     crashInfo = null
                                 }
                             ) {
-                                Text(stringResource(R.string.settings_clear_crash))
+                                Text(stringResource(R.string.settings_clear_crash), color = Slate700)
                             }
                         }
                     }
@@ -337,8 +307,8 @@ fun SettingsScreen(
 private fun SettingsSwitchRow(
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconBg: Color = MaterialTheme.colorScheme.primaryContainer,
-    iconTint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    iconBg: Color = EmeraldLight.copy(alpha = 0.2f),
+    iconTint: Color = Emerald,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -360,11 +330,12 @@ private fun SettingsSwitchRow(
                 Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Text(title, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+            Text(title, fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Slate900)
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Emerald)
         )
     }
 }
@@ -375,7 +346,7 @@ private fun SettingsSectionTitle(title: String) {
         text = title.uppercase(),
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
+        color = Emerald,
         letterSpacing = 0.5.sp,
         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
     )
@@ -384,10 +355,9 @@ private fun SettingsSectionTitle(title: String) {
 @Composable
 private fun SettingsCard(content: @Composable () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         content()
     }
@@ -404,7 +374,7 @@ private fun LanguageOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onSelect() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -413,12 +383,12 @@ private fun LanguageOption(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(flag, fontSize = 24.sp)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(name, fontWeight = if (code == currentCode) FontWeight.Bold else FontWeight.Normal)
+            Text(name, fontWeight = if (code == currentCode) FontWeight.Bold else FontWeight.Normal, color = Slate900)
         }
         RadioButton(
             selected = code == currentCode,
             onClick = { onSelect() },
-            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+            colors = RadioButtonDefaults.colors(selectedColor = Emerald, unselectedColor = Slate400)
         )
     }
 }
