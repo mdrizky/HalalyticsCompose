@@ -22,11 +22,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -42,12 +45,8 @@ import com.example.halalyticscompose.R
 import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.ui.viewmodel.*
 import com.example.halalyticscompose.utils.ImageUtils
-
 import com.example.halalyticscompose.ui.components.*
 import com.example.halalyticscompose.ui.theme.*
-import com.example.halalyticscompose.ui.components.HealthSummarySection
-import com.example.halalyticscompose.data.model.CategoryItem
-import com.example.halalyticscompose.data.model.HealthArticleItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.rememberScrollState
@@ -75,18 +74,15 @@ fun HomeScreen(
     val isArticlesLoading by articleViewModel.isLoading.collectAsState()
     val unreadCount by notificationViewModel.unreadCount.collectAsState()
     val banners by historyViewModel.banners.collectAsState()
-    
     val recommendedProducts by historyViewModel.recommendedProducts.collectAsState()
     
-    // UI State for All Features Sheet
     var showAllFeaturesSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-
     LaunchedEffect(Unit) {
         authViewModel.loadUserProfile()
-        healthViewModel.refreshHealthData() // Fetch all health related data
+        healthViewModel.refreshHealthData()
         historyViewModel.refreshAll()
         articleViewModel.loadArticles()
         notificationViewModel.loadNotifications()
@@ -96,7 +92,7 @@ fun HomeScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             val locationText = userData?.address?.substringBefore(",") ?: "Batam, Indonesia"
-            GroceryHeader(
+            PremiumHomeHeader(
                 name = name,
                 imageUrl = userData?.image,
                 unreadCount = unreadCount,
@@ -106,7 +102,17 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            PulsatingFAB(onClick = { navController.navigate("health_assistant") })
+            FloatingActionButton(
+                onClick = { navController.navigate("health_assistant") },
+                containerColor = Emerald,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(64.dp)
+                    .shadow(20.dp, CircleShape, spotColor = Emerald.copy(alpha = 0.5f), ambientColor = Emerald.copy(alpha = 0.3f))
+            ) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = "AI Assistant", modifier = Modifier.size(28.dp))
+            }
         }
     ) { innerPadding ->
         LazyColumn(
@@ -115,10 +121,10 @@ fun HomeScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 100.dp)
         ) {
-            // 1. Health Summary
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-                HealthSummarySection(
+                Spacer(modifier = Modifier.height(8.dp))
+                // Premium Health Ring + Summary
+                PremiumHealthRingCard(
                     bmi = bmi,
                     dailyIntake = dailyIntake?.dailyIntake,
                     targets = dailyIntake?.targets,
@@ -128,25 +134,22 @@ fun HomeScreen(
 
             item {
                 MedicalAiDisclaimerBanner(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp),
                     compact = true
                 )
             }
 
-
-            // 3. Promo Banners
             item {
-                Spacer(modifier = Modifier.height(24.dp))
-                AutoSlidingBanner(
+                Spacer(modifier = Modifier.height(16.dp))
+                AutoSlidingBannerImproved(
                     banners = banners,
                     onClick = { banner -> navigateByBannerAction(navController, banner) }
                 )
             }
 
-            // 4. Categories (Dynamic)
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                HomeCategorySection(
+                PremiumCategorySection(
                     categories = categories,
                     onCategoryClick = { categorySlug ->
                         navController.navigate("manual_input?category=$categorySlug")
@@ -154,19 +157,17 @@ fun HomeScreen(
                 )
             }
 
-            // 5. Quick Actions
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                FeatureGridSection(
+                PremiumFeatureGridSection(
                     onActionClick = { route -> navController.navigate(route) },
                     onLainnyaClick = { showAllFeaturesSheet = true }
                 )
             }
 
-            // 6. Recommendations
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                RecommendationSection(
+                PremiumRecommendationSection(
                     products = recommendedProducts,
                     onProductClick = { product -> 
                         navController.navigate("product_detail/${product.barcode}")
@@ -175,10 +176,9 @@ fun HomeScreen(
                 )
             }
 
-            // 6. Health Articles (Moved here per user request)
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                HealthArticlesSection(
+                PremiumHealthArticlesSection(
                     articles = articles,
                     isLoading = isArticlesLoading,
                     onArticleClick = { article -> 
@@ -191,7 +191,6 @@ fun HomeScreen(
             }
         }
 
-        // All Features Bottom Sheet
         if (showAllFeaturesSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showAllFeaturesSheet = false },
@@ -203,9 +202,7 @@ fun HomeScreen(
                     navController = navController,
                     onClose = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                showAllFeaturesSheet = false
-                            }
+                            if (!sheetState.isVisible) showAllFeaturesSheet = false
                         }
                     }
                 )
@@ -215,64 +212,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun AllFeaturesSheetContent(
-    navController: NavController,
-    onClose: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 32.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Semua Fitur",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription = "Close")
-            }
-        }
-
-        Box(modifier = Modifier.heightIn(max = 500.dp)) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-            ) {
-                Text(
-                    "Pilih layanan Halalytics lainnya untuk membantu gaya hidup sehat dan halal Anda.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-                
-                Button(
-                    onClick = {
-                        onClose()
-                        navController.navigate("all_features")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Lihat Semua Layanan")
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun GroceryHeader(
+fun PremiumHomeHeader(
     name: String,
     imageUrl: String?,
     unreadCount: Int,
@@ -283,10 +223,10 @@ fun GroceryHeader(
     val calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val timeGreeting = when (hour) {
-        in 4..10 -> "Good Morning"
-        in 11..14 -> "Good Afternoon"
-        in 15..18 -> "Good Evening"
-        else -> "Good Night"
+        in 4..10 -> "Selamat Pagi ☀️"
+        in 11..14 -> "Selamat Siang 🌤️"
+        in 15..18 -> "Selamat Sore 🌅"
+        else -> "Selamat Malam 🌙"
     }
 
     Box(
@@ -294,31 +234,23 @@ fun GroceryHeader(
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        com.example.halalyticscompose.ui.theme.EmeraldLight.copy(alpha = 0.5f),
-                        Color.White
-                    )
+                    colors = listOf(Emerald, TealDark)
                 )
             )
             .statusBarsPadding()
-            .padding(top = 16.dp, bottom = 8.dp)
+            .padding(top = 24.dp, bottom = 20.dp, start = 20.dp, end = 20.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Profile Avatar & Welcome
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(56.dp)
                             .clip(CircleShape)
-                            .background(com.example.halalyticscompose.ui.theme.TealLight)
                             .border(2.dp, Color.White, CircleShape)
                             .clickable { onProfileClick() }
                     ) {
@@ -334,10 +266,8 @@ fun GroceryHeader(
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = "Profile",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp),
-                                tint = com.example.halalyticscompose.ui.theme.TealDark
+                                modifier = Modifier.fillMaxSize().padding(12.dp),
+                                tint = Color.White
                             )
                         }
                     }
@@ -345,46 +275,46 @@ fun GroceryHeader(
                     Column {
                         Text(
                             text = timeGreeting,
-                            fontSize = 12.sp,
-                            color = com.example.halalyticscompose.ui.theme.Slate500,
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.85f),
                             fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = name,
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = com.example.halalyticscompose.ui.theme.Slate900,
+                            color = Color.White,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                // Notification & Settings
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Location Pill
-                    Box(
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.White.copy(alpha = 0.2f),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
                             Icon(
                                 Icons.Default.LocationOn,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = com.example.halalyticscompose.ui.theme.Emerald
+                                tint = Color.White
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = location ?: "Indonesia",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = com.example.halalyticscompose.ui.theme.Slate700
+                                color = Color.White
                             )
                         }
                     }
@@ -393,15 +323,15 @@ fun GroceryHeader(
                         IconButton(
                             onClick = onNotificationClick,
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color.White)
+                                .background(Color.White.copy(alpha = 0.2f))
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifications",
-                                modifier = Modifier.size(20.dp),
-                                tint = com.example.halalyticscompose.ui.theme.Slate700
+                                modifier = Modifier.size(22.dp),
+                                tint = Color.White
                             )
                         }
                         if (unreadCount > 0) {
@@ -409,13 +339,11 @@ fun GroceryHeader(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .offset(x = 2.dp, y = (-2).dp)
-                                    .size(14.dp)
+                                    .size(12.dp)
                                     .clip(CircleShape)
-                                    .background(com.example.halalyticscompose.ui.theme.Error)
-                                    .border(2.dp, Color.White, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                            }
+                                    .background(Error)
+                                    .border(1.5.dp, Color.White, CircleShape)
+                            )
                         }
                     }
                 }
@@ -424,9 +352,86 @@ fun GroceryHeader(
     }
 }
 
+@Composable
+fun PremiumHealthRingCard(
+    bmi: String,
+    dailyIntake: Int?,
+    targets: Map<String, Int>?,
+    onDetailsClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .shadow(16.dp, RoundedCornerShape(28.dp), spotColor = Emerald.copy(alpha = 0.2f), ambientColor = TealLight.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Ring Progress placeholder (bisa diganti dengan CircularProgressIndicator)
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(EmeraldLight.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = bmi,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Emerald
+                )
+                Text(
+                    text = "BMI",
+                    fontSize = 10.sp,
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
+                    color = Slate500
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Hari ini sehat?",
+                    fontSize = 14.sp,
+                    color = Slate600
+                )
+                Text(
+                    text = "Asupan kalori: ${dailyIntake ?: 0} / ${targets?.get("calories") ?: 2000} kkal",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Slate900
+                )
+                LinearProgressIndicator(
+                    progress = (dailyIntake ?: 0).toFloat() / (targets?.get("calories") ?: 2000).toFloat(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = Emerald,
+                    trackColor = EmeraldLight.copy(alpha = 0.3f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(
+                    onClick = onDetailsClick,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Lihat detail", color = Emerald, fontWeight = FontWeight.Medium)
+                }
+            }
+        }
+    }
+}
+
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
+fun AutoSlidingBannerImproved(banners: List<Banner>, onClick: (Banner?) -> Unit) {
     if (banners.isEmpty()) return
     val pagerState = rememberPagerState(pageCount = { banners.size })
     
@@ -444,9 +449,9 @@ fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(190.dp)
-                .clip(RoundedCornerShape(28.dp))
-                .shadow(8.dp, RoundedCornerShape(28.dp))
+                .height(200.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .shadow(16.dp, RoundedCornerShape(32.dp))
         ) { page ->
             val banner = banners[page]
             Box(modifier = Modifier.fillMaxSize().clickable { onClick(banner) }) {
@@ -456,13 +461,12 @@ fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
                             )
                         )
                         .padding(20.dp),
@@ -472,13 +476,13 @@ fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
                         Text(
                             text = banner.title ?: "",
                             color = Color.White,
-                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = banner.description ?: "",
-                            color = Color.White.copy(alpha = 0.8f),
-                            style = MaterialTheme.typography.bodySmall
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 12.sp
                         )
                     }
                 }
@@ -488,69 +492,54 @@ fun AutoSlidingBanner(banners: List<Banner>, onClick: (Banner?) -> Unit) {
 }
 
 @Composable
-fun HomeCategorySection(categories: List<CategoryItem>, onCategoryClick: (String) -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 0.dp)) {
-        PaddingValues(horizontal = 20.dp).let {
-            Row(modifier = Modifier.padding(it)) {
-                SectionTitle("Kategori Produk", null, null)
-            }
+fun PremiumCategorySection(categories: List<CategoryItem>, onCategoryClick: (String) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = "Kategori Populer",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Slate900
+            )
+            Text(
+                text = "Lihat semua",
+                color = Emerald,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable { }
+            )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (categories.isEmpty()) {
-                items(5) {
-                    CategorySkeleton()
-                }
-            } else {
-                items(categories) { category ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable { onCategoryClick(category.slug) }
+            items(categories) { category ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onCategoryClick(category.slug) }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(EmeraldLight.copy(alpha = 0.4f), TealLight.copy(alpha = 0.4f))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val icon = when(category.icon) {
-                                "kitchen" -> Icons.Default.Restaurant
-                                "herb" -> Icons.Default.Grass
-                                "medication" -> Icons.Default.Medication
-                                "spa" -> Icons.Default.Spa
-                                "cookie" -> Icons.Default.Cookie
-                                "local_drink" -> Icons.Default.LocalDrink
-                                "egg" -> Icons.Default.Egg
-                                "restaurant" -> Icons.Default.Restaurant
-                                "face" -> Icons.Default.Face
-                                "content_cut" -> Icons.Default.ContentCut
-                                "child_care" -> Icons.Default.ChildCare
-                                "bakery_dining" -> Icons.Default.BakeryDining
-                                "pill" -> Icons.Default.Medication
-                                "coffee" -> Icons.Default.Coffee
-                                "eco" -> Icons.Default.Eco
-                                else -> Icons.Default.Category
-                            }
-                            Icon(
-                                icon,
-                                contentDescription = category.name,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
+                        val icon = when(category.icon) {
+                            "kitchen" -> Icons.Default.Restaurant
+                            "herb" -> Icons.Default.Grass
+                            "medication" -> Icons.Default.Medication
+                            "spa" -> Icons.Default.Spa
+                            else -> Icons.Default.Category
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = category.name,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
-                        )
+                        Icon(icon, contentDescription = category.name, tint = Emerald, modifier = Modifier.size(32.dp))
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = category.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Slate700)
                 }
             }
         }
@@ -558,92 +547,28 @@ fun HomeCategorySection(categories: List<CategoryItem>, onCategoryClick: (String
 }
 
 @Composable
-fun CategorySkeleton() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color.Gray.copy(alpha = 0.1f))
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(
-            modifier = Modifier
-                .width(40.dp)
-                .height(10.dp)
-                .background(Color.Gray.copy(alpha = 0.1f))
-        )
-    }
-}
-
-data class CategoryData(val name: String, val icon: ImageVector, val color: Color, val id: String)
-
-@Composable
-fun StatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-@Composable
-fun FeatureGridSection(
-    onActionClick: (String) -> Unit,
-    onLainnyaClick: () -> Unit
-) {
+fun PremiumFeatureGridSection(onActionClick: (String) -> Unit, onLainnyaClick: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        SectionTitle(stringResource(R.string.home_quick_action), null, null)
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Fitur Cerdas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
+        Spacer(modifier = Modifier.height(12.dp))
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(HalalyticsShadows.elevation2, RoundedCornerShape(HalalyticsDimensions.radius2XLarge)),
-            shape = RoundedCornerShape(HalalyticsDimensions.radius2XLarge),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 val features = listOf(
-                    FeatureItemData(stringResource(R.string.feature_scan_halal), Icons.Default.QrCodeScanner, "scan", Emerald),
-                    FeatureItemData(stringResource(R.string.feature_cek_obat), Icons.AutoMirrored.Filled.MenuBook, "drug_interaction", HaramRed),
-                    FeatureItemData(stringResource(R.string.feature_kosmetik), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF7B1FA2)),
-                    FeatureItemData(stringResource(R.string.feature_bpom_id), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF0277BD)),
-                    FeatureItemData(stringResource(R.string.feature_riwayat_id), Icons.Default.History, "history", Teal),
-                    FeatureItemData(stringResource(R.string.feature_bmi_calculator), Icons.Default.Calculate, "bmi_calculator", TealDark),
-                    FeatureItemData(stringResource(R.string.feature_ai_assistant), Icons.Default.SmartToy, "health_assistant", Color(0xFF512DA8)),
-                    FeatureItemData(stringResource(R.string.feature_lainnya_id), Icons.Default.GridView, "all_features", Slate500)
+                    FeatureItemData("Scan Halal", Icons.Default.QrCodeScanner, "scan", Emerald),
+                    FeatureItemData("Cek Obat", Icons.AutoMirrored.Filled.MenuBook, "drug_interaction", Color(0xFFEF4444)),
+                    FeatureItemData("Skincare AI", Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF8B5CF6)),
+                    FeatureItemData("BPOM", Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF3B82F6)),
+                    FeatureItemData("Riwayat", Icons.Default.History, "history", Teal),
+                    FeatureItemData("BMI", Icons.Default.Calculate, "bmi_calculator", Color(0xFFF59E0B)),
+                    FeatureItemData("AI Asisten", Icons.Default.SmartToy, "health_assistant", Color(0xFF6366F1)),
+                    FeatureItemData("Lainnya", Icons.Default.GridView, "all_features", Slate500)
                 )
-
                 features.chunked(4).forEach { row ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                         row.forEach { item ->
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -655,19 +580,13 @@ fun FeatureGridSection(
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(item.color.copy(alpha = 0.12f)),
+                                        .background(item.color.copy(alpha = 0.15f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(item.icon, contentDescription = item.title, tint = item.color, modifier = Modifier.size(26.dp))
+                                    Icon(item.icon, contentDescription = item.title, tint = item.color, modifier = Modifier.size(28.dp))
                                 }
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = item.title,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    textAlign = TextAlign.Center,
-                                    color = Slate900,
-                                    maxLines = 1
-                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(text = item.title, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Slate700, maxLines = 1)
                             }
                         }
                     }
@@ -678,14 +597,17 @@ fun FeatureGridSection(
 }
 
 @Composable
-fun RecommendationSection(
-    products: List<com.example.halalyticscompose.data.model.ProductInfo>,
-    onProductClick: (com.example.halalyticscompose.data.model.ProductInfo) -> Unit,
+fun PremiumRecommendationSection(
+    products: List<ProductInfo>,
+    onProductClick: (ProductInfo) -> Unit,
     onViewAll: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle("Rekomendasi Premium", stringResource(R.string.home_see_all), onViewAll)
-        Spacer(modifier = Modifier.height(16.dp))
+        Row(modifier = Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "Rekomendasi Premium", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
+            Text(text = "Lihat semua", color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onViewAll() })
+        }
+        Spacer(modifier = Modifier.height(12.dp))
         LazyRow(
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -693,39 +615,24 @@ fun RecommendationSection(
             items(products) { product ->
                 Card(
                     modifier = Modifier
-                        .width(160.dp)
+                        .width(170.dp)
                         .clickable { onProductClick(product) }
-                        .shadow(
-                            elevation = com.example.halalyticscompose.ui.theme.HalalyticsShadows.elevation2,
-                            shape = RoundedCornerShape(com.example.halalyticscompose.ui.theme.HalalyticsDimensions.radius2XLarge)
-                        ),
-                    shape = RoundedCornerShape(com.example.halalyticscompose.ui.theme.HalalyticsDimensions.radius2XLarge),
+                        .shadow(12.dp, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column {
-                        Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                        Box(modifier = Modifier.fillMaxWidth().height(130.dp).background(Slate100)) {
                             AsyncImage(
                                 model = ImageUtils.normalizeUrl(product.image) ?: "https://ui-avatars.com/api/?name=${product.name}&background=random",
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-
                         }
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = product.name ?: "Produk",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = product.brand ?: "Local Brand",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = com.example.halalyticscompose.ui.theme.Slate500,
-                                maxLines = 1
-                            )
+                            Text(text = product.name ?: "Produk", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(text = product.brand ?: "Local Brand", fontSize = 12.sp, color = Slate500)
                         }
                     }
                 }
@@ -735,204 +642,69 @@ fun RecommendationSection(
 }
 
 @Composable
-fun HealthArticlesSection(
+fun PremiumHealthArticlesSection(
     articles: List<HealthArticleItem>,
-    isLoading: Boolean = false,
+    isLoading: Boolean,
     onArticleClick: (HealthArticleItem) -> Unit,
     onSeeAllClick: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        SectionTitle(stringResource(R.string.home_health_articles), stringResource(R.string.home_see_all), onSeeAllClick)
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        if (isLoading && articles.isEmpty()) {
-            repeat(3) {
-                ArticleSkeleton()
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        } else if (articles.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Belum ada artikel kesehatan tersedia.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text = "Artikel Kesehatan", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
+            Text(text = "Lihat semua", color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onSeeAllClick() })
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        if (isLoading) {
+            repeat(2) { ArticleSkeleton() }
         } else {
-            articles.take(8).forEach { article ->
-                ArticleCard(article = article, onClick = { onArticleClick(article) })
-                Spacer(modifier = Modifier.height(12.dp))
+            articles.take(3).forEach { article ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .clickable { onArticleClick(article) },
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(
+                            model = ImageUtils.normalizeUrl(article.imageUrl),
+                            contentDescription = null,
+                            modifier = Modifier.size(70.dp).clip(RoundedCornerShape(16.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = article.category ?: "Kesehatan", fontSize = 11.sp, color = Emerald, fontWeight = FontWeight.Bold)
+                            Text(text = article.title, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun ArticleSkeleton() {
-    val infiniteTransition = rememberInfiniteTransition()
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(1.dp)
-    ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(80.dp).clip(RoundedCornerShape(12.dp)).background(Color.LightGray.copy(alpha = alpha)))
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Box(modifier = Modifier.width(60.dp).height(10.dp).background(Color.LightGray.copy(alpha = alpha)))
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.fillMaxWidth().height(16.dp).background(Color.LightGray.copy(alpha = alpha)))
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.width(150.dp).height(16.dp).background(Color.LightGray.copy(alpha = alpha)))
-            }
+fun AllFeaturesSheetContent(navController: NavController, onClose: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Semua Fitur", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            IconButton(onClick = onClose) { Icon(Icons.Default.Close, contentDescription = "Close") }
         }
-    }
-}
-
-@Composable
-fun ArticleCard(article: HealthArticleItem, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(1.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Button(
+            onClick = { onClose(); navController.navigate("all_features") },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Emerald)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                AsyncImage(
-                    model = ImageUtils.normalizeUrl(article.imageUrl),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = article.category ?: "Kesehatan",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = article.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text("Lihat Semua Layanan", color = Color.White)
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
-@Composable
-fun SectionTitle(title: String, action: String?, onAction: (() -> Unit)?) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        if (action != null && onAction != null) {
-            Text(
-                text = action,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onAction() }
-            )
-        }
-    }
-}
-
-
-@Composable
-fun PulsatingFAB(onClick: () -> Unit) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-    FloatingActionButton(
-        onClick = onClick,
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-        shape = CircleShape,
-        modifier = Modifier.scale(scale)
-    ) {
-        Icon(Icons.Default.AutoAwesome, contentDescription = "AI Assistant")
-    }
-}
-
-@Composable
-fun AdminDashboardCard(onNavigate: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clickable { onNavigate() },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.AdminPanelSettings, null, tint = MaterialTheme.colorScheme.onPrimary)
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Admin Control Center", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                Text("Monitor app activity & products", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f))
-            }
-            Icon(Icons.AutoMirrored.Filled.ArrowForwardIos, null, modifier = Modifier.size(16.dp))
-        }
-    }
-}
+data class FeatureItemData(val title: String, val icon: ImageVector, val route: String, val color: Color)
 
 private fun navigateByBannerAction(navController: NavController, banner: Banner?) {
     val route = when (banner?.action_type) {
@@ -942,5 +714,3 @@ private fun navigateByBannerAction(navController: NavController, banner: Banner?
     }
     if (!route.isNullOrBlank()) navController.navigate(route)
 }
-
-data class FeatureItemData(val title: String, val icon: ImageVector, val route: String, val color: Color)
