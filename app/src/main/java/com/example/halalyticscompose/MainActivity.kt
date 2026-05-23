@@ -484,8 +484,7 @@ class MainActivity : FragmentActivity() {
                     composable("scan") {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ScanScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
+                                navController = navController
                             )
                         }
                     }

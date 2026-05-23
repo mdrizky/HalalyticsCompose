@@ -38,6 +38,7 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
 import com.example.halalyticscompose.data.model.LoginRequest
+import com.example.halalyticscompose.data.model.LoginResponse
 import com.example.halalyticscompose.BuildConfig
 import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
 import com.example.halalyticscompose.utils.RoleHelper
@@ -57,7 +58,7 @@ fun LoginScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    val navigateAfterLogin: () -> Unit = {
+    val navigateAfterLogin: (LoginResponse) -> Unit = { response ->
         val sm = SessionManager.getInstance(context)
         val dest = RoleHelper.homeRoute(sm.getRole())
         navController.navigate(dest) { popUpTo("login") { inclusive = true } }
@@ -66,7 +67,7 @@ fun LoginScreen(
     val facebookCallbackManager = LocalFacebookCallbackManager.current
     DisposableEffect(facebookCallbackManager) {
         val fbCallback = object : FacebookCallback<LoginResult> {
-            override fun onSuccess(result: LoginResult) { viewModel.loginWithFacebook(result.accessToken.token) { navigateAfterLogin() } }
+            override fun onSuccess(result: LoginResult) { viewModel.loginWithFacebook(result.accessToken.token) { response -> navigateAfterLogin(response) } }
             override fun onCancel() { Log.d("LoginScreen", "Facebook cancelled") }
             override fun onError(error: FacebookException) { Log.e("LoginScreen", "Facebook error", error) }
         }
@@ -79,7 +80,7 @@ fun LoginScreen(
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
                 val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-                account?.idToken?.let { viewModel.loginWithGoogle(it) { navigateAfterLogin() } }
+                account?.idToken?.let { viewModel.loginWithGoogle(it) { response -> navigateAfterLogin(response) } }
             } catch (e: Exception) { Log.e("LoginScreen", "Google sign in failed", e) }
         }
     }
@@ -102,7 +103,7 @@ fun LoginScreen(
                     OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) { Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null) } })
                     if (!errorMessage.isNullOrEmpty()) Text(errorMessage!!, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = { viewModel.login(LoginRequest(email = username, password = password), onSuccess = navigateAfterLogin) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Emerald)) { Text("Masuk", color = Color.White, fontWeight = FontWeight.Bold) }
+                    Button(onClick = { viewModel.login(LoginRequest(email = username, password = password), onSuccess = { response -> navigateAfterLogin(response) }) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Emerald)) { Text("Masuk", color = Color.White, fontWeight = FontWeight.Bold) }
                     Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         TextButton(onClick = { navController.navigate("forgot_password") }) { Text("Lupa password?", color = Teal) }
                         TextButton(onClick = { navController.navigate("register") }) { Text("Buat akun", color = Emerald) }

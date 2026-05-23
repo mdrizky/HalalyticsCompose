@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -175,7 +176,10 @@ fun ScanScreen(
                 Box(
                     modifier = Modifier
                         .size(width = 280.dp, height = if (selectedTab == 0) 180.dp else 220.dp)
-                        .border(2.dp, Emerald.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                        .border(
+                            BorderStroke(2.dp, Emerald.copy(alpha = 0.5f)),
+                            RoundedCornerShape(24.dp)
+                        )
                 ) {
                     CornerBracket(Alignment.TopStart)
                     CornerBracket(Alignment.TopEnd)

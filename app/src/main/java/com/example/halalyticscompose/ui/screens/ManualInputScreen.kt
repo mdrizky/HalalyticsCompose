@@ -105,16 +105,13 @@ fun ManualInputScreen(
     }
 
     val categories = listOf(
-            ManualCategoryItem("Makanan", Icons.Default.Restaurant, Color(0xFFE8F5E9), Color(0xFF2E7D32)),
-            ManualCategoryItem("Minuman", Icons.Default.LocalDrink, Color(0xFFE3F2FD), Color(0xFF1565C0)),
-            ManualCategoryItem("Obat", Icons.Default.Medication, Color(0xFFFFF3E0), Color(0xFFE65100)),
-            ManualCategoryItem("Kosmetik", Icons.Default.Face, Color(0xFFFCE4EC), Color(0xFFAD1457)),
-            ManualCategoryItem("Snack", Icons.Default.Cookie, Color(0xFFF3E5F5), Color(0xFF7B1FA2)),
-            ManualCategoryItem("Susu", Icons.Default.LocalCafe, Color(0xFFE0F7FA), Color(0xFF00838F))
-        )
-
-        )
-    }
+        ManualCategoryItem("Makanan", Icons.Default.Restaurant, Color(0xFFE8F5E9), Color(0xFF2E7D32)),
+        ManualCategoryItem("Minuman", Icons.Default.LocalDrink, Color(0xFFE3F2FD), Color(0xFF1565C0)),
+        ManualCategoryItem("Obat", Icons.Default.Medication, Color(0xFFFFF3E0), Color(0xFFE65100)),
+        ManualCategoryItem("Kosmetik", Icons.Default.Face, Color(0xFFFCE4EC), Color(0xFFAD1457)),
+        ManualCategoryItem("Snack", Icons.Default.Cookie, Color(0xFFF3E5F5), Color(0xFF7B1FA2)),
+        ManualCategoryItem("Susu", Icons.Default.LocalCafe, Color(0xFFE0F7FA), Color(0xFF00838F))
+    )
 
     Column(
         modifier = Modifier
