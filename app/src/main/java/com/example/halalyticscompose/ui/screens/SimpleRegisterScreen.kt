@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.halalyticscompose.R
+import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
+import com.example.halalyticscompose.data.model.RegisterRequest
 import com.example.halalyticscompose.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,24 +62,67 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = { Text("Konfirmasi Password") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
+                    
                     var bloodTypeExpanded by remember { mutableStateOf(false) }
                     ExposedDropdownMenuBox(expanded = bloodTypeExpanded, onExpandedChange = { bloodTypeExpanded = it }) {
-                        OutlinedTextField(value = bloodType, onValueChange = {}, readOnly = true, label = { Text("Golongan Darah") }, trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(16.dp))
+                        OutlinedTextField(
+                            value = bloodType, 
+                            onValueChange = {}, 
+                            readOnly = true, 
+                            label = { Text("Golongan Darah") }, 
+                            trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, 
+                            modifier = Modifier.fillMaxWidth().menuAnchor(), 
+                            shape = RoundedCornerShape(16.dp)
+                        )
                         DropdownMenu(expanded = bloodTypeExpanded, onDismissRequest = { bloodTypeExpanded = false }) {
                             listOf("A", "B", "AB", "O").forEach { DropdownMenuItem(text = { Text(it) }, onClick = { bloodType = it; bloodTypeExpanded = false }) }
                         }
                     }
+                    
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(value = allergy, onValueChange = { allergy = it }, label = { Text("Alergi") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = { Text("Riwayat Penyakit") }, modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(16.dp))
+                    
                     if (errorMessage.isNotEmpty()) Text(errorMessage, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                    
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = {
-                        if (fullName.isBlank() || username.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() || bloodType.isBlank()) errorMessage = "Semua field harus diisi"
-                        else if (password != confirmPassword) errorMessage = "Password tidak cocok"
-                        else viewModel.register(RegisterRequest(fullName = fullName, username = username, email = email, password = password, passwordConfirmation = confirmPassword, bloodType = bloodType, allergy = allergy, medicalHistory = medicalHistory), onSuccess = { navController.navigate("login") })
-                    }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Emerald)) { Text("Daftar", color = Color.White, fontWeight = FontWeight.Bold) }
+                    
+                    Button(
+                        onClick = {
+                            if (fullName.isBlank() || username.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() || bloodType.isBlank()) {
+                                errorMessage = "Semua field harus diisi"
+                            } else if (password != confirmPassword) {
+                                errorMessage = "Password tidak cocok"
+                            } else {
+                                viewModel.register(
+                                    RegisterRequest(
+                                        fullName = fullName, 
+                                        username = username, 
+                                        email = email, 
+                                        password = password, 
+                                        passwordConfirmation = confirmPassword, 
+                                        bloodType = bloodType, 
+                                        allergy = allergy, 
+                                        medicalHistory = medicalHistory
+                                    ),
+                                    onSuccess = {
+                                        navController.navigate("login?reg_user=$username&reg_success=1") {
+                                            popUpTo("register") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+                        }, 
+                        modifier = Modifier.fillMaxWidth().height(52.dp), 
+                        shape = RoundedCornerShape(28.dp), 
+                        colors = ButtonDefaults.buttonColors(containerColor = Emerald),
+                        enabled = !isLoading
+                    ) { 
+                        if (isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        else Text("Daftar", color = Color.White, fontWeight = FontWeight.Bold) 
+                    }
+                    
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         Text("Sudah punya akun? ", color = Slate500)

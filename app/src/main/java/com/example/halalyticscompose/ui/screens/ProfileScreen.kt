@@ -245,7 +245,7 @@ fun PremiumHealthProfileCard(userData: com.example.halalyticscompose.data.model.
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("Alergi", fontSize = 12.sp, color = Slate500)
-                        Text(userData?.allogy ?: "Tidak ada", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Teal)
+                        Text(userData?.allergy ?: "Tidak ada", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Teal)
                     }
                 }
             }

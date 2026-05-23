@@ -1278,8 +1278,8 @@ class MainActivity : FragmentActivity() {
 
                     composable("ocr_scan") {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
-                            OcrScanScreen(
-                                onNavigateBack = { navController.popBackStack() }
+                            EnhancedOCRScreen(
+                                navController = navController
                             )
                         }
                     }

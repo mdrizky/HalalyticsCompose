@@ -355,8 +355,8 @@ fun PremiumHomeHeader(
 @Composable
 fun PremiumHealthRingCard(
     bmi: String,
-    dailyIntake: Int?,
-    targets: Map<String, Int>?,
+    dailyIntake: DailyIntakeData?,
+    targets: IntakeTargets?,
     onDetailsClick: () -> Unit
 ) {
     Card(
@@ -373,7 +373,7 @@ fun PremiumHealthRingCard(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ring Progress placeholder (bisa diganti dengan CircularProgressIndicator)
+            // Ring Progress placeholder
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -402,28 +402,21 @@ fun PremiumHealthRingCard(
                     color = Slate600
                 )
                 Text(
-                    text = "Asupan kalori: ${dailyIntake ?: 0} / ${targets?.get("calories") ?: 2000} kkal",
+                    text = "Asupan kalori: ${dailyIntake?.totalCalories ?: 0} / ${targets?.calorieLimit ?: 2000} kkal",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Slate900
                 )
                 LinearProgressIndicator(
-                    progress = (dailyIntake ?: 0).toFloat() / (targets?.get("calories") ?: 2000).toFloat(),
+                    progress = { (dailyIntake?.totalCalories ?: 0).toFloat() / (targets?.calorieLimit ?: 2000).toFloat() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
                         .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
+                        .clip(CircleShape),
                     color = Emerald,
                     trackColor = EmeraldLight.copy(alpha = 0.3f)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextButton(
-                    onClick = onDetailsClick,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Lihat detail", color = Emerald, fontWeight = FontWeight.Medium)
-                }
             }
         }
     }
@@ -492,7 +485,7 @@ fun AutoSlidingBannerImproved(banners: List<Banner>, onClick: (Banner?) -> Unit)
 }
 
 @Composable
-fun PremiumCategorySection(categories: List<CategoryItem>, onCategoryClick: (String) -> Unit) {
+fun PremiumCategorySection(categories: List<com.example.halalyticscompose.data.model.CategoryItem>, onCategoryClick: (String) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
@@ -541,6 +534,27 @@ fun PremiumCategorySection(categories: List<CategoryItem>, onCategoryClick: (Str
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = category.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Slate700)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ArticleSkeleton() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Slate100.copy(alpha = 0.5f))
+    ) {
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(70.dp).clip(RoundedCornerShape(16.dp)).background(Slate200))
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Box(modifier = Modifier.width(60.dp).height(12.dp).background(Slate200))
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.fillMaxWidth(0.8f).height(16.dp).background(Slate200))
             }
         }
     }

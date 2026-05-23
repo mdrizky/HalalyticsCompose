@@ -36,6 +36,9 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
+import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
+import com.example.halalyticscompose.data.model.LoginRequest
+import com.example.halalyticscompose.BuildConfig
 import com.example.halalyticscompose.ui.LocalFacebookCallbackManager
 import com.example.halalyticscompose.utils.RoleHelper
 import com.example.halalyticscompose.utils.SessionManager

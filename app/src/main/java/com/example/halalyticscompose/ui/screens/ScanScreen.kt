@@ -35,148 +35,107 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
+import androidx.compose.ui.draw.shadow
 import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.viewmodel.ScanViewModel
-import com.example.halalyticscompose.utils.RetailBarcodeAnalyzer
-import com.example.halalyticscompose.utils.TextRecognitionAnalyzer
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
     navController: NavController,
-    viewModel: ScanViewModel = hiltViewModel(),
-    authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = hiltViewModel(),
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    viewModel: ScanViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    var selectedTab by remember { mutableStateOf(0) } // 0 = Barcode, 1 = Ingredients
-    var isScanning by remember { mutableStateOf(false) }
-    var scannedCode by remember { mutableStateOf("") }
-    var showFlash by remember { mutableStateOf(false) }
-    
     var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        )
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
-
+    
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasCameraPermission = granted
-        }
-    )
-
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+    }
+    
     LaunchedEffect(Unit) {
         if (!hasCameraPermission) {
             launcher.launch(Manifest.permission.CAMERA)
         }
     }
     
-    LaunchedEffect(Unit) {
-        isScanning = false
-        scannedCode = ""
-        showFlash = false
-        selectedTab = 0
-    }
-    
-    val infiniteTransition = rememberInfiniteTransition()
-    val scanLinePosition by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Top Bar Premium
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                shadowElevation = 4.dp
+    var selectedTab by remember { mutableIntStateOf(0) }
+    var scannedCode by remember { mutableStateOf("") }
+    var isScanning by remember { mutableStateOf(true) }
+    var showFlash by remember { mutableStateOf(false) }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showFlash = !showFlash },
+                containerColor = if (showFlash) Emerald else Color.White,
+                contentColor = if (showFlash) Color.White else Slate700,
+                shape = CircleShape,
+                modifier = Modifier.padding(bottom = 80.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Slate800)
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Pemindaian Cerdas",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                        val userData by authViewModel.userData.collectAsState()
-                        val userName = userData?.fullName ?: userData?.username ?: ""
-                        if (userName.isNotEmpty()) {
-                            Text(
-                                text = userName,
-                                fontSize = 11.sp,
-                                color = Emerald,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                    IconButton(onClick = { showFlash = !showFlash }) {
-                        Icon(
-                            if (showFlash) Icons.Filled.FlashOn else Icons.Outlined.FlashOff,
-                            contentDescription = "Flash",
-                            tint = if (showFlash) Emerald else Slate400
-                        )
-                    }
+                Icon(if (showFlash) Icons.Default.FlashOn else Icons.Default.FlashOff, "Flash")
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Brush.verticalGradient(listOf(Slate50, Color.White))),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Tab Selector
+            Surface(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White,
+                shadowElevation = 8.dp
+            ) {
+                Row(modifier = Modifier.padding(6.dp)) {
+                    PremiumTabButton(
+                        text = "Barcode",
+                        icon = Icons.Default.QrCodeScanner,
+                        isSelected = selectedTab == 0,
+                        onClick = { selectedTab = 0 }
+                    )
+                    PremiumTabButton(
+                        text = "Komposisi",
+                        icon = Icons.Default.TextFields,
+                        isSelected = selectedTab == 1,
+                        onClick = { selectedTab = 1 }
+                    )
                 }
             }
             
-            // Tab Switcher Premium
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                PremiumTabButton(
-                    text = "Barcode",
-                    icon = Icons.Outlined.QrCodeScanner,
-                    isSelected = selectedTab == 0,
-                    onClick = { selectedTab = 0 }
-                )
-                PremiumTabButton(
-                    text = "OCR Teks",
-                    icon = Icons.Outlined.CameraAlt,
-                    isSelected = selectedTab == 1,
-                    onClick = {
-                        selectedTab = 1
-                        navController.navigate("enhanced_ocr")
-                    }
-                )
-            }
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = if (selectedTab == 0) "Scan Barcode Produk" else "Scan Daftar Komposisi",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Slate900
+            )
+            
+            Text(
+                text = if (selectedTab == 0) "Arahkan kamera ke barcode di kemasan" else "Arahkan kamera ke tulisan komposisi",
+                fontSize = 14.sp,
+                color = Slate500,
+                modifier = Modifier.padding(top = 4.dp)
+            )
             
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -207,161 +166,130 @@ fun ScanScreen(
                         showFlash = showFlash
                     )
                 } else if (!hasCameraPermission) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Outlined.CameraAlt, null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(56.dp))
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Izin kamera diperlukan", color = Color.White, fontSize = 16.sp)
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }, colors = ButtonDefaults.buttonColors(containerColor = Emerald)) {
-                                Text("Berikan Izin")
-                            }
-                        }
-                    }
-                } else {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(if (selectedTab == 0) Icons.Outlined.QrCodeScanner else Icons.Outlined.Description, null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(56.dp))
-                            Text("Tekan tombol Mulai", color = Color.White.copy(alpha = 0.7f), fontSize = 14.sp)
-                        }
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Izin kamera ditolak", color = Color.White)
                     }
                 }
                 
-                // Overlay Frame & Scan Line
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (isScanning) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .padding(16.dp)
-                                .background(Error, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(modifier = Modifier.size(6.dp).background(Color.White, CircleShape))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("LIVE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            }
-                        }
-                    }
+                // Scanner Frame Overlay
+                Box(
+                    modifier = Modifier
+                        .size(width = 280.dp, height = if (selectedTab == 0) 180.dp else 220.dp)
+                        .border(2.dp, Emerald.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                ) {
+                    CornerBracket(Alignment.TopStart)
+                    CornerBracket(Alignment.TopEnd)
+                    CornerBracket(Alignment.BottomStart)
+                    CornerBracket(Alignment.BottomEnd)
                     
-                    Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
-                        if (isScanning) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(3.dp)
-                                    .offset(y = (scanLinePosition * 220 - 110).dp)
-                                    .background(Brush.horizontalGradient(listOf(Color.Transparent, Emerald, Emerald, Color.Transparent)))
-                            )
-                        }
-                        CornerBracket(Alignment.TopStart)
-                        CornerBracket(Alignment.TopEnd)
-                        CornerBracket(Alignment.BottomStart)
-                        CornerBracket(Alignment.BottomEnd)
-                        
-                        if (!isScanning) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(if (selectedTab == 0) Icons.Outlined.QrCodeScanner else Icons.Outlined.Description, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(48.dp))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = if (selectedTab == 0) "Arahkan kamera ke barcode" else "Arahkan ke teks komposisi",
-                                    fontSize = 13.sp,
-                                    color = Color.White.copy(alpha = 0.8f),
-                                    textAlign = TextAlign.Center
+                    // Scanning line animation
+                    val infiniteTransition = rememberInfiniteTransition(label = "")
+                    val offset by infiniteTransition.animateFloat(
+                        initialValue = 0.1f,
+                        targetValue = 0.9f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ), label = ""
+                    )
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.005f)
+                            .align(Alignment.TopCenter)
+                            .offset(y = 180.dp * offset)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color.Transparent, Emerald, Color.Transparent)
                                 )
-                            }
-                        }
-                    }
+                            )
+                    )
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
-            // Bottom Buttons
+            // Manual Input helper
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val galleryLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.GetContent()
-                ) { uri ->
-                    uri?.let {
-                        try {
-                            val image = InputImage.fromFilePath(context, it)
-                            val scanner = BarcodeScanning.getClient()
-                            scanner.process(image)
-                                .addOnSuccessListener { barcodes ->
-                                    val barcode = barcodes.firstOrNull()?.rawValue
-                                    if (barcode != null) {
-                                        scannedCode = barcode
-                                        navController.navigate("product_detail/$barcode")
-                                    } else {
-                                        android.widget.Toast.makeText(context, "Tidak ada barcode terdeteksi", android.widget.Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                                .addOnFailureListener {
-                                    android.widget.Toast.makeText(context, "Gagal membaca gambar", android.widget.Toast.LENGTH_SHORT).show()
-                                }
-                        } catch (e: Exception) {
-                            android.widget.Toast.makeText(context, "Error loading image", android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-                
-                OutlinedButton(
-                    onClick = { galleryLauncher.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    border = BorderStroke(1.dp, Slate300),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Slate700)
-                ) {
-                    Icon(Icons.Outlined.PhotoLibrary, null, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Pilih dari Galeri", fontSize = 14.sp)
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Button(
-                    onClick = { isScanning = true; scannedCode = "" },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Emerald),
-                    elevation = ButtonDefaults.buttonElevation(8.dp)
-                ) {
-                    Icon(if (selectedTab == 0) Icons.Outlined.QrCodeScanner else Icons.Outlined.CameraAlt, null, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("Mulai Scan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
                 Text(
-                    text = "Masukkan manual",
-                    fontSize = 13.sp,
+                    text = "Gagal scan barcode? Input Manual",
+                    fontSize = 14.sp,
                     color = Emerald,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.clickable { navController.navigate("manual_input") }
                 )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Text(
-                    text = "Laporkan produk tidak ditemukan",
-                    fontSize = 12.sp,
-                    color = Slate500,
-                    modifier = Modifier.clickable { navController.navigate("product_request/unknown") }
-                )
             }
         }
     }
+}
+
+@Composable
+fun CameraPreview(
+    scanMode: Int,
+    onResultDetected: (String) -> Unit,
+    showFlash: Boolean
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    val executor = remember { Executors.newSingleThreadExecutor() }
+
+    AndroidView(
+        factory = { ctx ->
+            val previewView = PreviewView(ctx)
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(executor) { imageProxy ->
+                    val mediaImage = imageProxy.image
+                    if (mediaImage != null) {
+                        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                        if (scanMode == 0) { // Barcode
+                            val scanner = BarcodeScanning.getClient()
+                            scanner.process(image)
+                                .addOnSuccessListener { barcodes ->
+                                    for (barcode in barcodes) {
+                                        barcode.rawValue?.let { onResultDetected(it) }
+                                    }
+                                }
+                                .addOnCompleteListener { imageProxy.close() }
+                        } else { // Text/OCR
+                             // We could add basic OCR here if needed, or just close
+                             imageProxy.close()
+                        }
+                    } else {
+                        imageProxy.close()
+                    }
+                }
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                try {
+                    cameraProvider.unbindAll()
+                    val camera = cameraProvider.bindToLifecycle(
+                        lifecycleOwner, cameraSelector, preview, imageAnalysis
+                    )
+                    camera.cameraControl.enableTorch(showFlash)
+                } catch (exc: Exception) {
+                    android.util.Log.e("CameraPreview", "Binding failed", exc)
+                }
+            }, ContextCompat.getMainExecutor(ctx))
+            previewView
+        },
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable

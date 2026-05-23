@@ -1,9 +1,7 @@
 package com.example.halalyticscompose.ui.screens
 
 import android.Manifest
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
@@ -43,7 +41,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import java.util.concurrent.Executors
-import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -100,8 +97,10 @@ fun OcrScanScreen(
         }
 
         // Center instruction
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text("Arahkan ke daftar komposisi", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(20.dp)).padding(horizontal = 16.dp, vertical = 6.dp))
+        if (!uiState.rawText.isNotBlank() && uiState.detectedIngredients.isEmpty()) {
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text("Arahkan ke daftar komposisi", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(20.dp)).padding(horizontal = 16.dp, vertical = 6.dp))
+            }
         }
 
         // Scanner Frame
@@ -134,6 +133,62 @@ fun OcrScanScreen(
 }
 
 @Composable
+fun CameraPreviewWithOcr(
+    onTextDetected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    val executor = remember { Executors.newSingleThreadExecutor() }
+
+    AndroidView(
+        factory = { ctx ->
+            val previewView = PreviewView(ctx)
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+
+                imageAnalysis.setAnalyzer(executor) { imageProxy ->
+                    val mediaImage = imageProxy.image
+                    if (mediaImage != null) {
+                        val image = com.google.mlkit.vision.common.InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                        val recognizer = com.google.mlkit.vision.text.TextRecognition.getClient(com.google.mlkit.vision.text.latin.TextRecognizerOptions.DEFAULT_OPTIONS)
+                        recognizer.process(image)
+                            .addOnSuccessListener { visionText ->
+                                if (visionText.text.isNotBlank()) {
+                                    onTextDetected(visionText.text)
+                                }
+                            }
+                            .addOnCompleteListener { imageProxy.close() }
+                    } else {
+                        imageProxy.close()
+                    }
+                }
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                try {
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner, cameraSelector, preview, imageAnalysis
+                    )
+                } catch (exc: Exception) {
+                    android.util.Log.e("OcrCamera", "Use case binding failed", exc)
+                }
+            }, ContextCompat.getMainExecutor(ctx))
+            previewView
+        },
+        modifier = modifier.fillMaxSize()
+    )
+}
+
+@Composable
 fun ScannerFrameOverlay(hasWarning: Boolean, hasDanger: Boolean) {
     val borderColor = when {
         hasDanger -> Error
@@ -146,12 +201,6 @@ fun ScannerFrameOverlay(hasWarning: Boolean, hasDanger: Boolean) {
                 .size(width = 300.dp, height = 190.dp)
                 .border(3.dp, borderColor, RoundedCornerShape(24.dp))
         )
-        // Corner accents
-        val cornerSize = 24.dp
-        val lineWidth = 3.dp
-        Box(modifier = Modifier.align(Alignment.TopStart).offset(x = (-8).dp, y = (-8).dp).size(cornerSize, lineWidth).background(borderColor, RoundedCornerShape(topStart = 8.dp)))
-        Box(modifier = Modifier.align(Alignment.TopStart).offset(x = (-8).dp, y = (-8).dp).size(lineWidth, cornerSize).background(borderColor, RoundedCornerShape(topStart = 8.dp)))
-        // ... (repeat for other corners)
     }
 }
 

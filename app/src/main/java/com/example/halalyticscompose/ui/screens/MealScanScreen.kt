@@ -8,6 +8,8 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -146,4 +148,44 @@ fun NutritionItem(label: String, value: String, unit: String) {
         Text(label, fontSize = 12.sp, color = Emerald)
     }
 }
-// Fungsi takePhoto, imageProxyToBitmap, saveBitmapToFile tetap sama seperti aslinya
+private fun takePhoto(
+    context: android.content.Context,
+    controller: androidx.camera.view.LifecycleCameraController,
+    onPhotoTaken: (android.graphics.Bitmap) -> Unit
+) {
+    controller.takePicture(
+        androidx.core.content.ContextCompat.getMainExecutor(context),
+        object : androidx.camera.core.ImageCapture.OnImageCapturedCallback() {
+            override fun onCaptureSuccess(image: androidx.camera.core.ImageProxy) {
+                super.onCaptureSuccess(image)
+                val matrix = android.graphics.Matrix().apply {
+                    postRotate(image.imageInfo.rotationDegrees.toFloat())
+                }
+
+                val buffer = image.planes[0].buffer
+                val bytes = ByteArray(buffer.capacity())
+                buffer.get(bytes)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+                val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+                    bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+                )
+                onPhotoTaken(rotatedBitmap)
+                image.close()
+            }
+
+            override fun onError(exception: androidx.camera.core.ImageCaptureException) {
+                super.onError(exception)
+                android.util.Log.e("Camera", "Couldn't take photo: ", exception)
+            }
+        }
+    )
+}
+
+private fun saveBitmapToFile(context: android.content.Context, bitmap: android.graphics.Bitmap): java.io.File {
+    val file = java.io.File(context.cacheDir, "meal_scan_${System.currentTimeMillis()}.jpg")
+    java.io.FileOutputStream(file).use { out ->
+        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+    }
+    return file
+}

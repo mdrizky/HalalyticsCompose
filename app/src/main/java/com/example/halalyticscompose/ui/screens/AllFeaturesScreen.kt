@@ -57,7 +57,7 @@ fun AllFeaturesScreen(navController: NavController) {
         FeatureActionItem("Donasi", Icons.Default.VolunteerActivism, "donations"),
         FeatureActionItem("Komunitas", Icons.Default.Groups, "community_hub"),
         FeatureActionItem("Kartu Sehat", Icons.Default.VerifiedUser, "health_pass"),
-        FeatureActionItem("Darurat", Icons.Default.LocalHospital, "emergency_p3k", color = Error),
+        FeatureActionItem("Darurat", Icons.Default.LocalHospital, "emergency_p3k", iconTint = Error),
         FeatureActionItem("Laporkan", Icons.Default.Warning, "report_issue/0/General"),
         FeatureActionItem("Pengingat Obat", Icons.Default.Alarm, "medicine_reminders")
     )
