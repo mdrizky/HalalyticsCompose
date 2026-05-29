@@ -20,7 +20,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import com.example.halalyticscompose.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -40,19 +43,35 @@ fun BMICalculatorScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val userData by authViewModel.userData.collectAsState()
+    val isLoadingAi by authViewModel.isLoading.collectAsState()
+
     var weightInput by remember { mutableStateOf("") }
     var heightInput by remember { mutableStateOf("") }
     var bmiResult by remember { mutableStateOf<Float?>(null) }
     var bmiCategory by remember { mutableStateOf("") }
     var showResult by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(true) }
-    
-    val isLoadingAi by authViewModel.isLoading.collectAsState()
     var aiAdvice by remember { mutableStateOf<BmiAdviceData?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
-    val userData by authViewModel.userData.collectAsState()
+
+    val catUnderweightSevere = stringResource(R.string.bmi_cat_underweight_severe)
+    val catUnderweightMild = stringResource(R.string.bmi_cat_underweight_mild)
+    val catNormalThin = stringResource(R.string.bmi_cat_normal_thin)
+    val catNormalIdeal = stringResource(R.string.bmi_cat_normal_ideal)
+    val catOverweight = stringResource(R.string.bmi_cat_overweight)
+    val catObese1 = stringResource(R.string.bmi_cat_obese_1)
+    val catObese2 = stringResource(R.string.bmi_cat_obese_2)
+
+    val descUnderweightSevere = stringResource(R.string.bmi_desc_underweight_severe)
+    val descUnderweightMild = stringResource(R.string.bmi_desc_underweight_mild)
+    val descNormalThin = stringResource(R.string.bmi_desc_normal_thin)
+    val descNormalIdeal = stringResource(R.string.bmi_desc_normal_ideal)
+    val descOverweight = stringResource(R.string.bmi_desc_overweight)
+    val descObese1 = stringResource(R.string.bmi_desc_obese_1)
+    val descObese2 = stringResource(R.string.bmi_desc_obese_2)
 
     // Initialize with user data if available
     LaunchedEffect(userData) {
@@ -81,10 +100,10 @@ fun BMICalculatorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Kalkulator BMI", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.bmi_calculator_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 }
             )
@@ -107,22 +126,22 @@ fun BMICalculatorScreen(
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F9FF))
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
-                            Text("📊 Klasifikasi BMI (Asia-Pasifik)", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.bmi_classification_title), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "Standar ini lebih akurat untuk masyarakat Indonesia. BMI menghitung proporsi berat terhadap tinggi badan.",
+                                stringResource(R.string.bmi_classification_desc),
                                 fontSize = 13.sp, color = Color.DarkGray, lineHeight = 20.sp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text("Kategori Standar Asia:", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                            Text(stringResource(R.string.bmi_asia_standards), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             listOf(
-                                Triple("< 18.5", "Kurus / Berat Kurang", BmiBlue),
-                                Triple("18.5 – 22.9", "Normal (Ideal)", BmiGreen),
-                                Triple("23.0 – 24.9", "Overweight (Gemuk)", BmiYellow),
-                                Triple("> 25.0", "Obesitas", BmiRed)
+                                Triple("< 18.5", stringResource(R.string.bmi_underweight), BmiBlue),
+                                Triple("18.5 – 22.9", stringResource(R.string.bmi_normal), BmiGreen),
+                                Triple("23.0 – 24.9", stringResource(R.string.bmi_overweight), BmiYellow),
+                                Triple("> 25.0", stringResource(R.string.bmi_obese), BmiRed)
                             ).forEach { (range, label, color) ->
                                 Row(
                                     modifier = Modifier.padding(vertical = 4.dp),
@@ -151,14 +170,14 @@ fun BMICalculatorScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text("Hitung BMI Anda", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.bmi_calculate_yours), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = weightInput,
                         onValueChange = { weightInput = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Berat Badan (kg)") },
-                        placeholder = { Text("Contoh: 62") },
+                        label = { Text(stringResource(R.string.bmi_weight_label)) },
+                        placeholder = { Text("62") },
                         leadingIcon = { Text("⚖️", fontSize = 20.sp) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
@@ -171,8 +190,8 @@ fun BMICalculatorScreen(
                     OutlinedTextField(
                         value = heightInput,
                         onValueChange = { heightInput = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Tinggi Badan (cm)") },
-                        placeholder = { Text("Contoh: 178") },
+                        label = { Text(stringResource(R.string.bmi_height_label)) },
+                        placeholder = { Text("178") },
                         leadingIcon = { Text("📏", fontSize = 20.sp) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
@@ -210,23 +229,23 @@ fun BMICalculatorScreen(
                     else -> Color.Gray
                 }
                 val categoryLabel = when (bmiCategory) {
-                    "underweight_severe" -> "Sangat Kurus ⚠️"
-                    "underweight_mild" -> "Kurus (Ringan)"
-                    "normal_thin" -> "Normal (Batas Bawah) ⚠️"
-                    "normal_ideal" -> "Normal (Ideal) ✅"
-                    "overweight" -> "Berat Badan Berlebih"
-                    "obese_1" -> "Obesitas Tk. I ⚠️"
-                    "obese_2" -> "Obesitas Tk. II 🚨"
+                    "underweight_severe" -> catUnderweightSevere
+                    "underweight_mild" -> catUnderweightMild
+                    "normal_thin" -> catNormalThin
+                    "normal_ideal" -> catNormalIdeal
+                    "overweight" -> catOverweight
+                    "obese_1" -> catObese1
+                    "obese_2" -> catObese2
                     else -> ""
                 }
                 val description = when (bmiCategory) {
-                    "underweight_severe" -> "Berat badan Anda sangat kurang. Disarankan untuk berkonsultasi dengan dokter untuk pemeriksaan kesehatan menyeluruh."
-                    "underweight_mild" -> "Berat badan Anda kurang (ringan). Tingkatkan asupan nutrisi protein dan karbohidrat kompleks."
-                    "normal_thin" -> "BMI Anda normal, namun mendekati batas bawah (kurus). Anda mungkin terlihat sangat ramping; pertimbangkan penambahan massa otot."
-                    "normal_ideal" -> "Selamat! BMI Anda berada di rentang ideal yang paling sehat. Pertahankan pola makan dan olahraga saat ini."
-                    "overweight" -> "Berat badan Anda sedikit berlebih. Batasi asupan gula dan lemak, serta tingkatkan aktivitas fisik harian."
-                    "obese_1" -> "BMI menunjukkan Obesitas tingkat 1. Sebaiknya mulai mengatur pola makan rendah kalori dan rutin berolahraga."
-                    "obese_2" -> "BMI menunjukkan Obesitas tingkat 2. Sangat disarankan untuk berkonsultasi dengan tenaga medis untuk program penurunan berat badan."
+                    "underweight_severe" -> descUnderweightSevere
+                    "underweight_mild" -> descUnderweightMild
+                    "normal_thin" -> descNormalThin
+                    "normal_ideal" -> descNormalIdeal
+                    "overweight" -> descOverweight
+                    "obese_1" -> descObese1
+                    "obese_2" -> descObese2
                     else -> ""
                 }
 
@@ -277,7 +296,7 @@ fun BMICalculatorScreen(
                                         fontWeight = FontWeight.Black,
                                         color = resultColor
                                     )
-                                    Text("BMI Score", fontSize = 12.sp, color = Color.Gray)
+                                    Text(stringResource(R.string.bmi_score_label), fontSize = 12.sp, color = Color.Gray)
                                 }
                             }
 
@@ -363,7 +382,7 @@ fun BMICalculatorScreen(
                                             aiAdvice = result
                                         } else {
                                             scope.launch {
-                                                snackbarHostState.showSnackbar("Gagal mendapatkan saran AI. Menggunakan saran lokal.")
+                                                snackbarHostState.showSnackbar(context.getString(R.string.bmi_ai_error))
                                                 // Local fallback logic
                                                 aiAdvice = BmiAdviceData(
                                                     statusFisik = "Berdasarkan BMI $bmi, Anda masuk kategori $categoryLabel.",
@@ -387,7 +406,7 @@ fun BMICalculatorScreen(
                             } else {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Dapatkan Saran Kesehatan AI", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.bmi_ai_advice_button), fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -405,26 +424,26 @@ fun BMICalculatorScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Icon(Icons.Default.Info, contentDescription = null, tint = resultColor)
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Analisis AI Coach", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                            Text(stringResource(R.string.bmi_ai_analysis_title), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                                         }
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(advice.statusFisik, fontSize = 14.sp, color = Color.Gray)
                                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                                        Text("Target 2 Bulan: ${advice.target2Bulan}", fontWeight = FontWeight.Bold, color = resultColor)
+                                        Text("${stringResource(R.string.bmi_target_label).substringBefore(":")}: ${advice.target2Bulan}", fontWeight = FontWeight.Bold, color = resultColor)
                                     }
                                 }
 
                                 // Nutrition & Exercise Cards
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     AdviceCard(
-                                        title = "Nutrisi",
+                                        title = stringResource(R.string.bmi_nutrition_label),
                                         items = advice.saranNutrisi,
                                         icon = Icons.Default.Restaurant,
                                         color = Color(0xFFF59E0B),
                                         modifier = Modifier.weight(1f)
                                     )
                                     AdviceCard(
-                                        title = "Olahraga",
+                                        title = stringResource(R.string.bmi_exercise_label),
                                         items = advice.saranOlahraga,
                                         icon = Icons.Default.FitnessCenter,
                                         color = Color(0xFF3B82F6),
@@ -462,7 +481,7 @@ fun BMICalculatorScreen(
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Hitung Ulang", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.bmi_recalculate_button), fontWeight = FontWeight.Bold)
                     }
                 }
             }

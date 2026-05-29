@@ -83,8 +83,68 @@ fun SleepTrackerScreen(navController: NavController) {
             PlannedFeature("Smart Alarm", "Alarm yang membangunkan di fase tidur ringan."),
             PlannedFeature("Sleep Score", "Skor kualitas tidur berdasarkan durasi dan pola."),
             PlannedFeature("Trend Analysis", "Grafik tren tidur mingguan dan bulanan."),
-            PlannedFeature("Wind Down", "Panduan relaksasi sebelum tidur dengan audio."),
+            PlannedFeature("Wind Down", "Panduan relaksasi sebelum tidur with audio."),
             PlannedFeature("AI Insight", "Korelasi kualitas tidur dengan pola makan Anda.")
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RiskCheckerScreen(navController: NavController) {
+    UnderDevelopmentScreen(
+        navController = navController,
+        title = "Cek Bahan Berisiko",
+        featureName = "Risk Ingredient Checker",
+        description = "Cari tahu apakah suatu bahan makanan berisiko bagi kesehatan Anda (seperti alergi atau pantangan penyakit).",
+        icon = Icons.Default.Warning,
+        gradientColors = listOf(Color(0xFFFF5252), Color(0xFFFF8A80)),
+        plannedFeatures = listOf(
+            PlannedFeature("Personalized Warning", "Peringatan otomatis berdasarkan profil medis Anda."),
+            PlannedFeature("Ingredient Encyclopedia", "Database lengkap bahan kimia dan pengawet makanan."),
+            PlannedFeature("Risk Leveling", "Kategorisasi risiko: Rendah, Sedang, hingga Berbahaya."),
+            PlannedFeature("Scientific Backup", "Referensi dari jurnal kesehatan terpercaya."),
+            PlannedFeature("Alternative Suggestion", "Saran bahan alternatif yang lebih aman.")
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SugarWarningScreen(navController: NavController) {
+    UnderDevelopmentScreen(
+        navController = navController,
+        title = "Peringatan Gula",
+        featureName = "Sugar & Diabetes Hub",
+        description = "Pantau asupan gula harian Anda dari makanan kemasan dan dapatkan peringatan dini risiko diabetes.",
+        icon = Icons.Default.ErrorOutline,
+        gradientColors = listOf(Color(0xFFFFD740), Color(0xFFFFE57F)),
+        plannedFeatures = listOf(
+            PlannedFeature("Daily Sugar Intake", "Hitung total gram gula dari setiap scan produk."),
+            PlannedFeature("Diabetes Risk Level", "Prediksi risiko berdasarkan konsumsi gula harian."),
+            PlannedFeature("Hidden Sugar Finder", "Identifikasi nama samaran gula pada label (seperti Maltodextrin)."),
+            PlannedFeature("Blood Sugar Log", "Catat hasil cek gula darah mandiri Anda."),
+            PlannedFeature("Sugar-Free Alternatives", "Rekomendasi camilan sehat rendah gula.")
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DietTipsScreen(navController: NavController) {
+    UnderDevelopmentScreen(
+        navController = navController,
+        title = "Tips Diet",
+        featureName = "AI Diet Coach",
+        description = "Dapatkan panduan diet yang disesuaikan dengan kebutuhan kalori dan target berat badan Anda.",
+        icon = Icons.Default.Lightbulb,
+        gradientColors = listOf(Color(0xFF00E676), Color(0xFFB9F6CA)),
+        plannedFeatures = listOf(
+            PlannedFeature("Personalized Meal Plan", "Rencana makan harian berdasarkan target BMI."),
+            PlannedFeature("Intermittent Fasting Timer", "Pelacak waktu puasa intermiten."),
+            PlannedFeature("Cheat Day Manager", "Atur jadwal hari bebas makan Anda tetap terkontrol."),
+            PlannedFeature("Diet Recipes", "Koleksi resep makanan sehat yang lezat."),
+            PlannedFeature("Community Motivation", "Berbagi tips dan progres dengan pengguna lain.")
         )
     )
 }

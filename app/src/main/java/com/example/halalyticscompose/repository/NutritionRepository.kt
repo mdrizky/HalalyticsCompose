@@ -20,7 +20,7 @@ class NutritionRepository @Inject constructor(
             val body = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
             val typeBody = mealType.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val response = api.logMeal("Bearer $token", body, typeBody)
+            val response = api.logMealMultipart("Bearer $token", body, typeBody)
             if (response.isSuccessful && response.body()?.success == true) {
                 Result.success(response.body()!!.data!!)
             } else {

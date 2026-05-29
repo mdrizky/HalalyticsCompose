@@ -4,20 +4,12 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,39 +18,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.halalyticscompose.R
+import com.example.halalyticscompose.ui.theme.*
 import com.example.halalyticscompose.ui.viewmodel.ProductRequestViewModel
 import com.example.halalyticscompose.utils.ImageUtils
 import okhttp3.MediaType.Companion.toMediaType
@@ -92,7 +71,7 @@ fun ProductRequestScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted) {
-            Toast.makeText(context, "Izin kamera dibutuhkan untuk ambil foto", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.product_request_camera_permission), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -116,7 +95,7 @@ fun ProductRequestScreen(
                 Toast.makeText(context, result.getOrNull(), Toast.LENGTH_LONG).show()
                 navController.popBackStack()
             } else {
-                Toast.makeText(context, result.exceptionOrNull()?.message ?: "Gagal kirim", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, result.exceptionOrNull()?.message ?: context.getString(R.string.product_request_upload_failed), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -124,52 +103,65 @@ fun ProductRequestScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Kontribusi Produk", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.product_request_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF00B894),
+                    containerColor = Emerald,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
             )
-        }
+        },
+        containerColor = Slate50
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(20.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                "Produk tidak ditemukan. Kirim foto depan + belakang agar admin bisa verifikasi.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF4B5563)
-            )
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                border = BorderStroke(1.dp, Emerald.copy(alpha = 0.2f))
+            ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, null, tint = Emerald)
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        stringResource(R.string.product_request_not_found),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Slate700
+                    )
+                }
+            }
+            
             if (barcode.isNotBlank()) {
-                Text("Barcode: $barcode", color = Color(0xFF0EA5E9), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.product_barcode_label, barcode), color = Emerald, fontWeight = FontWeight.Black, fontSize = 18.sp)
             }
 
             OutlinedTextField(
                 value = productName,
                 onValueChange = { productName = it },
-                label = { Text("Nama Produk") },
+                label = { Text(stringResource(R.string.product_request_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                shape = RoundedCornerShape(12.dp),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
             ImagePickerSection(
-                title = "Foto Depan Produk",
+                title = stringResource(R.string.product_request_photo_front),
                 imageUri = frontImageUri,
                 onCamera = {
                     cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                    val uri = createTempImageUri(context, "front")
+                    val uri = ImageUtils.createTempImageUri(context, "front")
                     pendingFrontCameraUri = uri
                     takeFrontPicture.launch(uri)
                 },
@@ -177,11 +169,11 @@ fun ProductRequestScreen(
             )
 
             ImagePickerSection(
-                title = "Foto Belakang (Komposisi/Label)",
+                title = stringResource(R.string.product_request_photo_back),
                 imageUri = backImageUri,
                 onCamera = {
                     cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                    val uri = createTempImageUri(context, "back")
+                    val uri = ImageUtils.createTempImageUri(context, "back")
                     pendingBackCameraUri = uri
                     takeBackPicture.launch(uri)
                 },
@@ -191,16 +183,17 @@ fun ProductRequestScreen(
             OutlinedTextField(
                 value = ocrText,
                 onValueChange = { ocrText = it },
-                label = { Text("Keluhan / Keterangan Produk") },
+                label = { Text(stringResource(R.string.product_request_ocr_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
-                maxLines = 5
+                maxLines = 5,
+                shape = RoundedCornerShape(12.dp)
             )
 
             Button(
                 onClick = {
                     if (frontImageUri == null || backImageUri == null || productName.isBlank()) {
-                        Toast.makeText(context, "Lengkapi nama + foto depan + foto belakang", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.product_request_validation_error), Toast.LENGTH_SHORT).show()
                         return@Button
                     }
 
@@ -223,16 +216,19 @@ fun ProductRequestScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(56.dp),
                 enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00B894))
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Emerald)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                 } else {
-                    Text("Kirim ke Admin Verifikasi", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.product_request_submit), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
+            
+            Spacer(Modifier.height(20.dp))
         }
     }
 }
@@ -244,48 +240,59 @@ private fun ImagePickerSection(
     onCamera: () -> Unit,
     onGallery: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, fontWeight = FontWeight.Medium)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(190.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .border(1.dp, Color(0xFFD1D5DB), RoundedCornerShape(14.dp))
-                .background(Color(0xFFF9FAFB)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(imageUri),
-                    contentDescription = title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(title, fontWeight = FontWeight.Bold, color = Slate800, fontSize = 14.sp)
+        if (imageUri == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Slate100),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = Color(0xFF9CA3AF), modifier = Modifier.size(42.dp))
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text("Belum ada foto", color = Color(0xFF6B7280))
+                    Icon(Icons.Default.PhotoLibrary, null, tint = Slate400, modifier = Modifier.size(40.dp))
+                    Spacer(Modifier.height(8.dp))
+                    Text(stringResource(R.string.product_request_no_photo), color = Slate400, fontSize = 12.sp)
                 }
             }
+        } else {
+            Image(
+                painter = rememberAsyncImagePainter(imageUri),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onCamera, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0EA5E9))) {
-                Icon(Icons.Default.CameraAlt, contentDescription = null)
-                Spacer(modifier = Modifier.size(6.dp))
-                Text("Kamera")
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onCamera,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Emerald)
+            ) {
+                Icon(Icons.Default.CameraAlt, null, tint = Emerald, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.product_request_camera), color = Emerald)
             }
-            Button(onClick = onGallery, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1F2937))) {
-                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                Spacer(modifier = Modifier.size(6.dp))
-                Text("Galeri")
+            OutlinedButton(
+                onClick = onGallery,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Emerald)
+            ) {
+                Icon(Icons.Default.PhotoLibrary, null, tint = Emerald, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.product_request_gallery), color = Emerald)
             }
         }
     }
-}
-
-private fun createTempImageUri(context: android.content.Context, prefix: String): Uri {
-    val imageFile = File.createTempFile("${prefix}_", ".jpg", context.cacheDir)
-    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
 }

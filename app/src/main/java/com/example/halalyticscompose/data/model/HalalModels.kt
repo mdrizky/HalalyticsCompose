@@ -139,49 +139,55 @@ data class HalalCheckRequest(
 )
 
 data class HalalCheckResponse(
-    val success: Boolean,
-    val halal_status: String,
-    val certificate_number: String?,
-    val certification_body: String?,
-    val valid_until: String?,
-    val last_checked: String?,
-    val source: String?
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("halal_status") val halal_status: String,
+    @SerializedName("certificate_number") val certificate_number: String?,
+    @SerializedName("certification_body") val certification_body: String?,
+    @SerializedName("valid_until") val valid_until: String?,
+    @SerializedName("last_checked") val last_checked: String?,
+    @SerializedName("source") val source: String?
 )
 
 data class HalalProductResponse(
-    val success: Boolean,
-    val data: ProductData
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("data") val data: ProductData
 )
 
 data class ProductData(
-    val product: ProductInfo,
-    val halal_info: HalalInfoResponse,
-    val halal_source: String
+    @SerializedName("product") val product: ProductInfo,
+    @SerializedName("halal_info") val halal_info: HalalInfoResponse,
+    @SerializedName("halal_source") val halal_source: String
 )
 
 data class ProductInfo(
-    val id: Int,
-    val barcode: String,
-    val name: String,
-    val brand: String,
-    val category: String,
-    val image: String?
+    @SerializedName("id") val id: Int,
+    @SerializedName("barcode") val barcode: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("brand") val brand: String?,
+    @SerializedName("category") val category: String?,
+    @SerializedName("image") val image: String?
 )
 
 data class HalalInfoResponse(
-    val halal_status: String,
-    val halal_certificate_number: String?,
-    val certification_body: String?,
-    val certificate_valid_until: String?,
-    val last_checked_at: String?
+    @SerializedName("halal_status") val halal_status: String,
+    @SerializedName("halal_certificate_number") val halal_certificate_number: String?,
+    @SerializedName("certification_body") val certification_body: String?,
+    @SerializedName("certificate_valid_until") val certificate_valid_until: String?,
+    @SerializedName("last_checked_at") val last_checked_at: String?
+)
+
+data class HalalAlternativeResponse(
+    @SerializedName("original_product") val original_product: String,
+    @SerializedName("alternatives") val alternatives: List<UnifiedProductData>,
+    @SerializedName("success") val success: Boolean = true
 )
 
 // Open Food Facts API Models
 data class OpenFoodFactsResponse(
-    val status: Int,
-    val status_verbose: String,
-    val product: OpenFoodFactsProduct?,
-    val warning: String?
+    @SerializedName("status") val status: Int,
+    @SerializedName("status_verbose") val status_verbose: String? = null,
+    @SerializedName("product") val product: OpenFoodFactsProduct?,
+    @SerializedName("warning") val warning: String? = null
 )
 
 data class OpenFoodFactsProduct(

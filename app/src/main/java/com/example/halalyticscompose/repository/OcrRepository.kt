@@ -27,13 +27,14 @@ class OcrRepository @Inject constructor(
                     HaramIngredientEntity(
                         id = it.id,
                         name = it.name,
-                        aliases = it.aliases.orEmpty(),
+                        aliases = it.aliases ?: emptyList(),
                         category = it.category,
                         severity = it.severity,
                         description = it.description,
                         isActive = it.isActive,
-                        updatedAt = it.updatedAt?.let { timestamp -> runCatching { Instant.parse(timestamp).toEpochMilli() }.getOrNull() }
-                            ?: System.currentTimeMillis()
+                        updatedAt = it.updatedAt?.let { timestamp -> 
+                            runCatching { Instant.parse(timestamp).toEpochMilli() }.getOrNull() 
+                        } ?: System.currentTimeMillis()
                     )
                 } ?: emptyList()
                 

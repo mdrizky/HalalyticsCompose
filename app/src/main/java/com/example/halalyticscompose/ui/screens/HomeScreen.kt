@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,9 +66,24 @@ fun HomeScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
     val userData by authViewModel.userData.collectAsState()
-    val name = userData?.fullName?.takeIf { it.isNotBlank() } ?: userData?.username?.takeIf { it.isNotBlank() } ?: "User"
+    
+    // Auto-refresh when screen is displayed to ensure personalized data
+    LaunchedEffect(Unit) {
+        authViewModel.loadUserProfile()
+        healthViewModel.refreshHealthData()
+        historyViewModel.refreshAll()
+        articleViewModel.loadArticles()
+        notificationViewModel.loadNotifications()
+    }
+
+    val defaultUserName = stringResource(R.string.home_default_user)
+    val rawName = userData?.fullName?.takeIf { it.isNotBlank() } ?: userData?.username?.takeIf { it.isNotBlank() } ?: defaultUserName
+    // Format name to Title Case if it's not the default user name
+    val name = if (rawName != defaultUserName) rawName.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } } else rawName
+    
     val bmiState by healthViewModel.bmi.collectAsState()
-    val bmi = if (userData?.bmi != null && userData?.bmi!! > 0) String.format("%.1f", userData?.bmi) else bmiState
+    val userBmi = userData?.bmi
+    val bmi = if (userBmi != null && userBmi > 0) String.format(java.util.Locale.US, "%.1f", userBmi) else bmiState
     val dailyIntake by healthViewModel.dailyIntake.collectAsState()
     val categories by healthViewModel.categories.collectAsState()
     val articles by articleViewModel.articles.collectAsState()
@@ -80,18 +96,10 @@ fun HomeScreen(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        authViewModel.loadUserProfile()
-        healthViewModel.refreshHealthData()
-        historyViewModel.refreshAll()
-        articleViewModel.loadArticles()
-        notificationViewModel.loadNotifications()
-    }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            val locationText = userData?.address?.substringBefore(",") ?: "Batam, Indonesia"
+            val locationText = userData?.address?.substringBefore(",")?.takeIf { it.isNotBlank() } ?: "Batam, Indonesia"
             PremiumHomeHeader(
                 name = name,
                 imageUrl = userData?.image,
@@ -111,7 +119,7 @@ fun HomeScreen(
                     .size(64.dp)
                     .shadow(20.dp, CircleShape, spotColor = Emerald.copy(alpha = 0.5f), ambientColor = Emerald.copy(alpha = 0.3f))
             ) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = "AI Assistant", modifier = Modifier.size(28.dp))
+                Icon(Icons.Default.AutoAwesome, contentDescription = stringResource(R.string.home_action_assistant), modifier = Modifier.size(28.dp))
             }
         }
     ) { innerPadding ->
@@ -223,22 +231,23 @@ fun PremiumHomeHeader(
     val calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val timeGreeting = when (hour) {
-        in 4..10 -> "Selamat Pagi ☀️"
-        in 11..14 -> "Selamat Siang 🌤️"
-        in 15..18 -> "Selamat Sore 🌅"
-        else -> "Selamat Malam 🌙"
+        in 4..10 -> stringResource(R.string.home_greeting_morning)
+        in 11..14 -> stringResource(R.string.home_greeting_noon)
+        in 15..18 -> stringResource(R.string.home_greeting_afternoon)
+        else -> stringResource(R.string.home_greeting_night)
     }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp))
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Emerald, TealDark)
                 )
             )
             .statusBarsPadding()
-            .padding(top = 24.dp, bottom = 20.dp, start = 20.dp, end = 20.dp)
+            .padding(top = 24.dp, bottom = 32.dp, start = 20.dp, end = 20.dp)
     ) {
         Column {
             Row(
@@ -249,8 +258,10 @@ fun PremiumHomeHeader(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
+                            .border(2.dp, Gold, CircleShape)
+                            .padding(2.dp)
                             .border(2.dp, Color.White, CircleShape)
                             .clickable { onProfileClick() }
                     ) {
@@ -258,20 +269,20 @@ fun PremiumHomeHeader(
                         if (profileImageUrl != null) {
                             AsyncImage(
                                 model = profileImageUrl,
-                                contentDescription = "Profile",
-                                modifier = Modifier.fillMaxSize(),
+                                contentDescription = stringResource(R.string.profile),
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "Profile",
-                                modifier = Modifier.fillMaxSize().padding(12.dp),
-                                tint = Color.White
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(id = R.drawable.logo_halalytics_official),
+                                contentDescription = stringResource(R.string.profile),
+                                modifier = Modifier.fillMaxSize().padding(8.dp),
+                                contentScale = ContentScale.Fit
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
                             text = timeGreeting,
@@ -279,13 +290,19 @@ fun PremiumHomeHeader(
                             color = Color.White.copy(alpha = 0.85f),
                             fontWeight = FontWeight.Medium
                         )
+                        val greetingText = if (name != stringResource(R.string.home_default_user)) {
+                            stringResource(R.string.home_greeting_user, name) + " 👋"
+                        } else {
+                            name
+                        }
                         Text(
-                            text = name,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
+                            text = greetingText,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
                             color = Color.White,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            letterSpacing = (-0.5).sp
                         )
                     }
                 }
@@ -294,28 +311,19 @@ fun PremiumHomeHeader(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Glassmorphism Location Card
                     Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier
+                        color = Color.White.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                Icons.Default.LocationOn,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = Color.White
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = location ?: "Indonesia",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
+                            Icon(Icons.Default.LocationOn, null, tint = Gold, modifier = Modifier.size(14.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text(location ?: "Indonesia", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -323,27 +331,37 @@ fun PremiumHomeHeader(
                         IconButton(
                             onClick = onNotificationClick,
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(44.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.2f))
+                                .background(Color.White.copy(alpha = 0.15f))
+                                .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                modifier = Modifier.size(22.dp),
+                                contentDescription = stringResource(R.string.notifications),
+                                modifier = Modifier.size(24.dp),
                                 tint = Color.White
                             )
                         }
                         if (unreadCount > 0) {
-                            Box(
+                            Surface(
+                                color = Error,
+                                shape = CircleShape,
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
-                                    .offset(x = 2.dp, y = (-2).dp)
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(Error)
-                                    .border(1.5.dp, Color.White, CircleShape)
-                            )
+                                    .size(18.dp)
+                                    .offset(x = (-2).dp, y = 2.dp),
+                                border = BorderStroke(2.dp, Emerald)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = if (unreadCount > 9) "9+" else unreadCount.toString(),
+                                        color = Color.White,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -388,7 +406,7 @@ fun PremiumHealthRingCard(
                     color = Emerald
                 )
                 Text(
-                    text = "BMI",
+                    text = stringResource(R.string.home_bmi_label),
                     fontSize = 10.sp,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp),
                     color = Slate500
@@ -397,12 +415,16 @@ fun PremiumHealthRingCard(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Hari ini sehat?",
+                    text = stringResource(R.string.home_healthy_today),
                     fontSize = 14.sp,
                     color = Slate600
                 )
                 Text(
-                    text = "Asupan kalori: ${dailyIntake?.totalCalories ?: 0} / ${targets?.calorieLimit ?: 2000} kkal",
+                    text = stringResource(
+                        R.string.home_calorie_intake,
+                        dailyIntake?.totalCalories ?: 0,
+                        targets?.calorieLimit ?: 2000
+                    ),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Slate900
@@ -489,13 +511,13 @@ fun PremiumCategorySection(categories: List<com.example.halalyticscompose.data.m
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = "Kategori Populer",
+                text = stringResource(R.string.home_popular_categories),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Slate900
             )
             Text(
-                text = "Lihat semua",
+                text = stringResource(R.string.home_see_all),
                 color = Emerald,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
@@ -563,26 +585,39 @@ fun ArticleSkeleton() {
 @Composable
 fun PremiumFeatureGridSection(onActionClick: (String) -> Unit, onLainnyaClick: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        Text(text = "Fitur Cerdas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Text(text = stringResource(R.string.home_featured_services), fontSize = 18.sp, fontWeight = FontWeight.Black, color = Slate900)
+            Text(
+                text = stringResource(R.string.home_see_all),
+                fontSize = 12.sp,
+                color = Emerald,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onLainnyaClick() }
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Card(
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 val features = listOf(
-                    FeatureItemData("Scan Halal", Icons.Default.QrCodeScanner, "scan", Emerald),
-                    FeatureItemData("Cek Obat", Icons.AutoMirrored.Filled.MenuBook, "drug_interaction", Color(0xFFEF4444)),
-                    FeatureItemData("Skincare AI", Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF8B5CF6)),
-                    FeatureItemData("BPOM", Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF3B82F6)),
-                    FeatureItemData("Riwayat", Icons.Default.History, "history", Teal),
-                    FeatureItemData("BMI", Icons.Default.Calculate, "bmi_calculator", Color(0xFFF59E0B)),
-                    FeatureItemData("AI Asisten", Icons.Default.SmartToy, "health_assistant", Color(0xFF6366F1)),
-                    FeatureItemData("Lainnya", Icons.Default.GridView, "all_features", Slate500)
+                    FeatureItemData(stringResource(R.string.feature_scan_halal_alt), Icons.Default.QrCodeScanner, "scan", Emerald),
+                    FeatureItemData(stringResource(R.string.feature_skincare_ai), Icons.Default.AutoAwesome, "skincare_scanner", Color(0xFF8B5CF6)),
+                    FeatureItemData(stringResource(R.string.feature_bpom_alt), Icons.Default.HealthAndSafety, "bpom_scanner", Color(0xFF3B82F6)),
+                    FeatureItemData(stringResource(R.string.feature_check_medicine_alt), Icons.AutoMirrored.Filled.MenuBook, "drug_interaction", Color(0xFFEF4444)),
+                    FeatureItemData(stringResource(R.string.feature_donor_darah), Icons.Default.Favorite, "donor_home", Color(0xFFF43F5E)),
+                    FeatureItemData(stringResource(R.string.feature_bmi_calculator_alt), Icons.Default.Calculate, "bmi_calculator", Color(0xFFF59E0B)),
+                    FeatureItemData(stringResource(R.string.feature_ai_chat), Icons.AutoMirrored.Filled.Chat, "ai_chat", Color(0xFF6366F1)),
+                    FeatureItemData(stringResource(R.string.home_lainnya_id), Icons.Default.GridView, "all_features", Slate500)
                 )
                 features.chunked(4).forEach { row ->
-                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         row.forEach { item ->
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -592,15 +627,22 @@ fun PremiumFeatureGridSection(onActionClick: (String) -> Unit, onLainnyaClick: (
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(56.dp)
+                                        .size(54.dp)
                                         .clip(RoundedCornerShape(18.dp))
-                                        .background(item.color.copy(alpha = 0.15f)),
+                                        .background(item.color.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(item.icon, contentDescription = item.title, tint = item.color, modifier = Modifier.size(28.dp))
+                                    Icon(item.icon, contentDescription = item.title, tint = item.color, modifier = Modifier.size(26.dp))
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = item.title, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Slate700, maxLines = 1)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = item.title,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Slate700,
+                                    maxLines = 1,
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
                     }
@@ -618,8 +660,8 @@ fun PremiumRecommendationSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Rekomendasi Premium", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
-            Text(text = "Lihat semua", color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onViewAll() })
+            Text(text = stringResource(R.string.home_premium_recommendations), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
+            Text(text = stringResource(R.string.home_see_all), color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onViewAll() })
         }
         Spacer(modifier = Modifier.height(12.dp))
         LazyRow(
@@ -664,8 +706,8 @@ fun PremiumHealthArticlesSection(
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Artikel Kesehatan", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
-            Text(text = "Lihat semua", color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onSeeAllClick() })
+            Text(text = stringResource(R.string.home_health_articles), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate900)
+            Text(text = stringResource(R.string.home_see_all), color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onSeeAllClick() })
         }
         Spacer(modifier = Modifier.height(12.dp))
         if (isLoading) {
@@ -703,8 +745,8 @@ fun PremiumHealthArticlesSection(
 fun AllFeaturesSheetContent(navController: NavController, onClose: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Semua Fitur", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            IconButton(onClick = onClose) { Icon(Icons.Default.Close, contentDescription = "Close") }
+            Text(text = stringResource(R.string.home_all_features), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            IconButton(onClick = onClose) { Icon(Icons.Default.Close, contentDescription = stringResource(R.string.common_close)) }
         }
         Button(
             onClick = { onClose(); navController.navigate("all_features") },
@@ -712,7 +754,7 @@ fun AllFeaturesSheetContent(navController: NavController, onClose: () -> Unit) {
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Emerald)
         ) {
-            Text("Lihat Semua Layanan", color = Color.White)
+            Text(stringResource(R.string.home_view_all_services), color = Color.White)
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

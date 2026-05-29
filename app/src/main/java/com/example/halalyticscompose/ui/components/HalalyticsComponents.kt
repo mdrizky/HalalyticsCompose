@@ -39,6 +39,59 @@ import androidx.compose.ui.unit.sp
 import com.example.halalyticscompose.ui.theme.*
 
 // ════════════════════════════════════════════════════════════════════
+// SHIMMER EFFECT
+// ════════════════════════════════════════════════════════════════════
+
+@Composable
+fun ShimmerBrush(
+    showShimmer: Boolean = true,
+    targetValue: Float = 1000f
+): androidx.compose.ui.graphics.Brush {
+    return if (showShimmer) {
+        val shimmerColors = listOf(
+            Color.LightGray.copy(alpha = 0.6f),
+            Color.LightGray.copy(alpha = 0.2f),
+            Color.LightGray.copy(alpha = 0.6f),
+        )
+
+        val transition = rememberInfiniteTransition(label = "")
+        val translateAnimation = transition.animateFloat(
+            initialValue = 0f,
+            targetValue = targetValue,
+            animationSpec = infiniteRepeatable(
+                animation = tween(800), repeatMode = RepeatMode.Reverse
+            ), label = ""
+        )
+        androidx.compose.ui.graphics.Brush.linearGradient(
+            colors = shimmerColors,
+            start = androidx.compose.ui.geometry.Offset.Zero,
+            end = androidx.compose.ui.geometry.Offset(x = translateAnimation.value, y = translateAnimation.value)
+        )
+    } else {
+        androidx.compose.ui.graphics.Brush.linearGradient(
+            colors = listOf(Color.Transparent, Color.Transparent),
+            start = androidx.compose.ui.geometry.Offset.Zero,
+            end = androidx.compose.ui.geometry.Offset.Zero
+        )
+    }
+}
+
+@Composable
+fun ShimmerCard(
+    modifier: Modifier = Modifier,
+    height: androidx.compose.ui.unit.Dp = 120.dp,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .clip(shape)
+            .background(ShimmerBrush())
+    )
+}
+
+// ════════════════════════════════════════════════════════════════════
 // PRIMARY BUTTON
 // ════════════════════════════════════════════════════════════════════
 
@@ -47,8 +100,8 @@ fun PrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
     isLoading: Boolean = false,
+    enabled: Boolean = true,
     fullWidth: Boolean = false
 ) {
     Button(
@@ -58,7 +111,7 @@ fun PrimaryButton(
         enabled = enabled,
         isLoading = isLoading,
         fullWidth = fullWidth,
-        backgroundColor = if (enabled) Emerald else Slate400,
+        backgroundColor = Emerald,
         textColor = Color.White,
         borderColor = Color.Transparent
     )
@@ -73,13 +126,17 @@ fun SecondaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
+    fullWidth: Boolean = false
 ) {
     Button(
         text = text,
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
+        isLoading = isLoading,
+        fullWidth = fullWidth,
         backgroundColor = Color.White,
         textColor = Teal,
         borderColor = Teal

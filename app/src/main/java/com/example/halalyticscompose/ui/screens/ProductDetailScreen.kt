@@ -55,7 +55,7 @@ import com.example.halalyticscompose.R
 fun ProductDetailScreen(
     navController: NavController,
     barcode: String,
-    mainViewModel: MainViewModel,
+    mainViewModel: MainViewModel = hiltViewModel(),
     viewModel: ProductViewModel = hiltViewModel(),
     compareViewModel: com.example.halalyticscompose.ui.viewmodel.CompareViewModel = hiltViewModel(),
     favoritesViewModel: com.example.halalyticscompose.ui.viewmodel.FavoritesViewModel = hiltViewModel()
@@ -267,10 +267,21 @@ fun ProductDetailContentPremium(
                 Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.background))))
                 
                 // Status Badge overlay
-                HalalStatusBadgePremium(
-                    status = product.halalInfo?.halalStatus ?: HalalStatus.UNKNOWN,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)
-                )
+                Row(
+                    modifier = Modifier.align(Alignment.BottomStart).padding(24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HalalStatusBadgePremium(
+                        status = product.halalInfo?.halalStatus ?: HalalStatus.UNKNOWN
+                    )
+                    
+                    if (product.halalInfo?.source == "bpom_official") {
+                        OfficialSourceBadge(stringResource(R.string.product_official_bpom), Emerald)
+                    } else if (product.halalInfo?.source == "mui_official") {
+                        OfficialSourceBadge(stringResource(R.string.product_official_mui), HalalGreen)
+                    }
+                }
             }
         }
 
@@ -361,6 +372,22 @@ fun ProductDetailContentPremium(
         }
         
         item { Spacer(Modifier.height(40.dp)) }
+    }
+}
+
+@Composable
+fun OfficialSourceBadge(label: String, color: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(color.copy(alpha = 0.9f))
+            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Default.Verified, null, tint = Color.White, modifier = Modifier.size(14.dp))
+            Text(label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 10.sp)
+        }
     }
 }
 

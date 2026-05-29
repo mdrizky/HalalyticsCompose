@@ -44,14 +44,14 @@
 
     <string name="home_ai_insight_title">AI Daily Insight</string>
 
-    <string name="feature_scan_ai">Scan AI</string>
-    <string name="feature_cek_obat">Cek Obat</string>
-    <string name="feature_kosmetik">Kosmetik</string>
-
-    <string name="feature_bpom_id">BPOM</string>
-    <string name="feature_ai_chat_id">AI Chat</string>
-    <string name="feature_riwayat_id">Riwayat</string>
-    <string name="feature_lainnya_id">Lainnya</string>
+    <string name="feature_scan_halal_alt">Scan Halal</string>
+    <string name="feature_skincare_ai">Skincare AI</string>
+    <string name="feature_bpom_alt">BPOM Cek</string>
+    <string name="feature_check_medicine_alt">Cek Obat</string>
+    <string name="feature_donor_darah">Donor Darah</string>
+    <string name="feature_bmi_calculator_alt">BMI Cek</string>
+    <string name="feature_ai_chat">AI Chat</string>
+    <string name="home_lainnya_id">Lainnya</string>
     <string name="feature_my_contribution">Kontribusi Saya</string>
     <string name="feature_favorite_list">Favorit</string>
     <string name="feature_edit_profile">Edit Profil</string>
@@ -91,13 +91,18 @@
     <string name="profile_notif_desc">Pengingat dan update</string>
     <string name="profile_logout">Keluar</string>
     <string name="profile_logout_desc">Logout dari aplikasi</string>
-    <string name="profile_total_scan">Total Scan</string>
-    <string name="profile_streak_day">%1$d hari</string>
+    <string name="profile_total_scans_summary">Total Scan</string>
+    <string name="profile_streak_day_label">%1$d hari</string>
     <string name="ai_analysis_title">Smart Analysis AI</string>
     <string name="ai_analysis_loading">AI sedang menganalisis komponen...</string>
     <string name="ai_analysis_profile">Analisis untuk Profil</string>
     <string name="ai_analysis_myself">Saya</string>
     <string name="ai_analysis_alerts">Health Guard Alerts</string>
+    <string name="product_official_bpom">Official BPOM Data</string>
+    <string name="product_official_mui">MUI Halal Official</string>
+    <string name="product_verified_label">Verified 100%</string>
+    <string name="product_source_label">Source: %1$s</string>
+
     <string name="ai_analysis_critical">Critical Ingredients</string>
     <string name="ai_analysis_failed">Analisis gagal</string>
     <string name="ai_analysis_retry">Coba Lagi</string>
@@ -129,7 +134,7 @@
     <string name="home_greeting_generic">Selamat datang</string>
     <string name="bottom_nav_search">Cari</string>
     <string name="bottom_nav_history">Riwayat</string>
-    <string name="bottom_nav_profile">Profil</string>
+    <string name="bottom_nav_profile_alt">Profil</string>
     <string name="bottom_nav_health">Kesehatan</string>
     <string name="bottom_nav_scan">Scan</string>
     <string name="mental_health_title">Kesehatan Mental</string>
@@ -547,7 +552,10 @@
     <string name="mental_health_carikan_ahli">Carikan Ahli</string>
     <string name="mental_health_quiz_start">Mulai →</string>
     <!-- Admin Panel -->
-    <string name="admin_panel_title">Admin Dashboard</string>
+    <string name="admin_panel_title">Admin Control</string>
+    <string name="admin_panel_subtitle">Halalytics Ecosystem Management</string>
+    <string name="admin_panel_full_panel">Full Admin Panel</string>
+    <string name="admin_panel_full_panel_desc">Kontrol penuh fitur web &amp; database</string>
     <string name="admin_panel_overview">Ikhtisar</string>
     <string name="admin_panel_pending">Menunggu</string>
     <string name="admin_panel_users">Pengguna</string>
@@ -558,6 +566,14 @@
     <string name="admin_panel_reject">Tolak</string>
     <string name="admin_panel_pending_approvals">Persetujuan Tertunda</string>
     <string name="admin_panel_refresh">Refresh</string>
+    <string name="admin_panel_product_approval">Persetujuan Produk</string>
+    <string name="admin_panel_menu_user">Manajemen User</string>
+    <string name="admin_panel_menu_system">Log Sistem</string>
+    <string name="admin_panel_menu_notif">Push Notification</string>
+    <string name="admin_panel_stat_pending">Tertunda</string>
+    <string name="admin_panel_stat_users">Total User</string>
+    <string name="product_sugar">Gula</string>
+    <string name="product_caffeine">Kafein</string>
 
     <!-- Admin Notification -->
     <string name="admin_notif_title">Notifikasi Admin</string>
@@ -659,8 +675,10 @@
     <string name="edit_profile_email">Email</string>
     <string name="edit_profile_phone">Nomor HP</string>
     <string name="edit_profile_birthdate">Tanggal Lahir</string>
+    <string name="edit_profile_birthdate_placeholder">YYYY-MM-DD</string>
     <string name="edit_profile_address">Alamat</string>
-    <string name="edit_profile_bio">Bio</string>
+    <string name="edit_profile_city">Kota</string>
+    <string name="edit_profile_bio">Bio / Slogan</string>
     <string name="edit_profile_health_profile">Profil Kesehatan</string>
     <string name="edit_profile_height">Tinggi (cm)</string>
     <string name="edit_profile_weight">Berat (kg)</string>
@@ -670,8 +688,8 @@
     <string name="edit_profile_gender_male">Laki-laki</string>
     <string name="edit_profile_gender_female">Perempuan</string>
     <string name="edit_profile_emergency">Kontak Darurat</string>
-    <string name="edit_profile_allergy">Alergi</string>
-    <string name="edit_profile_allergy_placeholder">Kacang, Seafood, dll</string>
+    <string name="edit_profile_allergy">Alergi (Pisahkan koma)</string>
+    <string name="edit_profile_allergy_placeholder">Misal: Kacang, Seafood</string>
     <string name="edit_profile_medical_history">Riwayat Medis</string>
     <string name="edit_profile_security">Keamanan</string>
     <string name="edit_profile_change_password">Ganti Password</string>
@@ -683,6 +701,25 @@
     <string name="edit_profile_current_password">Password Saat Ini</string>
     <string name="edit_profile_new_password">Password Baru</string>
     <string name="edit_profile_confirm_password">Konfirmasi Password Baru</string>
+    <string name="title_search_external">Global Search</string>
+    <string name="title_search_external_desc">Cari produk dari database lokal maupun global</string>
+    <string name="search_hint">Cari nama produk atau barcode...</string>
+    <string name="search_no_result">Produk tidak ditemukan</string>
+    <string name="search_empty_state">Mulai cari produk halal impianmu</string>
+
+    <!-- Nutritionist Strings -->
+    <string name="bottom_nav_nutritionist_dashboard">Beranda</string>
+    <string name="bottom_nav_nutritionist_patients">Pasien</string>
+    <string name="bottom_nav_nutritionist_verify">Verifikasi</string>
+    <string name="bottom_nav_nutritionist_education">Edukasi</string>
+    <string name="bottom_nav_nutritionist_profile">Profil</string>
+    <string name="nutritionist_dashboard_title">Dashboard Ahli Gizi</string>
+    <string name="nutritionist_patients_title">Daftar Pasien &amp; Konsultasi</string>
+    <string name="nutritionist_verify_title">Verifikasi AI</string>
+    <string name="nutritionist_education_title">Manajemen Artikel</string>
+    <string name="nutritionist_no_patients">Belum ada pasien yang aktif.</string>
+    <string name="nutritionist_no_recent_activity">Belum ada aktivitas terbaru.</string>
+    <string name="nutritionist_disclaimer_title">Medical Disclaimer</string>
 
     <!-- Health Profile Screen -->
     <string name="health_profile_title">Profil Kesehatan</string>
@@ -704,4 +741,94 @@
     <string name="health_profile_bmi_dialog_title">Hitung BMI</string>
     <string name="health_profile_activity_dialog_title">Pilih Tingkat Aktivitas</string>
     <string name="unknown">Tidak diketahui</string>
+    <string name="product_request_camera_permission">Izin kamera dibutuhkan untuk ambil foto</string>
+    <string name="product_request_upload_failed">Gagal kirim</string>
+    <string name="product_request_title">Kontribusi Produk</string>
+    <string name="product_request_not_found">Produk tidak ditemukan. Kirim foto agar admin bisa verifikasi.</string>
+    <string name="product_request_name">Nama Produk</string>
+    <string name="product_request_photo_front">Foto Depan Produk</string>
+    <string name="product_request_photo_back">Foto Belakang (Komposisi/Label)</string>
+    <string name="product_request_ocr_label">Keluhan / Keterangan Produk</string>
+    <string name="product_request_validation_error">Lengkapi nama + foto depan + foto belakang</string>
+    <string name="product_request_submit">Kirim ke Admin Verifikasi</string>
+    <string name="product_request_no_photo">Belum ada foto</string>
+    <string name="product_request_camera">Kamera</string>
+    <string name="product_request_gallery">Galeri</string>
+    <string name="profile_my_profile_label">Profil Saya</string>
+    <string name="profile_total_scans_alt">Total Scan</string>
+    <string name="profile_halal_score">Halal Score</string>
+    <string name="profile_health_rank">Health Rank</string>
+    <string name="profile_edit_profile_label">Edit Profil</string>
+    <string name="profile_edit_profile_desc">Lengkapi data diri &amp; kesehatan</string>
+    <string name="profile_family_account">Family Account</string>
+    <string name="profile_family_account_desc">Kelola profil keluarga</string>
+    <string name="profile_favorite_products">Produk Favorit</string>
+    <string name="profile_favorite_products_desc">Lihat simpanan produk</string>
+    <string name="profile_scan_history">Riwayat Scan</string>
+    <string name="profile_scan_history_desc">Log aktivitas pemindaian</string>
+    <string name="profile_help_cs">Bantuan &amp; CS</string>
+    <string name="profile_help_cs_desc">Hubungi tim Halalytics</string>
+    <string name="profile_logout_confirm">Keluar dari Akun</string>
+    <string name="home_bmi_label">BMI</string>
+    <string name="home_healthy_today">Hari ini sehat?</string>
+    <string name="home_calorie_intake">Asupan kalori: %1$d / %2$d kkal</string>
+    <string name="home_popular_categories">Kategori Populer</string>
+    <string name="home_featured_services">Layanan Unggulan</string>
+    <string name="home_all_features">Semua Fitur</string>
+    <string name="home_view_all_services">Lihat Semua Layanan</string>
+    <string name="home_premium_recommendations">Rekomendasi Premium</string>
+    <string name="home_greeting_user">Selamat datang, %s</string>
+    <string name="bottom_nav_home">Beranda</string>
+    <string name="bottom_nav_article">Artikel</string>
+    <string name="bottom_nav_donation">Donasi</string>
+    <string name="bottom_nav_profile">Profil</string>
+    <string name="register_error_empty_fields">Semua field harus diisi</string>
+    <string name="register_medical_history_label">Riwayat Penyakit</string>
+    <string name="bmi_calculator_title">Kalkulator BMI</string>
+    <string name="bmi_classification_title">Klasifikasi BMI (Asia-Pasifik)</string>
+    <string name="bmi_classification_desc">Standar ini lebih akurat untuk masyarakat Indonesia. BMI menghitung proporsi berat terhadap tinggi badan.</string>
+    <string name="bmi_asia_standards">Kategori Standar Asia:</string>
+    <string name="bmi_underweight">Kurus / Berat Kurang</string>
+    <string name="bmi_normal">Normal (Ideal)</string>
+    <string name="bmi_overweight">Overweight (Gemuk)</string>
+    <string name="bmi_obese">Obesitas</string>
+    <string name="bmi_calculate_yours">Hitung BMI Anda</string>
+    <string name="bmi_weight_label">Berat Badan (kg)</string>
+    <string name="bmi_height_label">Tinggi Badan (cm)</string>
+    <string name="bmi_target_label">Target 2 Bulan: %s</string>
+    <string name="bmi_score_label">BMI Score</string>
+    <string name="bmi_recalculate_button">Hitung Ulang</string>
+    <string name="bmi_ai_advice_button">Dapatkan Saran Kesehatan AI</string>
+    <string name="bmi_ai_analysis_title">Analisis AI Coach</string>
+    <string name="bmi_nutrition_label">Nutrisi</string>
+    <string name="bmi_exercise_label">Olahraga</string>
+    <string name="bmi_ai_error">Gagal mendapatkan saran AI. Menggunakan saran lokal.</string>
+    <string name="bmi_cat_underweight_severe">Sangat Kurus ⚠️</string>
+    <string name="bmi_cat_underweight_mild">Kurus (Ringan)</string>
+    <string name="bmi_cat_normal_thin">Normal (Batas Bawah) ⚠️</string>
+    <string name="bmi_cat_normal_ideal">Normal (Ideal) ✅</string>
+    <string name="bmi_cat_overweight">Berat Badan Berlebih</string>
+    <string name="bmi_cat_obese_1">Obesitas Tk. I ⚠️</string>
+    <string name="bmi_cat_obese_2">Obesitas Tk. II 🚨</string>
+
+    <string name="bmi_calculate_button">HITUNG</string>
+    <string name="feature_ai_chat_id">ai_chat</string>
+    <string name="feature_bpom_id">bpom</string>
+    <string name="feature_cek_obat">cek_obat</string>
+    <string name="feature_kosmetik">kosmetik</string>
+    <string name="feature_lainnya_id">lainnya</string>
+    <string name="feature_riwayat_id">riwayat</string>
+    <string name="feature_scan_ai">scan_ai</string>
+    <string name="profile_edit_profile">Edit Profil</string>
+    <string name="profile_my_profile">Profil Saya</string>
+    <string name="profile_streak_day">Hari</string>
+    <string name="profile_total_scan_count">Total Scan</string>
+
+    <string name="bmi_desc_underweight_severe">Berat badan Anda sangat kurang. Disarankan untuk berkonsultasi dengan dokter untuk pemeriksaan kesehatan menyeluruh.</string>
+    <string name="bmi_desc_underweight_mild">Berat badan Anda kurang (ringan). Tingkatkan asupan nutrisi protein dan karbohidrat kompleks.</string>
+    <string name="bmi_desc_normal_thin">BMI Anda normal, namun mendekati batas bawah (kurus). Anda mungkin terlihat sangat ramping; pertimbangkan penambahan massa otot.</string>
+    <string name="bmi_desc_normal_ideal">Selamat! BMI Anda berada di rentang ideal yang paling sehat. Pertahankan pola makan dan olahraga saat ini.</string>
+    <string name="bmi_desc_overweight">Berat badan Anda sedikit berlebih. Batasi asupan gula dan lemak, serta tingkatkan aktivitas fisik harian.</string>
+    <string name="bmi_desc_obese_1">BMI menunjukkan Obesitas tingkat 1. Sebaiknya mulai mengatur pola makan rendah kalori dan rutin berolahraga.</string>
+    <string name="bmi_desc_obese_2">BMI menunjukkan Obesitas tingkat 2. Sangat disarankan untuk berkonsultasi dengan tenaga medis untuk program penurunan berat badan.</string>
 </resources>

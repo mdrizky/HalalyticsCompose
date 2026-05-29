@@ -146,11 +146,18 @@ fun FamilyBoxScreen(
             initialProfile = profileToEdit,
             onDismiss = { profileToEdit = null },
             onConfirm = { name, rel, age, gender, allergies, medHistory, image ->
-                // In this implementation, updateFamilyProfile would be similar to add but with PUT/PATCH
-                // Since I didn't implement update specifically in FamilyViewModel yet (just add/delete),
-                // I'll skip the actual update call for now or add it later if needed.
-                // For now let's just close the dialog.
-                profileToEdit = null
+                viewModel.updateFamilyProfile(
+                    id = profileToEdit!!.id,
+                    name = name,
+                    relationship = rel,
+                    age = age,
+                    gender = gender,
+                    allergies = allergies,
+                    medicalHistory = medHistory,
+                    image = image,
+                    onSuccess = { profileToEdit = null },
+                    onError = { /* Handle error if needed */ }
+                )
             }
         )
     }

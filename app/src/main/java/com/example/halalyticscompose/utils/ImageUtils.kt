@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.content.FileProvider
 import com.example.halalyticscompose.BuildConfig
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -58,6 +59,18 @@ object ImageUtils {
         }
         inputStream.close()
         return tempFile
+    }
+
+    /**
+     * Create a temporary URI for capturing images with camera.
+     */
+    fun createTempImageUri(context: Context, prefix: String = "camera"): Uri {
+        val tempFile = File.createTempFile("${prefix}_", ".jpg", context.cacheDir)
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            tempFile
+        )
     }
 
     /**

@@ -46,21 +46,30 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
 
     Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(EmeraldLight, Color.White)))) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
-            IconButton(onClick = { navController.navigateUp() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+            IconButton(onClick = { navController.navigateUp() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) }
+            
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(R.drawable.logo_halalytics_official),
+                    contentDescription = "Halalytics Logo",
+                    modifier = Modifier.size(100.dp)
+                )
+            }
+            
             Spacer(modifier = Modifier.height(20.dp))
             Card(shape = RoundedCornerShape(32.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(16.dp)) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text("Buat Akun", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.register_create_account), fontSize = 28.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(24.dp))
-                    OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("Nama Lengkap") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), leadingIcon = { Icon(Icons.Default.Person, null) })
+                    OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text(stringResource(R.string.register_full_name)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), leadingIcon = { Icon(Icons.Default.Person, null) })
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = username, onValueChange = { username = it }, label = { Text("Username") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = username, onValueChange = { username = it }, label = { Text(stringResource(R.string.register_username)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(stringResource(R.string.register_email)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) { Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null) } }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text(stringResource(R.string.register_password)) }, visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) { Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null) } }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = { Text("Konfirmasi Password") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = { Text(stringResource(R.string.register_confirm_password)) }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
                     
                     var bloodTypeExpanded by remember { mutableStateOf(false) }
@@ -69,9 +78,9 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                             value = bloodType, 
                             onValueChange = {}, 
                             readOnly = true, 
-                            label = { Text("Golongan Darah") }, 
+                            label = { Text(stringResource(R.string.register_blood_type)) }, 
                             trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, 
-                            modifier = Modifier.fillMaxWidth().menuAnchor(), 
+                            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true), 
                             shape = RoundedCornerShape(16.dp)
                         )
                         DropdownMenu(expanded = bloodTypeExpanded, onDismissRequest = { bloodTypeExpanded = false }) {
@@ -80,20 +89,22 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                     }
                     
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = allergy, onValueChange = { allergy = it }, label = { Text("Alergi") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = allergy, onValueChange = { allergy = it }, label = { Text(stringResource(R.string.register_allergies)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp))
                     Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = { Text("Riwayat Penyakit") }, modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(16.dp))
+                    OutlinedTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = { Text(stringResource(R.string.register_medical_history_label)) }, modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(16.dp))
                     
                     if (errorMessage.isNotEmpty()) Text(errorMessage, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
+                    val errorEmptyFields = stringResource(R.string.register_error_empty_fields)
+                    val errorPasswordMismatch = stringResource(R.string.register_error_password_mismatch)
                     Button(
                         onClick = {
                             if (fullName.isBlank() || username.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() || bloodType.isBlank()) {
-                                errorMessage = "Semua field harus diisi"
+                                errorMessage = errorEmptyFields
                             } else if (password != confirmPassword) {
-                                errorMessage = "Password tidak cocok"
+                                errorMessage = errorPasswordMismatch
                             } else {
                                 viewModel.register(
                                     RegisterRequest(
@@ -120,13 +131,13 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                         enabled = !isLoading
                     ) { 
                         if (isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                        else Text("Daftar", color = Color.White, fontWeight = FontWeight.Bold) 
+                        else Text(stringResource(R.string.login_register), color = Color.White, fontWeight = FontWeight.Bold) 
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                        Text("Sudah punya akun? ", color = Slate500)
-                        Text("Masuk", color = Emerald, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { navController.navigate("login") })
+                        Text(stringResource(R.string.onboarding_have_account).substringBefore("Masuk"), color = Slate500)
+                        Text(stringResource(R.string.login_button), color = Emerald, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { navController.navigate("login") })
                     }
                 }
             }

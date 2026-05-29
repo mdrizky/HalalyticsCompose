@@ -15,6 +15,20 @@ data class FamilyProfile(
     val age: Int?,
     @SerializedName("gender")
     val gender: String?,
+    @SerializedName("weight_kg")
+    val weightKg: Double?,
+    @SerializedName("height_cm")
+    val heightCm: Double?,
+    @SerializedName("activity_level")
+    val activityLevel: String?,
+    @SerializedName("daily_calories_target")
+    val dailyCaloriesTarget: Int?,
+    @SerializedName("daily_sugar_limit_g")
+    val dailySugarLimitG: Double?,
+    @SerializedName("daily_sodium_limit_mg")
+    val dailySodiumLimitMg: Int?,
+    @SerializedName("daily_fat_limit_g")
+    val dailyFatLimitG: Double?,
     @SerializedName("allergies")
     val allergies: String?,
     @SerializedName("medical_history")

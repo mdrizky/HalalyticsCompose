@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.HalalyticsCompose" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.HalalyticsCompose" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <!-- Match background color with default Light Mode -->
         <item name="windowSplashScreenBackground">#FFFFFF</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_halalytics</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_halalytics_official</item>
         <item name="postSplashScreenTheme">@style/Theme.HalalyticsCompose</item>
     </style>
 </resources>

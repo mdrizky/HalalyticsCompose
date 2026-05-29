@@ -28,38 +28,43 @@ import com.example.halalyticscompose.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllFeaturesScreen(navController: NavController) {
-    val coreFeatures = listOf(
-        FeatureActionItem("Scan Halal", Icons.Default.QrCode2, "scan"),
-        FeatureActionItem("Cek BPOM", Icons.Default.HealthAndSafety, "bpom_scanner"),
-        FeatureActionItem("Skincare AI", Icons.Default.AutoAwesome, "skincare_scanner"),
-        FeatureActionItem("Interaksi Obat", Icons.Default.Medication, "drug_interaction"),
-        FeatureActionItem("Cari Obat", Icons.Default.Search, "medicine_search"),
-        FeatureActionItem("Obat Internasional", Icons.Default.Public, "international_medicine")
+    val halalFeatures = listOf(
+        FeatureActionItem("Scan Barcode", Icons.Default.QrCodeScanner, "scan"),
+        FeatureActionItem("OCR Ingredient", Icons.Default.TextFields, "ocr_scan"),
+        FeatureActionItem("Halal AI Analysis", Icons.Default.AutoAwesome, "ai_analysis"),
+        FeatureActionItem("Halal Education", Icons.Default.MenuBook, "encyclopedia"),
+        FeatureActionItem("Verifikasi Produk", Icons.Default.Verified, "product_request"),
+        FeatureActionItem("Cek Bahan Berisiko", Icons.Default.Warning, "risk_checker")
     )
     val healthFeatures = listOf(
-        FeatureActionItem("Rekam Medis", Icons.Default.MedicalServices, "medical_records"),
-        FeatureActionItem("Resume Medis", Icons.Default.Description, "medical_resume"),
-        FeatureActionItem("Monitor Kesehatan", Icons.Default.MonitorHeart, "health_monitor"),
-        FeatureActionItem("Kalkulator BMI", Icons.Default.Calculate, "bmi_calculator"),
-        FeatureActionItem("Info Medis", Icons.Default.Info, "medical_info"),
-        FeatureActionItem("Kesehatan Mental", Icons.Default.Psychology, "mental_health_hub")
+        FeatureActionItem("BMI Checker", Icons.Default.Calculate, "bmi_calculator"),
+        FeatureActionItem("Analisis Nutrisi", Icons.Default.Analytics, "nutrition_scanner"),
+        FeatureActionItem("Peringatan Gula", Icons.Default.ErrorOutline, "sugar_warning"),
+        FeatureActionItem("Rekomendasi Sehat", Icons.Default.Recommend, "health_monitor"),
+        FeatureActionItem("Tips Diet", Icons.Default.Lightbulb, "diet_tips"),
+        FeatureActionItem("Water Reminder", Icons.Default.WaterDrop, "water_tracker")
     )
     val aiFeatures = listOf(
         FeatureActionItem("AI Chat", Icons.AutoMirrored.Filled.Chat, "ai_chat"),
-        FeatureActionItem("Asisten Kesehatan", Icons.Default.SmartToy, "health_assistant"),
-        FeatureActionItem("Perjalanan Sehat", Icons.Default.CalendarMonth, "health_journey"),
-        FeatureActionItem("Nutrisi AI", Icons.Default.CameraAlt, "nutrition_scanner"),
-        FeatureActionItem("Buku Harian", Icons.Default.Edit, "health_diary"),
-        FeatureActionItem("Scanner Pil", Icons.Default.PhotoCamera, "pill_scanner"),
-        FeatureActionItem("Laporan Mingguan", Icons.Default.Assessment, "weekly_report")
+        FeatureActionItem("AI Nutritionist", Icons.Default.SmartToy, "health_assistant"),
+        FeatureActionItem("AI Halal Assistant", Icons.Default.Assistant, "ai_chat"),
+        FeatureActionItem("AI Product Analysis", Icons.Default.Psychology, "ai_analysis"),
+        FeatureActionItem("AI Recommendation", Icons.Default.AutoGraph, "search_external")
     )
-    val supportFeatures = listOf(
-        FeatureActionItem("Donasi", Icons.Default.VolunteerActivism, "donations"),
-        FeatureActionItem("Komunitas", Icons.Default.Groups, "community_hub"),
-        FeatureActionItem("Kartu Sehat", Icons.Default.VerifiedUser, "health_pass"),
-        FeatureActionItem("Darurat", Icons.Default.LocalHospital, "emergency_p3k", iconTint = Error),
-        FeatureActionItem("Laporkan", Icons.Default.Warning, "report_issue/0/General"),
-        FeatureActionItem("Pengingat Obat", Icons.Default.Alarm, "medicine_reminders")
+    val donorFeatures = listOf(
+        FeatureActionItem("Donor Event", Icons.Default.Event, "donor_events"),
+        FeatureActionItem("Emergency Blood", Icons.Default.LocalHospital, "emergency_blood", iconTint = Error),
+        FeatureActionItem("Volunteer Donor", Icons.Default.VolunteerActivism, "donor_home"),
+        FeatureActionItem("Nearby Donor", Icons.Default.LocationOn, "nearby_donor"),
+        FeatureActionItem("Blood History", Icons.Default.History, "donor_history")
+    )
+    val userFeatures = listOf(
+        FeatureActionItem("Profil", Icons.Default.Person, "profile"),
+        FeatureActionItem("Notifikasi", Icons.Default.Notifications, "notifications"),
+        FeatureActionItem("Produk Favorit", Icons.Default.Favorite, "favorites"),
+        FeatureActionItem("History Scan", Icons.Default.Restore, "history"),
+        FeatureActionItem("Upload Produk", Icons.Default.CloudUpload, "contribution"),
+        FeatureActionItem("Report Produk", Icons.Default.Flag, "report_issue/0/General")
     )
 
     Scaffold(
@@ -77,10 +82,11 @@ fun AllFeaturesScreen(navController: NavController) {
         containerColor = Slate50
     ) { paddingValues ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues), contentPadding = PaddingValues(vertical = 16.dp)) {
-            item { PremiumFeatureSection("Fitur Utama", coreFeatures, navController) }
-            item { PremiumFeatureSection("Kesehatan & Medis", healthFeatures, navController) }
-            item { PremiumFeatureSection("Kecerdasan Buatan", aiFeatures, navController) }
-            item { PremiumFeatureSection("Dukungan & Komunitas", supportFeatures, navController) }
+            item { PremiumFeatureSection("HALAL FEATURES", halalFeatures, navController) }
+            item { PremiumFeatureSection("HEALTH FEATURES", healthFeatures, navController) }
+            item { PremiumFeatureSection("AI FEATURES", aiFeatures, navController) }
+            item { PremiumFeatureSection("DONOR FEATURES", donorFeatures, navController) }
+            item { PremiumFeatureSection("USER FEATURES", userFeatures, navController) }
         }
     }
 }

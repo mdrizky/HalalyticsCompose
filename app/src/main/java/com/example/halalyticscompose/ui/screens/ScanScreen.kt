@@ -41,6 +41,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.Executors
 import androidx.compose.ui.draw.shadow
 import com.example.halalyticscompose.ui.theme.*
@@ -159,7 +161,7 @@ fun ScanScreen(
                                 scannedCode = result
                                 isScanning = false
                                 when (selectedTab) {
-                                    1 -> navController.navigate("enhanced_ocr?scannedText=${Uri.encode(result)}")
+                                    1 -> navController.navigate("ai_analysis?ingredients=${Uri.encode(result)}")
                                     else -> navController.navigate("product_detail/$result")
                                 }
                             }
@@ -271,8 +273,15 @@ fun CameraPreview(
                                 }
                                 .addOnCompleteListener { imageProxy.close() }
                         } else { // Text/OCR
-                             // We could add basic OCR here if needed, or just close
-                             imageProxy.close()
+                            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                            recognizer.process(image)
+                                .addOnSuccessListener { visionText ->
+                                    val fullText = visionText.text
+                                    if (fullText.length > 10) { // Minimum length to avoid noise
+                                        onResultDetected(fullText)
+                                    }
+                                }
+                                .addOnCompleteListener { imageProxy.close() }
                         }
                     } else {
                         imageProxy.close()

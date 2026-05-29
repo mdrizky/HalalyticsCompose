@@ -30,7 +30,7 @@ class MedicineTakenReceiver : BroadcastReceiver() {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
                         val apiService = com.example.halalyticscompose.data.network.ApiConfig.apiService
-                        val response = apiService.markMedicineAsTaken(token, reminderId, userId.toString())
+                        val response = apiService.markMedicineAsTaken(token, reminderId)
                         if (response.isSuccessful) {
                             Log.d("MedicineTaken", "Successfully marked medicine as taken")
                         } else {

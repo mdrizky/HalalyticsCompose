@@ -33,6 +33,7 @@ class SessionManager(private val context: Context) {
         // Auth keys
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_TOKEN_TYPE = "token_type"
+        private const val KEY_TOKEN_EXPIRY = "token_expiry"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         
         // User keys
@@ -97,13 +98,25 @@ class SessionManager(private val context: Context) {
     // Authentication Methods
     // ========================================
     
-    fun saveAuthToken(token: String, tokenType: String = "Bearer") {
+    fun saveAuthToken(token: String, tokenType: String = "Bearer", expiresInSeconds: Long = -1) {
         prefs.edit().apply {
             putString(KEY_AUTH_TOKEN, token)
             putString(KEY_TOKEN_TYPE, tokenType)
             putBoolean(KEY_IS_LOGGED_IN, true)
+            if (expiresInSeconds > 0) {
+                val expiryTs = System.currentTimeMillis() + (expiresInSeconds * 1000)
+                putLong(KEY_TOKEN_EXPIRY, expiryTs)
+            } else {
+                remove(KEY_TOKEN_EXPIRY)
+            }
             apply()
         }
+    }
+
+    fun isTokenExpired(): Boolean {
+        val expiryTs = prefs.getLong(KEY_TOKEN_EXPIRY, -1L)
+        if (expiryTs == -1L) return false // Assume no expiry if not set
+        return System.currentTimeMillis() > expiryTs
     }
     
     // ⚠️ NEW: Save complete session with role
@@ -377,7 +390,16 @@ class SessionManager(private val context: Context) {
     // ========================================
     
     fun logout() {
+        val darkMode = isDarkMode()
+        val language = getLanguage()
+        val onboarding = hasCompletedOnboarding()
+        
         prefs.edit().clear().apply()
+        
+        // Restore non-session preferences
+        saveDarkMode(darkMode)
+        saveLanguage(language)
+        setOnboardingCompleted(onboarding)
     }
     
     fun clearAll() {

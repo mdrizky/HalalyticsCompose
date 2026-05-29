@@ -32,7 +32,7 @@ class MedicineReminderWorker(
             val response = apiService.getUserMedicineReminders(token)
             
             if (response.isSuccessful) {
-                val reminders = response.body()?.data ?: emptyList()
+                val reminders: List<MedicineReminder> = response.body()?.data ?: emptyList()
                 
                 // Clear old alarms before recreating
                 for (reminder in reminders) {

@@ -215,9 +215,14 @@ class AuthViewModel @Inject constructor(
 
     fun loadUserProfile() {
         val token = _accessToken.value ?: sessionManager.getAuthToken()
-        if (token.isNullOrBlank()) return
+        if (token.isNullOrBlank()) {
+            _errorMessage.value = "Sesi berakhir. Silakan login kembali."
+            return
+        }
 
         viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
             try {
                 val response = apiService.getProfile("Bearer $token")
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -260,9 +265,14 @@ class AuthViewModel @Inject constructor(
                             gender = it.gender
                         )
                     }
+                } else {
+                    _errorMessage.value = "Gagal memuat profil: ${response.message()}"
                 }
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Load profile error", e)
+                _errorMessage.value = "Koneksi bermasalah: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }

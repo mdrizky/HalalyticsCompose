@@ -33,6 +33,9 @@ class DonorViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private val _activeEmergencies = MutableStateFlow<List<EmergencyBloodRequest>>(emptyList())
+    val activeEmergencies: StateFlow<List<EmergencyBloodRequest>> = _activeEmergencies
+
     fun loadDonorDashboard(token: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -44,6 +47,7 @@ class DonorViewModel @Inject constructor(
                 launch { _bloodStock.value = apiService.getBloodStockSummary().data ?: emptyList() }
                 launch { _donorCard.value = apiService.getDonorCard(bearer).data }
                 launch { _donorHistory.value = apiService.getMyAppointments(bearer).data ?: emptyList() }
+                launch { _activeEmergencies.value = apiService.getActiveEmergencies().data ?: emptyList() }
                 
                 _error.value = null
             } catch (e: Exception) {
@@ -66,6 +70,38 @@ class DonorViewModel @Inject constructor(
                 _error.value = e.message ?: "Gagal mendaftar event"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun registerForEventWithPayload(token: String, payload: Map<String, Any>, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val bearer = if (token.startsWith("Bearer ")) token else "Bearer $token"
+                apiService.createAppointment(bearer, payload)
+                onSuccess()
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Gagal mendaftar event"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun toggleVoluntaryStatus(isActive: Boolean, token: String) {
+        viewModelScope.launch {
+            try {
+                val bearer = if (token.startsWith("Bearer ")) token else "Bearer $token"
+                // Assuming an endpoint exists, let's call it and update local state
+                val request = mapOf("is_voluntary_donor" to isActive)
+                apiService.updateVoluntaryStatus(bearer, request)
+                
+                // Update local state
+                _donorCard.value = _donorCard.value?.copy(isVoluntaryDonor = isActive)
+            } catch (e: Exception) {
+                _error.value = "Gagal memperbarui status: ${e.message}"
             }
         }
     }

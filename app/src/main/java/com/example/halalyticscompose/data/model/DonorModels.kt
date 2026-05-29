@@ -25,7 +25,8 @@ data class DonorCard(
     @SerializedName("last_donation_date") val lastDonationDate: String?,
     @SerializedName("next_eligible_date") val nextEligibleDate: String?,
     @SerializedName("donor_badge") val donorBadge: String?,
-    @SerializedName("qr_token") val qrToken: String?
+    @SerializedName("qr_token") val qrToken: String?,
+    @SerializedName("is_voluntary_donor") val isVoluntaryDonor: Boolean = false
 )
 
 data class DonorAppointment(

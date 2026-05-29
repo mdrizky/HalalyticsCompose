@@ -68,7 +68,7 @@ sealed class BottomNavItem(
 
     
     // Admin Items
-    object AdminDashboard : BottomNavItem("home", R.string.admin_panel_title, Icons.Filled.Build, Icons.Outlined.Build)
+    object AdminDashboard : BottomNavItem("admin_panel_app", R.string.admin_panel_title, Icons.Filled.Build, Icons.Outlined.Build)
     object AdminUsers : BottomNavItem("admin_users", R.string.admin_panel_users, Icons.Filled.Person, Icons.Outlined.Person)
     object AdminNotifications : BottomNavItem("admin_notifications_app", R.string.notification_title, Icons.Filled.Notifications, Icons.Outlined.Notifications)
 }
@@ -77,6 +77,7 @@ sealed class BottomNavItem(
 fun BottomNavBar(
     navController: NavController,
     isAdmin: Boolean = false,
+
     isNutritionist: Boolean = false,
     modifier: Modifier = Modifier
 ) {

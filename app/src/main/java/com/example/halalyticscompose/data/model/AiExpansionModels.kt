@@ -32,6 +32,13 @@ data class OcrScanResultRequest(
 // ============================================================
 // FASE 5: SMART NUTRITION MODELS
 // ============================================================
+data class MealLogRequest(
+    @SerializedName("product_id") val product_id: Int?,
+    @SerializedName("barcode") val barcode: String?,
+    @SerializedName("portion") val portion: Double,
+    @SerializedName("meal_type") val meal_type: String
+)
+
 data class DailyNutritionLog(
     val id: Int,
     @SerializedName("meal_type") val mealType: String,

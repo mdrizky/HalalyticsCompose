@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,8 +37,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.halalyticscompose.R
+import com.example.halalyticscompose.utils.ImageUtils
 import com.example.halalyticscompose.data.model.User
 import com.example.halalyticscompose.ui.viewmodel.AuthViewModel
+import com.example.halalyticscompose.ui.theme.*
 import coil.compose.AsyncImage
 import java.io.File
 import java.io.FileOutputStream
@@ -51,9 +54,11 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val userData by viewModel.userData.collectAsState()
     val isLoadingVM by viewModel.isLoading.collectAsState()
+    val errorMessageVM by viewModel.errorMessage.collectAsState()
     
     // Form States
     var fullName by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
@@ -65,6 +70,7 @@ fun EditProfileScreen(
     var selectedDiet by remember { mutableStateOf("None") }
     var activityLevel by remember { mutableStateOf("medium") }
     var address by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
     var emergencyContact by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
     var allergy by remember { mutableStateOf("") }
@@ -90,8 +96,10 @@ fun EditProfileScreen(
     
     LaunchedEffect(userData) {
         userData?.let { user ->
-            if (!isInitialized) {
+            // Re-initialize state if data changes and we are not already editing
+            if (!isInitialized || (fullName.isEmpty() && user.fullName != null)) {
                 fullName = user.fullName ?: ""
+                username = user.username
                 phone = user.phone ?: ""
                 email = user.email
                 bio = user.bio ?: ""
@@ -105,6 +113,7 @@ fun EditProfileScreen(
                 allergy = user.allergy ?: ""
                 medicalHistory = user.medicalHistory ?: ""
                 address = user.address ?: ""
+                city = user.address?.substringAfterLast(",")?.trim() ?: ""
                 emergencyContact = user.emergencyContact ?: ""
                 birthDate = user.birthDate ?: ""
                 isInitialized = true
@@ -143,7 +152,7 @@ fun EditProfileScreen(
             activityLevel = activityLevel,
             allergy = allergy,
             medicalHistory = medicalHistory,
-            address = address,
+            address = if (city.isNotBlank()) "$address, $city" else address,
             emergencyContact = emergencyContact,
             birthDate = birthDate,
             image = imageFile,
@@ -152,14 +161,27 @@ fun EditProfileScreen(
                 navController.popBackStack()
             },
             onError = { msg ->
-                Toast.makeText(context, context.getString(R.string.edit_profile_failed, msg), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "${context.getString(R.string.edit_profile_failed)} $msg", Toast.LENGTH_SHORT).show()
             }
         )
     }
 
-    if (userData == null && !isInitialized) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    if (userData == null && !isInitialized && isLoadingVM) {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Emerald)
+        }
+        return
+    }
+
+    if (userData == null && !isInitialized && errorMessageVM != null) {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(errorMessageVM ?: context.getString(R.string.error_general), color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { viewModel.loadUserProfile() }) {
+                    Text(context.getString(R.string.error_retry))
+                }
+            }
         }
         return
     }
@@ -170,7 +192,7 @@ fun EditProfileScreen(
                 title = { Text(stringResource(R.string.edit_profile_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back))
                     }
                 },
                 actions = {
@@ -214,10 +236,14 @@ fun EditProfileScreen(
                 EditCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         EditTextField(value = fullName, onValueChange = { fullName = it }, label = stringResource(R.string.edit_profile_full_name), icon = Icons.Default.Badge)
-                        EditTextField(value = email, onValueChange = { }, label = stringResource(R.string.edit_profile_email), icon = Icons.Default.Email, enabled = false)
+                        EditTextField(value = username, onValueChange = { }, label = stringResource(R.string.account_username), icon = Icons.Default.AlternateEmail, enabled = false)
+                        EditTextField(value = email, onValueChange = { }, label = stringResource(R.string.account_email), icon = Icons.Default.Email, enabled = false)
                         EditTextField(value = phone, onValueChange = { phone = it }, label = stringResource(R.string.edit_profile_phone), icon = Icons.Default.Phone, keyboardType = KeyboardType.Phone)
-                        EditTextField(value = birthDate, onValueChange = { birthDate = it }, label = stringResource(R.string.edit_profile_birthdate), icon = Icons.Default.Cake, placeholder = "YYYY-MM-DD")
-                        EditTextField(value = address, onValueChange = { address = it }, label = stringResource(R.string.edit_profile_address), icon = Icons.Default.Home)
+                        EditTextField(value = birthDate, onValueChange = { birthDate = it }, label = stringResource(R.string.edit_profile_birthdate), icon = Icons.Default.Cake, placeholder = stringResource(R.string.edit_profile_birthdate_placeholder))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            EditTextField(value = address, onValueChange = { address = it }, label = stringResource(R.string.edit_profile_address), icon = Icons.Default.Home, modifier = Modifier.weight(1.5f))
+                            EditTextField(value = city, onValueChange = { city = it }, label = stringResource(R.string.edit_profile_city), icon = Icons.Default.LocationCity, modifier = Modifier.weight(1f))
+                        }
                         EditTextField(value = bio, onValueChange = { bio = it }, label = stringResource(R.string.edit_profile_bio), icon = Icons.Default.EditNote, singleLine = false, minLines = 2)
                     }
                 }
@@ -237,6 +263,11 @@ fun EditProfileScreen(
                             BloodTypeDropdown(selected = bloodType, onSelected = { bloodType = it }, modifier = Modifier.weight(1f))
                         }
                         GenderSelector(selected = gender, onSelected = { gender = it })
+                        
+                        // Added Activity Level and Diet Preference
+                        ActivityLevelDropdown(selected = activityLevel, onSelected = { activityLevel = it })
+                        DietPreferenceDropdown(selected = selectedDiet, onSelected = { selectedDiet = it })
+                        
                         EditTextField(value = emergencyContact, onValueChange = { emergencyContact = it }, label = stringResource(R.string.edit_profile_emergency), icon = Icons.Default.ContactPhone, keyboardType = KeyboardType.Phone)
                         EditTextField(value = allergy, onValueChange = { allergy = it }, label = stringResource(R.string.edit_profile_allergy), icon = Icons.Default.Warning, placeholder = stringResource(R.string.edit_profile_allergy_placeholder))
                         EditTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = stringResource(R.string.edit_profile_medical_history), icon = Icons.Default.History, singleLine = false, minLines = 2)
@@ -333,11 +364,12 @@ fun ProfilePhotoHeader(
                 Surface(
                     modifier = Modifier
                         .size(110.dp)
-                        .border(4.dp, Color.White, CircleShape)
+                        .border(4.dp, Gold, CircleShape) // Changed to Gold border
                         .shadow(8.dp, CircleShape),
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surface
                 ) {
+                    val profileImageUrl = ImageUtils.normalizeUrl(userData?.image)
                     if (selectedUri != null) {
                         AsyncImage(
                             model = selectedUri,
@@ -345,9 +377,9 @@ fun ProfilePhotoHeader(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                    } else if (!userData?.image.isNullOrBlank()) {
+                    } else if (profileImageUrl != null) {
                         AsyncImage(
-                            model = userData?.image,
+                            model = profileImageUrl,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -356,10 +388,15 @@ fun ProfilePhotoHeader(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.primary.copy(0.1f)),
+                                .background(Emerald.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Person, null, modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.primary)
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(id = R.drawable.logo_halalytics_official),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                contentScale = ContentScale.Fit
+                            )
                         }
                     }
                 }
@@ -565,6 +602,76 @@ fun ChangePasswordDialog(
         },
         shape = RoundedCornerShape(24.dp)
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ActivityLevelDropdown(selected: String, onSelected: (String) -> Unit) {
+    val levels = listOf("low", "medium", "high", "very_high")
+    val levelLabels = mapOf(
+        "low" to "Sedenter (Jarang olahraga)",
+        "medium" to "Moderat (1-3x seminggu)",
+        "high" to "Aktif (3-5x seminggu)",
+        "very_high" to "Sangat Aktif (Atlet/Fisik berat)"
+    )
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = levelLabels[selected] ?: selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Level Aktivitas") },
+            leadingIcon = { Icon(Icons.Default.DirectionsRun, null, tint = Emerald) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            levels.forEach { level ->
+                DropdownMenuItem(
+                    text = { Text(levelLabels[level] ?: level) },
+                    onClick = { onSelected(level); expanded = false }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DietPreferenceDropdown(selected: String, onSelected: (String) -> Unit) {
+    val diets = listOf("None", "Vegetarian", "Vegan", "Keto", "Paleo", "Low Carb")
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+    ) {
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Preferensi Diet") },
+            leadingIcon = { Icon(Icons.Default.Restaurant, null, tint = Emerald) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            diets.forEach { diet ->
+                DropdownMenuItem(
+                    text = { Text(diet) },
+                    onClick = { onSelected(diet); expanded = false }
+                )
+            }
+        }
+    }
 }
 
 @Composable

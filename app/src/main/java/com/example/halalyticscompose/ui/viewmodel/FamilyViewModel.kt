@@ -117,6 +117,68 @@ class FamilyViewModel @Inject constructor(
         }
     }
 
+    fun updateFamilyProfile(
+        id: Int,
+        name: String,
+        relationship: String?,
+        age: Int?,
+        gender: String?,
+        allergies: String?,
+        medicalHistory: String?,
+        image: java.io.File? = null,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val token = sessionManager.getAuthToken() ?: return@launch
+                
+                val response = if (image != null) {
+                    val imageBody = image.asRequestBody("image/*".toMediaTypeOrNull())
+                    val imagePart = MultipartBody.Part.createFormData("image", image.name, imageBody)
+                    
+                    apiService.updateFamilyProfileMultipart(
+                        bearer = "Bearer $token",
+                        id = id,
+                        method = "PUT".toRequestBody("text/plain".toMediaTypeOrNull()),
+                        image = imagePart,
+                        name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        relationship = relationship?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        age = age?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        gender = gender?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        allergies = allergies?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        medicalHistory = medicalHistory?.toRequestBody("text/plain".toMediaTypeOrNull())
+                    )
+                } else {
+                    apiService.updateFamilyProfile(
+                        bearer = "Bearer $token",
+                        id = id,
+                        method = "PUT",
+                        name = name,
+                        relationship = relationship,
+                        age = age,
+                        gender = gender,
+                        allergies = allergies,
+                        medicalHistory = medicalHistory
+                    )
+                }
+                
+                if (response.success) {
+                    fetchFamilyProfiles()
+                    onSuccess()
+                } else {
+                    onError(response.message)
+                }
+            } catch (e: Exception) {
+                Log.e("FamilyVM", "Update failed", e)
+                onError(e.message ?: "Gagal memperbarui profil keluarga")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun deleteFamilyProfile(id: Int, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             try {

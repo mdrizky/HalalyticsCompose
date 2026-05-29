@@ -22,7 +22,7 @@ object RoleHelper {
      * Primary home route after splash / login.
      */
     fun homeRoute(role: String?): String = when (normalizeRole(role)) {
-        "admin" -> "home"
+        "admin" -> "admin_panel_app"
         "ahli_gizi" -> "nutritionist_home"
         else -> "home"
     }

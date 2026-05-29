@@ -64,24 +64,26 @@ class ProductRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 println("✅ Halalytics API success for barcode: $barcode")
                 val responseData = response.body()!!.data
-                val productInfo = responseData.product
-                val product = Product(
-                    id = productInfo.id,
-                    barcode = productInfo.barcode,
-                    name = productInfo.name,
-                    brand = productInfo.brand,
-                    category = productInfo.category,
-                    image = productInfo.image,
-                    halalInfo = HalalInfo(
-                        halalStatus = HalalStatus.fromString(responseData.halal_info.halal_status),
-                        certificateNumber = responseData.halal_info.halal_certificate_number,
-                        certificationBody = responseData.halal_info.certification_body,
-                        validUntil = responseData.halal_info.certificate_valid_until,
-                        lastChecked = responseData.halal_info.last_checked_at,
-                        source = responseData.halal_source
+                if (responseData != null) {
+                    val productInfo = responseData.product
+                    val product = Product(
+                        id = productInfo.id,
+                        barcode = productInfo.barcode,
+                        name = productInfo.name,
+                        brand = productInfo.brand,
+                        category = productInfo.category,
+                        image = productInfo.image,
+                        halalInfo = HalalInfo(
+                            halalStatus = HalalStatus.fromString(responseData.halal_info.halal_status),
+                            certificateNumber = responseData.halal_info.halal_certificate_number,
+                            certificationBody = responseData.halal_info.certification_body,
+                            validUntil = responseData.halal_info.certificate_valid_until,
+                            lastChecked = responseData.halal_info.last_checked_at,
+                            source = responseData.halal_source
+                        )
                     )
-                )
-                return Result.success(product)
+                    return Result.success(product)
+                }
             } 
 
             // 5. Fallback to local cache
@@ -120,7 +122,7 @@ class ProductRepository @Inject constructor(
                 lastChecked = null,
                 source = data.source
             ),
-            ingredientsText = data.komposisi?.joinToString(", "),
+            ingredientsText = data.komposisi,
             isVerified = data.isVerified,
             verificationStatus = data.verificationStatus,
             quantity = data.quantity,
@@ -237,10 +239,10 @@ class ProductRepository @Inject constructor(
         }
     }
 
-    suspend fun getProductAlternatives(barcode: String, token: String? = null): Result<com.example.halalyticscompose.data.api.HalalAlternativeResponse> {
+    suspend fun getProductAlternatives(barcode: String, token: String? = null): Result<HalalAlternativeResponse> {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val bearerToken = if (token != null && !token.startsWith("Bearer ")) "Bearer $token" else token
+                val bearerToken = if (token != null && !token.startsWith("Bearer ")) "Bearer $token" else token ?: ""
                 val response = apiService.getProductAlternatives(barcode, bearerToken)
                 if (response.isSuccessful && response.body()?.success == true) {
                     val data = response.body()?.data

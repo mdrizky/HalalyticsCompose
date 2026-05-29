@@ -138,6 +138,7 @@ dependencies {
     implementation(libs.androidx.benchmark.baseline.profile.gradle.plugin)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material)
+    implementation(libs.google.material)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -152,22 +153,22 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     // Navigation (buat pindah antar screen)
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.2")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.2")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
     // Retrofit + OkHttp (buat koneksi API Laravel)
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:retrofit:2.10.0")
     implementation("com.squareup.retrofit2:converter-gson:2.10.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     // Facebook Login
-    implementation("com.facebook.android:facebook-android-sdk:latest.release")
-    implementation("com.facebook.android:facebook-login:latest.release")
+    implementation("com.facebook.android:facebook-android-sdk:17.0.0")
+    implementation("com.facebook.android:facebook-login:17.0.0")
 
     //Animasi
     implementation("androidx.compose.animation:animation:1.5.4")

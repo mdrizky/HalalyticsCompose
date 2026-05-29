@@ -62,7 +62,7 @@ fun MedicineRemindersScreen(
                 val title = reminderToDelete?.medicineName
                     ?.takeIf { it.isNotBlank() }
                     ?: reminderToDelete?.drug?.name
-                    ?: stringResource(R.string.feature_cek_obat)
+                    ?: stringResource(R.string.feature_check_medicine_alt)
                 Text(stringResource(R.string.med_reminder_delete_desc, title))
             },
             confirmButton = {

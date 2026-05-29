@@ -247,7 +247,9 @@ fun AccountManagementScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Button(
-                onClick = { viewModel.logout(navController) },
+                onClick = {
+                    viewModel.logout(navController)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ErrorColor

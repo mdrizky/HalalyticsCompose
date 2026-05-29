@@ -3,6 +3,7 @@ package com.example.halalyticscompose.ui.screens.donation
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,8 +15,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -23,6 +26,16 @@ import com.example.halalyticscompose.data.model.DonationCampaignDto
 import com.example.halalyticscompose.ui.viewmodel.DonationViewModel
 import java.text.NumberFormat
 import java.util.Locale
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import com.example.halalyticscompose.R
+import com.example.halalyticscompose.ui.theme.*
 
 private fun formatIdr(value: Double): String {
     return NumberFormat.getCurrencyInstance(Locale.Builder().setLanguage("id").setRegion("ID").build()).format(value)
@@ -90,16 +103,30 @@ private fun CampaignCard(c: DonationCampaignDto, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(Modifier.padding(16.dp)) {
-            if (c.isUrgent) {
-                Text("URGENT", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+        Column {
+            if (!c.image.isNullOrBlank()) {
+                AsyncImage(
+                    model = c.image,
+                    contentDescription = c.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().height(160.dp)
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxWidth().height(160.dp).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
+                }
             }
-            Text(c.title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-            c.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2) }
-            Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(progress = { (c.progressPercent / 100f).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(4.dp))
-            Text("${formatIdr(c.collectedAmount)} / ${formatIdr(c.targetAmount)}", style = MaterialTheme.typography.labelMedium)
+            Column(Modifier.padding(16.dp)) {
+                if (c.isUrgent) {
+                    Text("URGENT", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+                }
+                Text(c.title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                c.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 2) }
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(progress = { (c.progressPercent / 100f).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(4.dp))
+                Text("${formatIdr(c.collectedAmount)} / ${formatIdr(c.targetAmount)}", style = MaterialTheme.typography.labelMedium)
+            }
         }
     }
 }
@@ -132,9 +159,17 @@ fun DonationDetailScreen(
     ) { padding ->
         Column(Modifier.padding(padding).padding(16.dp)) {
             campaign?.let { c ->
+                if (!c.image.isNullOrBlank()) {
+                    AsyncImage(
+                        model = c.image,
+                        contentDescription = c.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(16.dp)).padding(bottom = 16.dp)
+                    )
+                }
                 Text(c.description ?: "", style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(16.dp))
-                LinearProgressIndicator(progress = { (c.progressPercent / 100f).coerceIn(0f, 1f) })
+                LinearProgressIndicator(progress = { (c.progressPercent / 100f).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
                 Text("${c.donorCount} donatur · ${formatIdr(c.collectedAmount)} terkumpul", Modifier.padding(top = 8.dp))
                 Spacer(Modifier.height(24.dp))
                 Button(
@@ -159,7 +194,16 @@ fun DonationFormScreen(
     var amountText by remember { mutableStateOf("50000") }
     var anonymous by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
+    var selectedMethod by remember { mutableStateOf("qris") }
     val presets = listOf(25000, 50000, 100000, 250000)
+
+    val paymentMethods = listOf(
+        PaymentMethodItem("gopay", "GoPay", R.drawable.logo_halalytics_official),
+        PaymentMethodItem("dana", "DANA", R.drawable.logo_halalytics_official),
+        PaymentMethodItem("shopeepay", "ShopeePay", R.drawable.logo_halalytics_official),
+        PaymentMethodItem("qris", "QRIS", R.drawable.logo_halalytics_official),
+        PaymentMethodItem("bca_va", "BCA Virtual Account", R.drawable.logo_halalytics_official)
+    )
 
     LaunchedEffect(campaignId) {
         if (state.campaigns.isEmpty()) viewModel.loadCampaigns()
@@ -178,7 +222,7 @@ fun DonationFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Form Donasi") },
+                title = { Text("Lengkapi Donasi", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -187,48 +231,155 @@ fun DonationFormScreen(
             )
         }
     ) { padding ->
-        Column(Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Pilih nominal", fontWeight = FontWeight.Bold)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                presets.forEach { p ->
-                    FilterChip(
-                        selected = amountText == p.toString(),
-                        onClick = { amountText = p.toString() },
-                        label = { Text(formatIdr(p.toDouble())) }
-                    )
+        LazyColumn(
+            modifier = Modifier.padding(padding).padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 32.dp)
+        ) {
+            item {
+                Text("Pilih Nominal", fontWeight = FontWeight.Black, fontSize = 16.sp, color = Slate900)
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    presets.forEach { p ->
+                        Surface(
+                            onClick = { amountText = p.toString() },
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(
+                                1.5.dp,
+                                if (amountText == p.toString()) Emerald else Slate200
+                            ),
+                            color = if (amountText == p.toString()) Emerald.copy(alpha = 0.05f) else Color.Transparent,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                formatIdr(p.toDouble()).replace(",00", ""),
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = if (amountText == p.toString()) Emerald else Slate600
+                            )
+                        }
+                    }
                 }
             }
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = { amountText = it.filter { ch -> ch.isDigit() } },
-                label = { Text("Nominal (Rp)") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = anonymous, onCheckedChange = { anonymous = it })
-                Text("Sembunyikan nama saya")
+
+            item {
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { amountText = it.filter { ch -> ch.isDigit() } },
+                    label = { Text("Nominal Lainnya (Rp)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    leadingIcon = { Text("Rp", modifier = Modifier.padding(start = 12.dp), fontWeight = FontWeight.Bold, color = Slate400) },
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black, color = Emerald)
+                )
             }
-            OutlinedTextField(
-                value = message,
-                onValueChange = { message = it },
-                label = { Text("Pesan (opsional)") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(
-                onClick = {
-                    val amount = amountText.toDoubleOrNull() ?: 0.0
-                    if (amount >= 1000) {
-                        viewModel.createDonation(amount, anonymous, message.ifBlank { null })
+
+            item {
+                Text("Metode Pembayaran", fontWeight = FontWeight.Black, fontSize = 16.sp, color = Slate900)
+                Spacer(Modifier.height(12.dp))
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, Slate100)
+                ) {
+                    Column {
+                        paymentMethods.forEachIndexed { index, method ->
+                            PaymentMethodRow(
+                                method = method,
+                                isSelected = selectedMethod == method.id,
+                                onClick = { selectedMethod = method.id }
+                            )
+                            if (index < paymentMethods.size - 1) {
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Slate100)
+                            }
+                        }
                     }
-                },
-                enabled = !state.loading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (state.loading) CircularProgressIndicator(Modifier.size(22.dp))
-                else Text("Lanjutkan ke Pembayaran")
+                }
+            }
+
+            item {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Slate50)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = anonymous,
+                                onCheckedChange = { anonymous = it },
+                                colors = CheckboxDefaults.colors(checkedColor = Emerald)
+                            )
+                            Text("Sembunyikan nama saya (Hamba Allah)", fontSize = 14.sp, color = Slate700)
+                        }
+                        OutlinedTextField(
+                            value = message,
+                            onValueChange = { message = it },
+                            label = { Text("Pesan Doa (Opsional)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            placeholder = { Text("Semoga berkah...", fontSize = 14.sp) }
+                        )
+                    }
+                }
+            }
+
+            item {
+                state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
+                Button(
+                    onClick = {
+                        val amount = amountText.toDoubleOrNull() ?: 0.0
+                        if (amount >= 1000) {
+                            viewModel.createDonation(amount, anonymous, message.ifBlank { null })
+                        }
+                    },
+                    enabled = !state.loading,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Emerald)
+                ) {
+                    if (state.loading) {
+                        CircularProgressIndicator(Modifier.size(24.dp), color = Color.White)
+                    } else {
+                        Text("Bayar Sekarang", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                    }
+                }
             }
         }
+    }
+}
+
+data class PaymentMethodItem(val id: String, val name: String, val iconRes: Int)
+
+@Composable
+private fun PaymentMethodRow(
+    method: PaymentMethodItem,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(method.iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp).clip(RoundedCornerShape(4.dp))
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(method.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, color = Slate800, fontSize = 14.sp)
+        RadioButton(
+            selected = isSelected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(selectedColor = Emerald)
+        )
     }
 }
 

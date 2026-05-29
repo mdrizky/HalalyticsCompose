@@ -185,7 +185,16 @@ class MainActivity : FragmentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         
-        // Cek dan tampilkan log jika ada crash sebelumnya
+        Log.d("HALALYTICS_FLOW", "MainActivity: onCreate Started")
+        Log.d("HALALYTICS_DEBUG", "MainActivity Started")
+
+        // Custom crash handling
+        Thread.setDefaultUncaughtExceptionHandler { thread, e ->
+            Log.e("HALALYTICS_CRASH", "FATAL CRASH on thread ${thread.name}: " + e.stackTraceToString())
+        }
+        com.example.halalyticscompose.utils.CrashReporter.install(this)
+        
+        // Show previous crash log if exists
         val lastCrash = com.example.halalyticscompose.utils.CrashReporter.getLastCrash(this)
         if (lastCrash != null) {
             Log.e("HALALYTICS_CRASH", "PREVIOUS CRASH DETECTED:\n$lastCrash")
@@ -194,8 +203,20 @@ class MainActivity : FragmentActivity() {
         }
 
         setContent {
+            Log.d("HALALYTICS_FLOW", "MainActivity: setContent block started")
             val mainViewModel: MainViewModel = hiltViewModel()
             val authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = hiltViewModel()
+            
+            // Keep system splash screen until we have the first frame of Compose and initial session state
+            var isReady by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                Log.d("HALALYTICS_FLOW", "MainActivity: Initializing isReady delay")
+                // Short delay to allow Compose to settle
+                kotlinx.coroutines.delay(200)
+                isReady = true
+                Log.d("HALALYTICS_FLOW", "MainActivity: isReady = true")
+            }
+            splashScreen.setKeepOnScreenCondition { !isReady }
             val historyViewModel: com.example.halalyticscompose.ui.viewmodel.HistoryViewModel = hiltViewModel()
             val healthViewModel: com.example.halalyticscompose.ui.viewmodel.HealthViewModel = hiltViewModel()
             
@@ -210,6 +231,8 @@ class MainActivity : FragmentActivity() {
             val isAdmin by authViewModel.isAdmin.collectAsState()
             val isNutritionist by authViewModel.isNutritionist.collectAsState()
 
+            Log.d("HALALYTICS_FLOW", "MainActivity: Rendering Theme. isLoggedIn=$isLoggedIn, isAdmin=$isAdmin")
+
             HalalyticsComposeTheme(darkTheme = isDarkMode) {
                 CompositionLocalProvider(LocalFacebookCallbackManager provides facebookCallbackManager) {
                 Surface(
@@ -223,6 +246,7 @@ class MainActivity : FragmentActivity() {
                     LaunchedEffect(intent) {
                         val navigateTo = intent.getStringExtra("navigate_to")
                         if (!navigateTo.isNullOrEmpty()) {
+                            Log.d("HALALYTICS_FLOW", "MainActivity: Intent navigation to $navigateTo")
                             // Delay slightly to ensure startDestination is set
                             navController.navigate(navigateTo)
                         }
@@ -232,6 +256,7 @@ class MainActivity : FragmentActivity() {
                     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
                 LaunchedEffect(appLanguage) {
+                    Log.d("HALALYTICS_FLOW", "MainActivity: Language changed to $appLanguage")
                     LanguageManager.applyLanguageIfNeeded(this@MainActivity, appLanguage)
                 }
 
@@ -312,6 +337,9 @@ class MainActivity : FragmentActivity() {
                 // Comparison Feature
                 val compareViewModel: com.example.halalyticscompose.ui.viewmodel.CompareViewModel = hiltViewModel()
 
+                // Donor Feature
+                val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = hiltViewModel()
+
                 // Initialize PreferenceManager
                 val preferenceManager = remember {
                     com.example.halalyticscompose.utils.PreferenceManager(context)
@@ -366,10 +394,25 @@ class MainActivity : FragmentActivity() {
                     // Splash Screen
                     composable("splash") {
                         SplashScreen(
-                            navController = navController,
-                            isLoggedIn = sessionManager.isLoggedIn(),
-                            onSplashComplete = {
-                                // Additional logic if needed after splash
+                            onNavigateToOnboarding = {
+                                Log.d("HALALYTICS_FLOW", "Navigate Onboarding")
+                                navController.navigate("onboarding") { popUpTo("splash") { inclusive = true } }
+                            },
+                            onNavigateToLogin = {
+                                Log.d("HALALYTICS_FLOW", "Navigate Login")
+                                navController.navigate("login") { popUpTo("splash") { inclusive = true } }
+                            },
+                            onNavigateToUserHome = {
+                                Log.d("HALALYTICS_FLOW", "Navigate Home")
+                                navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                            },
+                            onNavigateToAdminDashboard = {
+                                Log.d("HALALYTICS_FLOW", "Navigate Admin")
+                                navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                            },
+                            onNavigateToNutritionistHome = {
+                                Log.d("HALALYTICS_FLOW", "Navigate Nutritionist")
+                                navController.navigate("nutritionist_home") { popUpTo("splash") { inclusive = true } }
                             }
                         )
                     }
@@ -420,13 +463,13 @@ class MainActivity : FragmentActivity() {
                     composable("home") {
                         MainLayout(
                             navController = navController,
-                            showBottomNav = true,
+                            showBottomNav = !isNutritionist,
                             isAdmin = isAdmin,
                             isNutritionist = isNutritionist
                         ) { paddingValues ->
                             when {
                                 isAdmin -> AdminPanelScreen(navController = navController)
-                                isNutritionist -> NutritionistHomeScreen(navController = navController)
+                                isNutritionist -> NutritionistMainScreen(navController = navController)
                                 else -> HomeScreen(
                                     navController = navController,
                                     paddingValues = paddingValues
@@ -437,14 +480,21 @@ class MainActivity : FragmentActivity() {
 
                     composable("nutritionist_home") {
                         if (isNutritionist) {
-                            MainLayout(navController = navController, showBottomNav = true, isAdmin = false, isNutritionist = true) { paddingValues ->
-                                NutritionistHomeScreen(navController = navController)
-                            }
+                            NutritionistMainScreen(navController = navController)
                         } else {
                             LaunchedEffect(Unit) {
                                 navController.popBackStack()
                             }
                         }
+                    }
+
+                    composable("patient_detail/{userId}") { backStackEntry ->
+                        val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                        PatientDetailScreen(userId = userId, navController = navController)
+                    }
+
+                    composable("consultations") {
+                        ConsultationScreen(navController = navController)
                     }
 
 
@@ -548,8 +598,7 @@ class MainActivity : FragmentActivity() {
                     composable("profile") {
                         MainLayout(navController = navController, showBottomNav = true, isAdmin = isAdmin) { paddingValues ->
                             ProfileScreen(
-                                navController = navController,
-                                paddingValues = paddingValues
+                                navController = navController
                             )
                         }
                     }
@@ -588,7 +637,16 @@ class MainActivity : FragmentActivity() {
 
                     
                     // AI Analysis Screen
-                    composable("ai_analysis") { backStackEntry ->
+                    composable(
+                        "ai_analysis?ingredients={ingredients}",
+                        arguments = listOf(
+                            navArgument("ingredients") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { backStackEntry ->
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             AiAnalysisScreen(
                                 navController = navController
@@ -604,7 +662,40 @@ class MainActivity : FragmentActivity() {
                     
                     // All Features App Menu
                     composable("all_features") {
-                        AllFeaturesScreen(navController = navController)
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            AllFeaturesScreen(navController = navController)
+                        }
+                    }
+
+                    composable("diet_tips") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            DietTipsScreen(navController = navController)
+                        }
+                    }
+
+                    composable("sugar_warning") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            SugarWarningScreen(navController = navController)
+                        }
+                    }
+
+                    composable("risk_checker") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            RiskCheckerScreen(navController = navController)
+                        }
+                    }
+
+                    composable(
+                        "product_request/{barcode}",
+                        arguments = listOf(navArgument("barcode") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val barcode = backStackEntry.arguments?.getString("barcode") ?: ""
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            ProductRequestScreen(
+                                navController = navController,
+                                barcode = barcode
+                            )
+                        }
                     }
 
                     composable("community_hub") {
@@ -647,8 +738,7 @@ class MainActivity : FragmentActivity() {
                         val category = backStackEntry.arguments?.getString("category") ?: ""
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ManualInputScreen(
-                                navController = navController,
-                                initialCategory = category
+                                navController = navController
                             )
                         }
                     }
@@ -709,72 +799,9 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                     
-                    // 🩸 BLOOD DONATION ROUTES
-                    composable("donor_home") {
-                        val token = sessionManager.getAuthToken() ?: ""
-                        val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            com.example.halalyticscompose.ui.screens.donor.DonorHomeScreen(
-                                navController = navController,
-                                viewModel = donorViewModel,
-                                token = token
-                            )
-                        }
-                    }
-
-                    composable("donor_events") {
-                        val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            com.example.halalyticscompose.ui.screens.donor.DonorEventsScreen(
-                                navController = navController,
-                                viewModel = donorViewModel
-                            )
-                        }
-                    }
-
-                    composable("donor_event_detail/{eventId}") { backStackEntry ->
-                        val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            com.example.halalyticscompose.ui.screens.donor.DonorEventDetailScreen(
-                                navController = navController,
-                                eventId = eventId
-                            )
-                        }
-                    }
-
-                    composable("donor_screening/{eventId}") { backStackEntry ->
-                        val token = sessionManager.getAuthToken() ?: ""
-                        val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            com.example.halalyticscompose.ui.screens.donor.SelfScreeningScreen(
-                                navController = navController,
-                                viewModel = donorViewModel,
-                                token = token,
-                                eventId = eventId
-                            )
-                        }
-                    }
-
-                    composable("donor_history") {
-                        val token = sessionManager.getAuthToken() ?: ""
-                        val donorViewModel: com.example.halalyticscompose.ui.viewmodel.DonorViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-                        MainLayout(navController = navController, isAdmin = isAdmin) {
-                            com.example.halalyticscompose.ui.screens.donor.DonorHistoryScreen(
-                                navController = navController,
-                                viewModel = donorViewModel,
-                                token = token
-                            )
-                        }
-                    }
-                    
                     // Edit Profile Screen
                     composable("edit_profile") {
-                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
-                            EditProfileScreen(
-                                navController = navController
-                            )
-                        }
+                        EditProfileScreen(navController = navController)
                     }
 
                     // Family Box Screen
@@ -792,9 +819,8 @@ class MainActivity : FragmentActivity() {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             val barcode = backStackEntry.arguments?.getString("barcode")
                             ProductDetailScreen(
-                                navController,
-                                barcode ?: "",
-                                mainViewModel
+                                navController = navController,
+                                barcode = barcode ?: ""
                             )
                         }
                     }
@@ -1434,6 +1460,88 @@ class MainActivity : FragmentActivity() {
 
                     composable("help_center") {
                         HelpCenterScreen(navController = navController)
+                    }
+
+                    // ═══ BLOOD DONOR ROUTES ═══
+
+                    composable("donor_home") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            val token = sessionManager.getAuthToken() ?: ""
+                            com.example.halalyticscompose.ui.screens.donor.DonorHomeScreen(
+                                navController = navController,
+                                viewModel = donorViewModel,
+                                token = token
+                            )
+                        }
+                    }
+
+                    composable("donor_events") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            com.example.halalyticscompose.ui.screens.donor.DonorEventsScreen(
+                                navController = navController,
+                                viewModel = donorViewModel
+                            )
+                        }
+                    }
+
+                    composable(
+                        "donor_event_detail/{eventId}",
+                        arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val eventId = backStackEntry.arguments?.getInt("eventId") ?: 0
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            com.example.halalyticscompose.ui.screens.donor.DonorEventDetailScreen(
+                                navController = navController,
+                                eventId = eventId
+                            )
+                        }
+                    }
+
+                    composable("donor_history") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            val token = sessionManager.getAuthToken() ?: ""
+                            com.example.halalyticscompose.ui.screens.donor.DonorHistoryScreen(
+                                navController = navController,
+                                viewModel = donorViewModel,
+                                token = token
+                            )
+                        }
+                    }
+
+                    composable("emergency_blood") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            val emergencies by donorViewModel.activeEmergencies.collectAsState()
+                            com.example.halalyticscompose.ui.screens.donor.EmergencyRequestScreen(
+                                navController = navController,
+                                emergencies = emergencies
+                            )
+                        }
+                    }
+
+                    composable("emergency_request") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            val emergencies by donorViewModel.activeEmergencies.collectAsState()
+                            com.example.halalyticscompose.ui.screens.donor.EmergencyRequestScreen(
+                                navController = navController,
+                                emergencies = emergencies
+                            )
+                        }
+                    }
+
+                    composable(
+                        "donor_form/{eventId}",
+                        arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val eventId = backStackEntry.arguments?.getInt("eventId") ?: 0
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            val token = sessionManager.getAuthToken() ?: ""
+                            com.example.halalyticscompose.ui.screens.donor.DonorFormScreen(
+                                navController = navController,
+                                viewModel = donorViewModel,
+                                eventId = eventId,
+                                token = token
+                            )
+                        }
                     }
                 }
                 } // End of Surface

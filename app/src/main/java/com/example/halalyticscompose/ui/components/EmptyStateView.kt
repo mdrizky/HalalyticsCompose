@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.halalyticscompose.ui.theme.*
 
+import androidx.compose.ui.res.painterResource
+import com.example.halalyticscompose.R
+
 /**
  * HALALYTICS PREMIUM EMPTY STATE VIEW
  *
@@ -37,6 +40,7 @@ fun EmptyStateView(
     title: String = "No Data Yet",
     description: String = "Data will appear here once you start using the app.",
     icon: ImageVector = Icons.Default.Inbox,
+    useOfficialLogo: Boolean = false,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -76,12 +80,20 @@ fun EmptyStateView(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Emerald.copy(alpha = 0.6f),
-                modifier = Modifier.size(48.dp)
-            )
+            if (useOfficialLogo) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(R.drawable.logo_halalytics_official),
+                    contentDescription = null,
+                    modifier = Modifier.size(60.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Emerald.copy(alpha = 0.6f),
+                    modifier = Modifier.size(48.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

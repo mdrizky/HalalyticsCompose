@@ -84,7 +84,17 @@ fun DonorHomeScreen(
                 )
             }
 
-            // 2. Quick Actions
+            // 2. Voluntary Status Toggle
+            item {
+                VoluntaryStatusToggle(
+                    isVoluntary = donorCard?.isVoluntaryDonor ?: false,
+                    onToggle = { isActive ->
+                        viewModel.toggleVoluntaryStatus(isActive, token)
+                    }
+                )
+            }
+
+            // 3. Quick Actions
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -112,12 +122,28 @@ fun DonorHomeScreen(
 
             // 4. Emergency Requests
             item {
-                EmergencyCard(
-                    hospital = "RS PMI Pusat",
-                    bloodType = "B-",
-                    reason = "Pasien Operasi Jantung",
-                    onDonate = { /* Handle navigate */ }
-                )
+                val emergencies by viewModel.activeEmergencies.collectAsState()
+                if (emergencies.isNotEmpty()) {
+                    val first = emergencies.first()
+                    EmergencyCard(
+                        hospital = first.hospital,
+                        bloodType = first.bloodType,
+                        reason = first.reason ?: "Butuh Darah Cepat",
+                        onDonate = { navController.navigate("emergency_request") }
+                    )
+                } else {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().clickable { navController.navigate("emergency_request") },
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Text(
+                            "Belum ada permintaan darurat",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
             }
 
             // 5. Featured Events
@@ -202,6 +228,57 @@ private fun DonorCardWidget(name: String, bloodType: String, donations: Int, nex
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun VoluntaryStatusToggle(isVoluntary: Boolean, onToggle: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(if (isVoluntary) Color(0xFFE8F5E9) else Color(0xFFFEEBEE)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isVoluntary) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isVoluntary) Color(0xFF4CAF50) else DonorRed
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text("Saya Siap Donor Sukarela", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(
+                        if (isVoluntary) "Lokasi Anda akan terlihat saat keadaan darurat" else "Aktifkan agar bisa dihubungi saat darurat",
+                        fontSize = 11.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+            Switch(
+                checked = isVoluntary,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = Color(0xFF4CAF50)
+                )
+            )
         }
     }
 }
@@ -311,12 +388,19 @@ private fun EventListItem(title: String, location: String, date: String, image: 
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = image,
-                contentDescription = null,
-                modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.LightGray.copy(alpha = 0.3f))
+            ) {
+                AsyncImage(
+                    model = image ?: "https://via.placeholder.com/150/ff0000/FFFFFF?text=Donor",
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(title, fontWeight = FontWeight.Bold)

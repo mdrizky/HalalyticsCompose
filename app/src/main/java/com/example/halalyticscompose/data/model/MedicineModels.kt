@@ -122,7 +122,20 @@ data class HalalAlternativeItem(
     @SerializedName("confidence") val confidence: Double?
 )
 
-// Original/Legacy classes for backward compatibility if needed
+// Original/Legacy classes for backward compatibility
+data class MedicineReminder(
+    @SerializedName("id") val id: Int,
+    @SerializedName("drug") val drug: DrugInfo?,
+    @SerializedName("medicine_name") val medicineName: String,
+    @SerializedName("is_active") val isActive: Boolean,
+    @SerializedName("schedule_times") val scheduleTimes: List<String>?,
+    @SerializedName("time_slots") val timeSlots: List<String>?
+)
+
+data class DrugInfo(
+    @SerializedName("name") val name: String
+)
+
 data class MedicineScheduleRequest(
     @SerializedName("medicine_id") val medicineId: Int?,
     @SerializedName("custom_name") val customName: String?,

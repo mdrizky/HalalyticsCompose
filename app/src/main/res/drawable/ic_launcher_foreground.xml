@@ -9,7 +9,7 @@
             android:insetBottom="12dp">
             <bitmap
                 android:gravity="center"
-                android:src="@drawable/logo_halalytics" />
+                android:src="@drawable/logo_halalytics_official" />
         </inset>
     </item>
 </layer-list>
