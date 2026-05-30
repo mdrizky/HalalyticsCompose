@@ -2,7 +2,7 @@ package com.example.halalyticscompose.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.halalyticscompose.data.model.Product
+import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.data.repository.ProductRepository
 import com.example.halalyticscompose.domain.usecase.GetProductImagesUseCase
 import com.example.halalyticscompose.data.model.ProductImageResult
@@ -90,6 +90,6 @@ sealed class ProductUiState {
 sealed class AlternativesUiState {
     object Initial : AlternativesUiState()
     object Loading : AlternativesUiState()
-    data class Success(val response: com.example.halalyticscompose.data.api.HalalAlternativeResponse) : AlternativesUiState()
+    data class Success(val response: HalalAlternativeResponse) : AlternativesUiState()
     data class Error(val message: String) : AlternativesUiState()
 }

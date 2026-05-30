@@ -24,23 +24,23 @@ class AIRepository @Inject constructor(
         // Combine all info into the ingredients text for the AI to analyze properly
         val fullContext = "Product: $name\nBrand: $brand\nCategory: $category\nIngredients: $ingredients"
         
-        val request = mapOf("ingredients" to fullContext)
+        val request = AiAnalysisRequest(ingredientsText = fullContext)
 
         val response = apiService.analyzeIngredients(authHeader, request)
         
-        if (response.isSuccessful && response.body()?.success == true) {
-            val content = response.body()!!.data!!
+        if (response.success) {
+            val content = response.content
             return AnalysisResult(
-                halalStatus = content.statusHalal,
-                halalScore = content.healthScore.toDouble(), 
-                healthStatus = content.healthStatus ?: "Unknown",
-                healthScore = content.healthScore,
-                personalizedMessage = content.personalizedMessage ?: "",
-                recommendations = content.recommendations ?: emptyList(),
-                dangerousIngredients = content.watchouts
+                halalStatus = content?.status ?: "Unknown",
+                halalScore = content?.confidence ?: 0, 
+                healthStatus = content?.healthRisk ?: "Unknown",
+                healthScore = content?.confidence ?: 0,
+                personalizedMessage = content?.analysis ?: "",
+                recommendations = content?.redFlags ?: emptyList(),
+                dangerousIngredients = content?.redFlags ?: emptyList()
             )
         } else {
-            throw Exception("Failed to analyze product: ${response.message()}")
+            throw Exception("Failed to analyze product: ${response.message}")
         }
     }
 }

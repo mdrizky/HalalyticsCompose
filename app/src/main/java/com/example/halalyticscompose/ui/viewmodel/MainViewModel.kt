@@ -88,7 +88,7 @@ class MainViewModel @Inject constructor(
             try {
                 val response = apiService.getFamilyProfiles("Bearer $token")
                 if (response.success) {
-                    _familyProfiles.value = response.data
+                    _familyProfiles.value = response.data ?: emptyList()
                 }
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Failed to fetch family profiles", e)

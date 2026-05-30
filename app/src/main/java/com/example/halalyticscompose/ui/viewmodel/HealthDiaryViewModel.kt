@@ -48,7 +48,7 @@ class HealthDiaryViewModel @Inject constructor(
             try {
                 val response = apiService.getHealthDiary(bearer, limit)
                 if (response.success) {
-                    _entries.value = response.data.sortedByDescending { it.recordedAt }
+                    _entries.value = response.data?.sortedByDescending { it.recordedAt } ?: emptyList()
                 } else {
                     _error.value = "Gagal memuat diary kesehatan"
                 }
@@ -79,10 +79,10 @@ class HealthDiaryViewModel @Inject constructor(
                     "notes" to note
                 )
                 val response = apiService.recordHealthMetric(bearer, payload)
-                if (response.success) {
+                if (response.isSuccessful && response.body()?.success == true) {
                     loadEntries()
                 } else {
-                    _error.value = response.message ?: "Gagal menyimpan diary"
+                    _error.value = response.body()?.message ?: "Gagal menyimpan diary"
                 }
             } catch (e: Exception) {
                 _error.value = "Gagal menyimpan diary: ${e.message}"

@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.halalyticscompose.ui.screens.donation.DonationScreen
 
 // Tab untuk bottom navigation user
 sealed class UserTab(val route: String, val labelRes: Int, val icon: @Composable () -> Unit) {
@@ -99,9 +100,6 @@ fun UserMainScreen(navController: NavController) {
             }
             composable(UserTab.Donation.route) {
                 DonationScreen(
-                    onCampaignClick = { campaignId ->
-                        navController.navigate("donation_detail/$campaignId")
-                    },
                     navController = navController
                 )
             }

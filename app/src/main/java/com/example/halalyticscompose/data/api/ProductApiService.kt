@@ -18,16 +18,5 @@ interface ProductApiService {
     ): Response<ApiResponse<Any>>
 }
 
-/** Dipakai oleh [ApiService.getProductAlternatives] & ProductRepository. */
-data class HalalAlternativeResponse(
-    val problematic_ingredients_reason: String,
-    val halal_alternatives: List<HalalAlternativeItem>,
-    val explanation: String
-)
+// (HalalAlternativeResponse and HalalAlternativeItem moved to HalalModels.kt to avoid redeclaration)
 
-data class HalalAlternativeItem(
-    val name: String,
-    val manufacturer: String,
-    val brand: String? = null,
-    val reason_it_is_better: String
-)

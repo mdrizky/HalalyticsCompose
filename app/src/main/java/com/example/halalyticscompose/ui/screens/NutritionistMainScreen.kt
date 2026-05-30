@@ -3,6 +3,7 @@ package com.example.halalyticscompose.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -21,7 +22,7 @@ sealed class NutritionistTab(val route: String, val labelRes: Int, val icon: @Co
     object Dashboard : NutritionistTab("nutri_tab_home", R.string.bottom_nav_nutritionist_dashboard, { Icon(Icons.Filled.Dashboard, null) })
     object Patients : NutritionistTab("nutri_tab_patients", R.string.bottom_nav_nutritionist_patients, { Icon(Icons.Filled.People, null) })
     object AIReview : NutritionistTab("nutri_tab_verify", R.string.bottom_nav_nutritionist_verify, { Icon(Icons.Filled.Science, null) })
-    object Education : NutritionistTab("nutri_tab_edu", R.string.bottom_nav_nutritionist_education, { Icon(Icons.Filled.MenuBook, null) })
+    object Education : NutritionistTab("nutri_tab_edu", R.string.bottom_nav_nutritionist_education, { Icon(Icons.AutoMirrored.Filled.MenuBook, null) })
     object Profile : NutritionistTab("nutri_tab_profile", R.string.bottom_nav_nutritionist_profile, { Icon(Icons.Filled.Person, null) })
 }
 

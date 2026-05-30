@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.example.halalyticscompose.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult

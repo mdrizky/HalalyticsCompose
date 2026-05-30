@@ -82,19 +82,5 @@ data class EmergencyLogData(
 
 // ----------------- AI Insight & Health Score ----------------- //
 
-data class DailyInsightResponse(
-    val status: String,
-    val insight: String
-)
+// (Moved to HealthModels.kt to avoid redeclaration)
 
-data class HealthScoreResponse(
-    val status: String,
-    val data: HealthScoreData
-)
-
-data class HealthScoreData(
-    val score: Int,
-    val level: String,
-    val color: String,
-    val label: String
-)

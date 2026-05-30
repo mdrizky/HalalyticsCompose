@@ -79,7 +79,22 @@ class AiReportViewModel @Inject constructor(
                     try {
                         val reportsResponse = apiService.getMedicalReportsHistory(token)
                         if (reportsResponse.success && reportsResponse.data != null) {
-                            reportsHistory = reportsResponse.data
+                            @Suppress("UNCHECKED_CAST")
+                            reportsHistory = reportsResponse.data.map {
+                                val aiResponseMap = it["ai_response"] as? Map<*, *>
+                                MedicalReportHistory(
+                                    id = (it["id"] as? Number)?.toInt() ?: 0,
+                                    type = it["type"] as? String ?: "",
+                                    created_at = it["created_at"] as? String ?: "",
+                                    ai_response = AiReportResponseData(
+                                        status_fisik = aiResponseMap?.get("status_fisik") as? String,
+                                        target_2_bulan = aiResponseMap?.get("target_2_bulan") as? String,
+                                        saran_nutrisi = aiResponseMap?.get("saran_nutrisi") as? List<String>,
+                                        saran_olahraga = aiResponseMap?.get("saran_olahraga") as? List<String>,
+                                        pesan_motivasi = aiResponseMap?.get("pesan_motivasi") as? String
+                                    )
+                                )
+                            }
                         }
                     } catch (e: Exception) {
                         Log.e("AiReportVM", "Error fetching medical reports history", e)

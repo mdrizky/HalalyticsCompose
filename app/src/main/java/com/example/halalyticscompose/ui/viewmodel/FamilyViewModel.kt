@@ -50,7 +50,7 @@ class FamilyViewModel @Inject constructor(
                 val token = sessionManager.getAuthToken() ?: return@launch
                 val response = apiService.getFamilyProfiles("Bearer $token")
                 if (response.success) {
-                    _familyProfiles.value = response.data
+                    _familyProfiles.value = response.data ?: emptyList()
                 }
             } catch (e: Exception) {
                 Log.e("FamilyVM", "Failed to fetch family profiles", e)
@@ -84,29 +84,33 @@ class FamilyViewModel @Inject constructor(
                         bearer = "Bearer $token",
                         image = imagePart,
                         name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        relationship = relationship?.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        age = age?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        relation = (relationship ?: "").toRequestBody("text/plain".toMediaTypeOrNull()),
+                        birthDate = age?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         gender = gender?.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        allergies = allergies?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        allergy = allergies?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         medicalHistory = medicalHistory?.toRequestBody("text/plain".toMediaTypeOrNull())
                     )
                 } else {
+                    val profileMap = mutableMapOf<String, Any>(
+                        "name" to name
+                    )
+                    relationship?.let { profileMap["relation"] = it }
+                    age?.let { profileMap["birth_date"] = it }
+                    gender?.let { profileMap["gender"] = it }
+                    allergies?.let { profileMap["allergy"] = it }
+                    medicalHistory?.let { profileMap["medical_history"] = it }
+
                     apiService.addFamilyProfile(
                         bearer = "Bearer $token",
-                        name = name,
-                        relationship = relationship,
-                        age = age,
-                        gender = gender,
-                        allergies = allergies,
-                        medicalHistory = medicalHistory
+                        profile = profileMap
                     )
                 }
                 
-                if (response.success) {
+                if (response.isSuccessful && response.body()?.success == true) {
                     fetchFamilyProfiles()
                     onSuccess()
                 } else {
-                    onError(response.message)
+                    onError(response.body()?.message ?: "Gagal menambah profil keluarga")
                 }
             } catch (e: Exception) {
                 Log.e("FamilyVM", "Add failed", e)
@@ -144,31 +148,35 @@ class FamilyViewModel @Inject constructor(
                         method = "PUT".toRequestBody("text/plain".toMediaTypeOrNull()),
                         image = imagePart,
                         name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        relationship = relationship?.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        age = age?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        relation = relationship?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        birthDate = age?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         gender = gender?.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        allergies = allergies?.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        allergy = allergies?.toRequestBody("text/plain".toMediaTypeOrNull()),
                         medicalHistory = medicalHistory?.toRequestBody("text/plain".toMediaTypeOrNull())
                     )
                 } else {
+                    val profileMap = mutableMapOf<String, Any>(
+                        "_method" to "PUT",
+                        "name" to name
+                    )
+                    relationship?.let { profileMap["relation"] = it }
+                    age?.let { profileMap["birth_date"] = it }
+                    gender?.let { profileMap["gender"] = it }
+                    allergies?.let { profileMap["allergy"] = it }
+                    medicalHistory?.let { profileMap["medical_history"] = it }
+
                     apiService.updateFamilyProfile(
                         bearer = "Bearer $token",
                         id = id,
-                        method = "PUT",
-                        name = name,
-                        relationship = relationship,
-                        age = age,
-                        gender = gender,
-                        allergies = allergies,
-                        medicalHistory = medicalHistory
+                        profile = profileMap
                     )
                 }
                 
-                if (response.success) {
+                if (response.isSuccessful && response.body()?.success == true) {
                     fetchFamilyProfiles()
                     onSuccess()
                 } else {
-                    onError(response.message)
+                    onError(response.body()?.message ?: "Gagal memperbarui profil keluarga")
                 }
             } catch (e: Exception) {
                 Log.e("FamilyVM", "Update failed", e)
@@ -185,7 +193,7 @@ class FamilyViewModel @Inject constructor(
                 _isLoading.value = true
                 val token = sessionManager.getAuthToken() ?: return@launch
                 val response = apiService.deleteFamilyProfile("Bearer $token", id)
-                if (response.success) {
+                if (response.isSuccessful && response.body()?.success == true) {
                     fetchFamilyProfiles()
                     if (_selectedProfile.value?.id == id) {
                         _selectedProfile.value = null

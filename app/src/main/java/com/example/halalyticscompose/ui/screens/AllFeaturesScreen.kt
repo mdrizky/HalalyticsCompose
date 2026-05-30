@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +33,7 @@ fun AllFeaturesScreen(navController: NavController) {
         FeatureActionItem("Scan Barcode", Icons.Default.QrCodeScanner, "scan"),
         FeatureActionItem("OCR Ingredient", Icons.Default.TextFields, "ocr_scan"),
         FeatureActionItem("Halal AI Analysis", Icons.Default.AutoAwesome, "ai_analysis"),
-        FeatureActionItem("Halal Education", Icons.Default.MenuBook, "encyclopedia"),
+        FeatureActionItem("Halal Education", Icons.AutoMirrored.Filled.MenuBook, "encyclopedia"),
         FeatureActionItem("Verifikasi Produk", Icons.Default.Verified, "product_request"),
         FeatureActionItem("Cek Bahan Berisiko", Icons.Default.Warning, "risk_checker")
     )

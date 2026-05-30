@@ -34,8 +34,8 @@ class NutritionRepository @Inject constructor(
     suspend fun getDailyLog(token: String, date: String? = null): Result<NutritionDashboardData> {
         return try {
             val response = api.getDailyNutritionLog("Bearer $token", date)
-            if (response.isSuccessful && response.body()?.success == true) {
-                Result.success(response.body()!!.data)
+            if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
             } else {
                 Result.failure(Exception("Fetch log failed"))
             }

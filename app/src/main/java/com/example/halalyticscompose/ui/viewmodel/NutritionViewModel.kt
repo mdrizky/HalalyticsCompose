@@ -93,7 +93,7 @@ class NutritionViewModel @Inject constructor(
                 val imagePart = okhttp3.MultipartBody.Part.createFormData("image", file.name, requestFile)
                 val mealTypePart = mealType.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                val response = apiService.logMeal(
+                val response = apiService.logMealMultipart(
                     "Bearer $token",
                     imagePart,
                     mealTypePart

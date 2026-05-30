@@ -173,11 +173,7 @@ data class HealthMetricResponse(
     @SerializedName("data") val data: List<com.example.halalyticscompose.data.model.HealthMetricData>
 )
 
-data class HalalAlternativeResponse(
-    @SerializedName("success") val success: Boolean,
-    @SerializedName("source") val source: String?,
-    @SerializedName("data") val data: com.example.halalyticscompose.data.model.HalalAlternativeData
-)
+// (HalalAlternativeResponse moved to HalalModels.kt)
 
 // Safe Schedule Response
 data class SafeScheduleResponse(

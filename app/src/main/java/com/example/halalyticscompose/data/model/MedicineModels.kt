@@ -111,11 +111,11 @@ data class HealthMetricData(
 // Halal Alternatives Models
 data class HalalAlternativeData(
     @SerializedName("problematic_ingredients") val problematicIngredients: List<String>?,
-    @SerializedName("halal_alternatives") val halalAlternatives: List<HalalAlternativeItem>?,
+    @SerializedName("halal_alternatives") val halalAlternatives: List<MedicineHalalAlternativeItem>?,
     @SerializedName("explanation") val explanation: String?
 )
 
-data class HalalAlternativeItem(
+data class MedicineHalalAlternativeItem(
     @SerializedName("name") val name: String,
     @SerializedName("manufacturer") val manufacturer: String?,
     @SerializedName("halal_cert") val halalCert: String?,

@@ -34,7 +34,7 @@ class MedicalInfoViewModel @Inject constructor(
                 _isLoading.value = true
                 val response = apiService.getMedicalProfile("Bearer $token")
                 if (response.isSuccessful && response.body()?.success == true) {
-                    val data = response.body()?.content as? Map<String, Any>
+                    val data = response.body()?.data as? Map<String, Any>
                     _profileData.value = data
                 } else {
                     _error.value = "Failed to load medical profile"

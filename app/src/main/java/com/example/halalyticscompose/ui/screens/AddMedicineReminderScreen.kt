@@ -88,7 +88,7 @@ fun AddMedicineReminderScreen(
             if (!name.isNullOrBlank()) medicineName = name
         }
         val idObserver = Observer<Int> { id ->
-            if (id != null && id > 0) medicineId = id
+            if (id > 0) medicineId = id
         }
         nameHandle?.getLiveData<String>("selected_medicine_name")?.observeForever(nameObserver)
         nameHandle?.getLiveData<Int>("selected_medicine_id")?.observeForever(idObserver)

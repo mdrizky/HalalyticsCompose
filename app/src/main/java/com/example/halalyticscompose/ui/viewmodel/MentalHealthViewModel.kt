@@ -40,7 +40,7 @@ class MentalHealthViewModel @Inject constructor(
                 _isLoading.value = true
                 val response = apiService.getMentalHealthArticles("Bearer $token")
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _news.value = response.body()?.content as? List<Map<String, Any>> ?: emptyList()
+                    _news.value = response.body()?.data as? List<Map<String, Any>> ?: emptyList()
                     _articles.value = _news.value
                 }
             } catch (e: Exception) {
@@ -58,17 +58,17 @@ class MentalHealthViewModel @Inject constructor(
                 _isLoading.value = true
                 val topicsResp = apiService.getMentalHealthTopics("Bearer $token")
                 if (topicsResp.isSuccessful && topicsResp.body()?.success == true) {
-                    _topics.value = topicsResp.body()?.content as? List<Map<String, Any>> ?: emptyList()
+                    _topics.value = topicsResp.body()?.data as? List<Map<String, Any>> ?: emptyList()
                 }
 
                 val articlesResp = apiService.getMentalHealthArticles("Bearer $token")
                 if (articlesResp.isSuccessful && articlesResp.body()?.success == true) {
-                    _articles.value = articlesResp.body()?.content as? List<Map<String, Any>> ?: emptyList()
+                    _articles.value = articlesResp.body()?.data as? List<Map<String, Any>> ?: emptyList()
                 }
 
                 val expertsResp = apiService.getMentalHealthExperts("Bearer $token")
                 if (expertsResp.isSuccessful && expertsResp.body()?.success == true) {
-                    _experts.value = expertsResp.body()?.content as? List<Map<String, Any>> ?: emptyList()
+                    _experts.value = expertsResp.body()?.data as? List<Map<String, Any>> ?: emptyList()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

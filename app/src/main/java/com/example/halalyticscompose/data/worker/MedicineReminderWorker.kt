@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import com.example.halalyticscompose.MainActivity
 import com.example.halalyticscompose.R
 import com.example.halalyticscompose.data.api.ApiService
+import com.example.halalyticscompose.data.model.*
 import com.example.halalyticscompose.utils.SessionManager
 import kotlinx.coroutines.flow.first
 
@@ -25,14 +26,15 @@ class MedicineReminderWorker(
             val sessionManager = SessionManager(applicationContext)
             val apiService = com.example.halalyticscompose.data.network.ApiConfig.apiService
             
-            val userId = sessionManager.getUserId() ?: return Result.failure()
-            val token = sessionManager.getBearerToken() ?: return Result.failure()
+            val userId = sessionManager.getUserId()
+            if (userId == 0) return Result.failure()
+            val token = sessionManager.getBearerToken() ?: sessionManager.getAuthToken()?.let { "Bearer $it" } ?: return Result.failure()
             
             // Get user reminders
             val response = apiService.getUserMedicineReminders(token)
             
             if (response.isSuccessful) {
-                val reminders: List<MedicineReminder> = response.body()?.data ?: emptyList()
+                val reminders: List<MedicationReminderItem> = response.body()?.data ?: emptyList()
                 
                 // Clear old alarms before recreating
                 for (reminder in reminders) {

@@ -9,7 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -45,7 +45,7 @@ fun ConsultationScreen(navController: NavController) {
                 containerColor = Emerald,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.Chat, "New Chat")
+                Icon(Icons.AutoMirrored.Filled.Chat, "New Chat")
             }
         }
     ) { padding ->

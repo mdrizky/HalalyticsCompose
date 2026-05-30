@@ -34,7 +34,7 @@ class HelpCenterViewModel @Inject constructor(
                 _isLoading.value = true
                 val response = apiService.getHelpCategories("Bearer $token")
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _categories.value = response.body()?.content as? List<Map<String, Any>> ?: emptyList()
+                    _categories.value = response.body()?.data as? List<Map<String, Any>> ?: emptyList()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

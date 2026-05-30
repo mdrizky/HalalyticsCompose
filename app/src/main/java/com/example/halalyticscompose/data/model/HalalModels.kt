@@ -150,10 +150,10 @@ data class HalalCheckResponse(
 
 data class HalalProductResponse(
     @SerializedName("success") val success: Boolean,
-    @SerializedName("data") val data: ProductData
+    @SerializedName("data") val data: ProductDetailData
 )
 
-data class ProductData(
+data class ProductDetailData(
     @SerializedName("product") val product: ProductInfo,
     @SerializedName("halal_info") val halal_info: HalalInfoResponse,
     @SerializedName("halal_source") val halal_source: String
@@ -176,10 +176,25 @@ data class HalalInfoResponse(
     @SerializedName("last_checked_at") val last_checked_at: String?
 )
 
-data class HalalAlternativeResponse(
+data class UnifiedProductAlternativeResponse(
     @SerializedName("original_product") val original_product: String,
     @SerializedName("alternatives") val alternatives: List<UnifiedProductData>,
     @SerializedName("success") val success: Boolean = true
+)
+
+/** Dipakai oleh [ApiService.getProductAlternatives] & ProductRepository. */
+data class HalalAlternativeResponse(
+    @SerializedName("problematic_ingredients_reason") val problematic_ingredients_reason: String,
+    @SerializedName("halal_alternatives") val halal_alternatives: List<HalalAlternativeItem>,
+    @SerializedName("explanation") val explanation: String,
+    @SerializedName("success") val success: Boolean = true
+)
+
+data class HalalAlternativeItem(
+    @SerializedName("name") val name: String,
+    @SerializedName("manufacturer") val manufacturer: String,
+    @SerializedName("brand") val brand: String? = null,
+    @SerializedName("reason_it_is_better") val reason_it_is_better: String
 )
 
 // Open Food Facts API Models
@@ -259,5 +274,42 @@ data class RecommendationsResponse(
     val content: List<ProductInfo>
 )
 
+
+
+
+// AI Meal Analysis Models
+data class AiAnalysisState(
+    val isLoading: Boolean = false,
+    val data: MealData? = null,
+    val error: String? = null
+)
+
+data class MealAnalysisRequest(
+    @SerializedName("image") val image: String
+)
+
+data class MealData(
+    @SerializedName("meal_name") val mealName: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("halal_analysis") val halalAnalysis: MealHalalAnalysis,
+    @SerializedName("health_score") val healthScore: Int,
+    @SerializedName("health_grade") val healthGrade: String,
+    @SerializedName("nutrition") val nutrition: MealNutrition,
+    @SerializedName("portion_advice") val portionAdvice: String
+)
+
+data class MealHalalAnalysis(
+    @SerializedName("status") val status: String,
+    @SerializedName("reason") val reason: String,
+    @SerializedName("risk_factors") val riskFactors: List<String>
+)
+
+data class MealNutrition(
+    @SerializedName("calories") val calories: Int,
+    @SerializedName("protein") val protein: Double,
+    @SerializedName("carbs") val carbs: Double,
+    @SerializedName("fat") val fat: Double,
+    @SerializedName("sugar") val sugar: Double
+)
 
 

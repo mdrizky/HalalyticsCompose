@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -171,7 +172,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = Error)
             ) {
-                Icon(Icons.Default.Logout, null)
+                Icon(Icons.AutoMirrored.Filled.Logout, null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.profile_logout_confirm), fontWeight = FontWeight.Bold)
             }

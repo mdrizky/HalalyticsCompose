@@ -32,12 +32,7 @@ data class OcrScanResultRequest(
 // ============================================================
 // FASE 5: SMART NUTRITION MODELS
 // ============================================================
-data class MealLogRequest(
-    @SerializedName("product_id") val product_id: Int?,
-    @SerializedName("barcode") val barcode: String?,
-    @SerializedName("portion") val portion: Double,
-    @SerializedName("meal_type") val meal_type: String
-)
+// (MealLogRequest moved to MealModels.kt to avoid redeclaration)
 
 data class DailyNutritionLog(
     val id: Int,
@@ -87,14 +82,7 @@ data class NutritionDashboardData(
     val goal: NutritionGoal?
 )
 
-data class NutritionHistoryItem(
-    val date: String,
-    @SerializedName("total_calories") val totalCalories: Int,
-    @SerializedName("total_carbs") val totalCarbs: Double,
-    @SerializedName("total_protein") val totalProtein: Double,
-    @SerializedName("total_fat") val totalFat: Double,
-    @SerializedName("meal_count") val mealCount: Int = 0,
-)
+// (NutritionHistoryItem moved to MealModels.kt to avoid redeclaration)
 
 // ============================================================
 // FASE 6: RECIPE AI MODELS

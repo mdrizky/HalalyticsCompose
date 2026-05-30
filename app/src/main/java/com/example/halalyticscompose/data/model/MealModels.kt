@@ -24,5 +24,9 @@ data class DailyNutritionResponse(
 
 data class NutritionHistoryItem(
     @SerializedName("date") val date: String,
-    @SerializedName("total_calories") val total_calories: Double
+    @SerializedName("total_calories") val totalCalories: Double,
+    @SerializedName("meal_count") val mealCount: Int = 0,
+    @SerializedName("total_carbs") val totalCarbs: Double = 0.0,
+    @SerializedName("total_protein") val totalProtein: Double = 0.0,
+    @SerializedName("total_fat") val totalFat: Double = 0.0
 )

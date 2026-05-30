@@ -188,17 +188,13 @@ class MainActivity : FragmentActivity() {
         Log.d("HALALYTICS_FLOW", "MainActivity: onCreate Started")
         Log.d("HALALYTICS_DEBUG", "MainActivity Started")
 
-        // Custom crash handling
-        Thread.setDefaultUncaughtExceptionHandler { thread, e ->
-            Log.e("HALALYTICS_CRASH", "FATAL CRASH on thread ${thread.name}: " + e.stackTraceToString())
-        }
+        // Global crash handling via CrashReporter
         com.example.halalyticscompose.utils.CrashReporter.install(this)
         
         // Show previous crash log if exists
         val lastCrash = com.example.halalyticscompose.utils.CrashReporter.getLastCrash(this)
         if (lastCrash != null) {
             Log.e("HALALYTICS_CRASH", "PREVIOUS CRASH DETECTED:\n$lastCrash")
-            android.widget.Toast.makeText(this, "App crashed previously. Check Logcat (HALALYTICS_CRASH).", android.widget.Toast.LENGTH_LONG).show()
             com.example.halalyticscompose.utils.CrashReporter.clearLastCrash(this)
         }
 
@@ -243,14 +239,21 @@ class MainActivity : FragmentActivity() {
                     val navController = rememberNavController()
                     
                     // Handle Notification Navigation (e.g. from Blood Emergency Alerts)
-                    LaunchedEffect(intent) {
-                        val navigateTo = intent.getStringExtra("navigate_to")
-                        if (!navigateTo.isNullOrEmpty()) {
-                            Log.d("HALALYTICS_FLOW", "MainActivity: Intent navigation to $navigateTo")
-                            // Delay slightly to ensure startDestination is set
-                            navController.navigate(navigateTo)
-                        }
-                    }
+        var intentNavigated by remember { mutableStateOf(false) }
+        LaunchedEffect(intent) {
+            val navigateTo = intent.getStringExtra("navigate_to")
+            if (!navigateTo.isNullOrEmpty() && !intentNavigated) {
+                Log.d("HALALYTICS_FLOW", "MainActivity: Intent navigation to $navigateTo")
+                // Wait for NavHost to be ready
+                kotlinx.coroutines.delay(1000)
+                try {
+                    navController.navigate(navigateTo)
+                    intentNavigated = true
+                } catch (e: Exception) {
+                    Log.e("HALALYTICS_FLOW", "MainActivity: Intent navigation failed", e)
+                }
+            }
+        }
                     
                     val context = LocalContext.current
                     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -396,23 +399,43 @@ class MainActivity : FragmentActivity() {
                         SplashScreen(
                             onNavigateToOnboarding = {
                                 Log.d("HALALYTICS_FLOW", "Navigate Onboarding")
-                                navController.navigate("onboarding") { popUpTo("splash") { inclusive = true } }
+                                try {
+                                    navController.navigate("onboarding") { popUpTo("splash") { inclusive = true } }
+                                } catch (e: Exception) {
+                                    Log.e("HALALYTICS_FLOW", "Navigation to Onboarding failed", e)
+                                }
                             },
                             onNavigateToLogin = {
                                 Log.d("HALALYTICS_FLOW", "Navigate Login")
-                                navController.navigate("login") { popUpTo("splash") { inclusive = true } }
+                                try {
+                                    navController.navigate("login") { popUpTo("splash") { inclusive = true } }
+                                } catch (e: Exception) {
+                                    Log.e("HALALYTICS_FLOW", "Navigation to Login failed", e)
+                                }
                             },
                             onNavigateToUserHome = {
                                 Log.d("HALALYTICS_FLOW", "Navigate Home")
-                                navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                                try {
+                                    navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                                } catch (e: Exception) {
+                                    Log.e("HALALYTICS_FLOW", "Navigation to Home failed", e)
+                                }
                             },
                             onNavigateToAdminDashboard = {
                                 Log.d("HALALYTICS_FLOW", "Navigate Admin")
-                                navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                                try {
+                                    navController.navigate("home") { popUpTo("splash") { inclusive = true } }
+                                } catch (e: Exception) {
+                                    Log.e("HALALYTICS_FLOW", "Navigation to Admin failed", e)
+                                }
                             },
                             onNavigateToNutritionistHome = {
                                 Log.d("HALALYTICS_FLOW", "Navigate Nutritionist")
-                                navController.navigate("nutritionist_home") { popUpTo("splash") { inclusive = true } }
+                                try {
+                                    navController.navigate("nutritionist_home") { popUpTo("splash") { inclusive = true } }
+                                } catch (e: Exception) {
+                                    Log.e("HALALYTICS_FLOW", "Navigation to Nutritionist failed", e)
+                                }
                             }
                         )
                     }

@@ -70,8 +70,8 @@ class ProductRepository @Inject constructor(
                         id = productInfo.id,
                         barcode = productInfo.barcode,
                         name = productInfo.name,
-                        brand = productInfo.brand,
-                        category = productInfo.category,
+                        brand = productInfo.brand ?: "Unknown",
+                        category = productInfo.category ?: "Unknown",
                         image = productInfo.image,
                         halalInfo = HalalInfo(
                             halalStatus = HalalStatus.fromString(responseData.halal_info.halal_status),
@@ -244,12 +244,12 @@ class ProductRepository @Inject constructor(
             try {
                 val bearerToken = if (token != null && !token.startsWith("Bearer ")) "Bearer $token" else token ?: ""
                 val response = apiService.getProductAlternatives(barcode, bearerToken)
-                if (response.isSuccessful && response.body()?.success == true) {
-                    val data = response.body()?.data
-                    if (data != null) {
-                        Result.success(data)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.success == true && body.data != null) {
+                        Result.success(body.data)
                     } else {
-                        Result.failure(Exception("Alternative data is null"))
+                        Result.failure(Exception(body?.message ?: "Alternative data is null"))
                     }
                 } else {
                     Result.failure(Exception("Failed to get alternatives: ${response.message()}"))

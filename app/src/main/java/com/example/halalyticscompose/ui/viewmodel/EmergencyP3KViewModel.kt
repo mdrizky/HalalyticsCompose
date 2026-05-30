@@ -56,8 +56,8 @@ class EmergencyP3KViewModel @Inject constructor(
                 )
                 
                 val res = apiService.triggerEmergency(bearer, req)
-                if (res.isSuccessful && res.body() != null) {
-                    _guidance.value = res.body()!!.guidance
+                if (res.success) {
+                    _guidance.value = res.guidance
                 } else {
                     _error.value = "Gagal memanggil AI Darurat. Hubungi 119!"
                 }

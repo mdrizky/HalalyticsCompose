@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -626,7 +627,7 @@ fun ActivityLevelDropdown(selected: String, onSelected: (String) -> Unit) {
             onValueChange = {},
             readOnly = true,
             label = { Text("Level Aktivitas") },
-            leadingIcon = { Icon(Icons.Default.DirectionsRun, null, tint = Emerald) },
+            leadingIcon = { Icon(Icons.AutoMirrored.Filled.DirectionsRun, null, tint = Emerald) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth()

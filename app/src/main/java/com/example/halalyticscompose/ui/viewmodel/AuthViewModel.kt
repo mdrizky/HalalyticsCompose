@@ -355,11 +355,11 @@ class AuthViewModel @Inject constructor(
                     )
                 }
                 
-                if (response.isSuccess) {
+                if (response.success) {
                     loadUserProfile() // Refresh local state from server
                     onSuccess()
                 } else {
-                    val errorMsg = response.errorMessage ?: "Gagal memperbarui profil"
+                    val errorMsg = response.message ?: "Gagal memperbarui profil"
                     onError(errorMsg)
                 }
             } catch (e: Exception) {
