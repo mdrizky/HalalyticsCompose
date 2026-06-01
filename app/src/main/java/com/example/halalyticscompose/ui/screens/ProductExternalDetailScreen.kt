@@ -109,7 +109,7 @@ fun ProductExternalDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Loading product...",
+                            text = "Mencari produk di database internasional...",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
                         )
@@ -118,41 +118,66 @@ fun ProductExternalDetailScreen(
             }
             
             error.isNotEmpty() -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(32.dp)
+                    Icon(
+                        imageVector = Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Product not in database",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Barcode: $barcode",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = TealDark,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Button(
+                        onClick = { navController.navigate("contribution?barcode=$barcode") },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = TealDark),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(
-                            Icons.Outlined.ErrorOutline,
-                            contentDescription = null,
-                            tint = HaramColor,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Product Not Found",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextWhite
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = error,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            onClick = { externalViewModel.getProductDetail(barcode) },
-                            colors = ButtonDefaults.buttonColors(containerColor = HalalGreen)
-                        ) {
-                            Text("Retry", color = MaterialTheme.colorScheme.onPrimary)
-                        }
+                        Text("Report & Admin Verification", color = Color.White)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    OutlinedButton(
+                        onClick = { navController.navigate("ocr_scan") },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Open OCR (Front & Back Photo)")
+                    }
+                    
+                    TextButton(
+                        onClick = { externalViewModel.getProductDetail(barcode) },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Try Again", color = TealDark)
                     }
                 }
             }
@@ -168,8 +193,8 @@ fun ProductExternalDetailScreen(
                             barcode = barcode,
                             productName = productDetail!!.getDisplayName(),
                             productImage = productDetail!!.getBestImageUrl(),
-                            halalStatus = if (productDetail!!.isHalal()) "halal" else "unknown",
-                            source = productDetail!!.source ?: "openfoodfacts"
+                            halalStatus = productDetail!!.getHalalStatus(),
+                            source = productDetail!!.source ?: "external"
                         )
                     },
                     modifier = Modifier.padding(top = 56.dp)

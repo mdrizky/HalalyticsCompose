@@ -185,12 +185,18 @@ fun AdminPanelScreen(
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White)
                         ) {
-                            Text(
-                                stringResource(R.string.admin_panel_no_pending),
-                                color = Slate400,
-                                modifier = Modifier.padding(32.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(Icons.Default.Inventory, null, tint = Slate300, modifier = Modifier.size(48.dp))
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    stringResource(R.string.admin_panel_no_pending),
+                                    color = Slate400,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
                         }
                     }
                 } else {

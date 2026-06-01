@@ -45,6 +45,7 @@ data class LoginModel(
         val phone: String?,
         val blood_type: String?,
         val allergy: String?,
+        val allergies: List<String>? = emptyList(),
         val medical_history: String?,
         val role: String,
         val active: Boolean,
@@ -68,8 +69,8 @@ data class LoginModel(
         val halal_count: Int?,           // Total hasil scan halal
         val syubhat_count: Int?,         // Total hasil scan syubhat
         val streak: Int?,                // Streak penggunaan (hari berturut)
-        val notif_enabled: Boolean?,     // Status notifikasi aktif / tidak
-        val dark_mode: Boolean?,         // Mode gelap aktif / tidak
+        val notif_enabled: Int?,     // Status notifikasi aktif / tidak
+        val dark_mode: Int?,         // Mode gelap aktif / tidak
         val bio: String?,                // Biografi user
         val gender: String?              // Jenis kelamin user
 
@@ -83,6 +84,7 @@ data class LoginModel(
                 phone = this.phone,
                 bloodType = this.blood_type ?: "-",
                 allergy = this.allergy,
+                allergies = this.allergies,
                 medicalHistory = this.medical_history,
                 role = this.role,
                 active = this.active,
@@ -96,8 +98,8 @@ data class LoginModel(
                 height = this.height?.toDouble() ?: 0.0,
                 weight = this.weight?.toDouble() ?: 0.0,
                 bmi = this.bmi?.toDouble() ?: 0.0,
-                notifEnabled = this.notif_enabled ?: true,
-                darkMode = this.dark_mode ?: false,
+                notifEnabled = this.notif_enabled ?: 1,
+                darkMode = this.dark_mode ?: 0,
                 bio = this.bio
             )
         }

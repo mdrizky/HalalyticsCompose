@@ -49,11 +49,12 @@ class HealthAiViewModel @Inject constructor(
                 }
 
                 val response = apiService.checkDrugInteraction(token, drugAId, drugBId, drugAName, drugBName, familyId)
-                if (response.success) {
-                    _interactionResult.value = response.data
-                    _interactionSource.value = response.source
+                if (response.isSuccessful && response.body()?.success == true) {
+                    _interactionResult.value = response.body()?.data
+                    _interactionSource.value = response.body()?.source
                 } else {
-                    _error.value = "Interaksi tidak dapat diproses."
+                    val errorBody = response.errorBody()?.string()
+                    _error.value = if (response.code() == 404) "Layanan interaksi obat belum tersedia di server." else "Gagal memproses interaksi: ${response.message()}"
                 }
                 _isLoading.value = false
             } catch (e: Exception) {

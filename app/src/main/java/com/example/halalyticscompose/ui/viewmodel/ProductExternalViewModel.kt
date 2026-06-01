@@ -79,6 +79,10 @@ class ProductExternalViewModel @Inject constructor(
     private val _productDetail = MutableStateFlow<ProductItem?>(null)
     val productDetail: StateFlow<ProductItem?> = _productDetail.asStateFlow()
     
+    // Intelligence Result
+    private val _intelligenceResult = MutableStateFlow<com.example.halalyticscompose.data.model.ProductIntelligenceResult?>(null)
+    val intelligenceResult: StateFlow<com.example.halalyticscompose.data.model.ProductIntelligenceResult?> = _intelligenceResult.asStateFlow()
+    
     // Total count from search
     private val _totalCount = MutableStateFlow(0)
     val totalCount: StateFlow<Int> = _totalCount.asStateFlow()
@@ -402,52 +406,158 @@ class ProductExternalViewModel @Inject constructor(
             _isLoadingDetail.value = true
             _detailError.value = ""
             
-            Log.d(TAG, "📦 Fetching product detail: $barcode")
+            val cleanBarcode = barcode.trim()
+            Log.d(TAG, "📦 Fetching product detail: $cleanBarcode")
             
             try {
-                val response = externalApiService.getProductDetail(barcode)
+                // Step 1: Try Local Backend First
+                val backendResponse = externalApiService.getProductDetail(cleanBarcode)
+                Log.d(TAG, "📡 Backend Response: ${backendResponse.code()}")
                 
-                Log.d(TAG, "📡 Detail response code: ${response.code()}")
-                
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val content = body?.content
-                    
-                    if (body?.responseCode == 200 && content != null) {
-                        _productDetail.value = content
-                        Log.d(TAG, "✅ Product found: ${content.getDisplayName()}")
-                        
-                        // Load advanced images
-                        val result = getProductImagesUseCase(content.getDisplayName(), barcode, "external")
-                        _productImageState.value = result
-                    } else {
-                        val fallback = loadProductDetailDirectFallback(barcode)
-                        if (!fallback) {
-                            _detailError.value = body?.message ?: "Product not found"
-                            _productDetail.value = null
-                            Log.d(TAG, "⚠️ ${body?.message}")
-                        }
-                    }
-                } else {
-                    val fallback = loadProductDetailDirectFallback(barcode)
-                    if (!fallback) {
-                        val errorMsg = buildHttpError(response, "Server error")
-                        _detailError.value = errorMsg
-                        _productDetail.value = null
-                        Log.e(TAG, "❌ $errorMsg")
+                if (backendResponse.isSuccessful) {
+                    val body = backendResponse.body()
+                    if (body?.responseCode == 200 && body.content != null) {
+                        _productDetail.value = body.content
+                        Log.d(TAG, "✅ Product found in Backend: ${body.content.getDisplayName()}")
+                        fetchAdvancedImages(body.content.getDisplayName(), cleanBarcode)
+                        performIntelligenceAnalysis(body.content)
+                        _isLoadingDetail.value = false
+                        return@launch
                     }
                 }
+
+                // Step 2: Fallback to OpenFoodFacts Direct
+                Log.d(TAG, "🔄 Falling back to OpenFoodFacts Direct for: $cleanBarcode")
+                val offResponse = openFoodFactsApiService.getProductDetail(cleanBarcode)
+                
+                if (offResponse.isSuccessful) {
+                    val body = offResponse.body()
+                    if (body?.product != null) {
+                        Log.d(TAG, "✅ OFF Direct Match: ${body.product.getDisplayName()}")
+                        _productDetail.value = body.product
+                        fetchAdvancedImages(body.product.getDisplayName(), cleanBarcode)
+                        performIntelligenceAnalysis(body.product)
+                        _isLoadingDetail.value = false
+                        return@launch
+                    }
+                }
+
+                // Step 3: Final Fallback - If still not found
+                _detailError.value = "Produk tidak ditemukan di database Halalytics maupun Open Food Facts."
+                _productDetail.value = null
+                Log.d(TAG, "⚠️ Product $cleanBarcode not found anywhere.")
+                
             } catch (e: Exception) {
-                val fallback = loadProductDetailDirectFallback(barcode)
-                if (!fallback) {
-                    val errorMsg = buildThrowableError("Network error", e)
-                    _detailError.value = errorMsg
-                    _productDetail.value = null
-                    Log.e(TAG, "❌ $errorMsg", e)
-                }
+                _detailError.value = buildThrowableError("Gagal memproses data produk", e)
+                _productDetail.value = null
+                Log.e(TAG, "❌ Error fetching product detail", e)
             } finally {
                 _isLoadingDetail.value = false
             }
+        }
+    }
+
+    private fun fetchAdvancedImages(productName: String, barcode: String) {
+        viewModelScope.launch {
+            try {
+                val result = getProductImagesUseCase(productName, barcode, "external")
+                _productImageState.value = result
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching advanced images", e)
+            }
+        }
+    }
+    
+    private suspend fun performIntelligenceAnalysis(product: ProductItem) {
+        try {
+            val ingredientsText = product.ingredientsText ?: product.ingredientsTextEn ?: ""
+            val productName = product.getDisplayName()
+
+            // 1. Local Halal Database Check
+            var halalAnalysis = com.example.halalyticscompose.data.local.LocalHaramDatabase.analyzeIngredients(ingredientsText)
+            
+            // 2. Parallel AI Calls (if needed)
+            var ingredientsAnalysis: List<com.example.halalyticscompose.data.model.IngredientDetail>? = null
+            var alternatives: List<com.example.halalyticscompose.data.model.AlternativeProduct>? = null
+            
+            kotlinx.coroutines.coroutineScope {
+                val aiHalalDeferred = if (halalAnalysis == null || halalAnalysis!!.status == com.example.halalyticscompose.data.model.IntelligenceHalalStatus.UNKNOWN || halalAnalysis!!.status == com.example.halalyticscompose.data.model.IntelligenceHalalStatus.HALAL) {
+                    // Coba AI jika lokal gagal atau lokal bilang halal (bisa jadi ada yang terlewat, walau lokal cepat)
+                    // Atau kita biarkan lokal jika sudah jelas halal/haram. Mari kita minta AI jika syubhat atau bahan kurang jelas
+                    kotlinx.coroutines.async { com.example.halalyticscompose.data.api.GroqApiClient.analyzeHalal(productName, ingredientsText) }
+                } else null
+
+                val ingredientsDeferred = if (ingredientsText.isNotBlank()) {
+                    kotlinx.coroutines.async { com.example.halalyticscompose.data.api.GroqApiClient.analyzeIngredients(ingredientsText) }
+                } else null
+
+                val aiHalal = aiHalalDeferred?.await()
+                if (aiHalal != null && (halalAnalysis == null || halalAnalysis!!.status == com.example.halalyticscompose.data.model.IntelligenceHalalStatus.UNKNOWN)) {
+                    halalAnalysis = aiHalal
+                }
+                
+                ingredientsAnalysis = ingredientsDeferred?.await()
+            }
+
+            // Fallback Halal Analysis if both failed
+            if (halalAnalysis == null) {
+                halalAnalysis = com.example.halalyticscompose.data.model.HalalAnalysisResult(
+                    status = com.example.halalyticscompose.data.model.IntelligenceHalalStatus.UNKNOWN,
+                    reason = "Tidak dapat memverifikasi status halal saat ini.",
+                    suspiciousIngredients = emptyList()
+                )
+            }
+
+            // 3. Health Score
+            val offNutriments = com.example.halalyticscompose.data.model.OFFNutriments(
+                energyKcal = product.getNutrimentNumber("energy-kcal_100g", "energy-kcal")?.toDoubleOrNull(),
+                fat = product.getNutrimentNumber("fat_100g", "fat")?.toDoubleOrNull(),
+                saturatedFat = product.getNutrimentNumber("saturated-fat_100g", "saturated_fat")?.toDoubleOrNull(),
+                carbohydrates = product.getNutrimentNumber("carbohydrates_100g", "carbohydrates")?.toDoubleOrNull(),
+                sugars = product.getNutrimentNumber("sugars_100g", "sugars")?.toDoubleOrNull(),
+                fiber = product.getNutrimentNumber("fiber_100g", "fiber")?.toDoubleOrNull(),
+                proteins = product.getNutrimentNumber("proteins_100g", "proteins")?.toDoubleOrNull(),
+                salt = product.getNutrimentNumber("salt_100g", "salt")?.toDoubleOrNull(),
+                sodium = product.getNutrimentNumber("sodium_100g")?.toDoubleOrNull()
+            )
+
+            val healthScore = com.example.halalyticscompose.data.local.HealthScoreCalculator.calculate(
+                novaGroup = product.novaGroup as? Int ?: product.novaGroup?.toString()?.toIntOrNull(),
+                nutriscoreGrade = product.nutriscoreGrade,
+                nutriments = offNutriments
+            )
+
+            // 4. Alternatives if score is bad or non-halal
+            if (healthScore.score < 70 || halalAnalysis!!.status != com.example.halalyticscompose.data.model.IntelligenceHalalStatus.HALAL) {
+                val issues = buildString {
+                    if (halalAnalysis!!.status != com.example.halalyticscompose.data.model.IntelligenceHalalStatus.HALAL) append("Bahan tidak halal/syubhat. ")
+                    healthScore.factors.filter { it.impact.startsWith("-") }.forEach {
+                        append("${it.name} (${it.value}). ")
+                    }
+                }
+                alternatives = com.example.halalyticscompose.data.api.GroqApiClient.getAlternatives(productName, issues)
+            }
+
+            // 5. Build Result
+            val result = com.example.halalyticscompose.data.model.ProductIntelligenceResult(
+                barcode = product.barcode ?: product.id ?: "",
+                name = productName,
+                brands = product.brands,
+                imageUrl = product.getBestImageUrl(),
+                ingredientsText = ingredientsText,
+                halalAnalysis = halalAnalysis!!,
+                healthScore = healthScore,
+                ingredientsAnalysis = ingredientsAnalysis,
+                alternatives = alternatives,
+                nutriments = offNutriments,
+                novaGroup = product.novaGroup as? Int ?: product.novaGroup?.toString()?.toIntOrNull(),
+                nutriscoreGrade = product.nutriscoreGrade
+            )
+
+            _intelligenceResult.value = result
+            Log.d(TAG, "🤖 Intelligence Analysis Complete for: $productName")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in performIntelligenceAnalysis", e)
         }
     }
     
@@ -470,6 +580,7 @@ class ProductExternalViewModel @Inject constructor(
      */
     fun clearProductDetail() {
         _productDetail.value = null
+        _intelligenceResult.value = null
         _detailError.value = ""
         Log.d(TAG, "🧹 Product detail cleared")
     }

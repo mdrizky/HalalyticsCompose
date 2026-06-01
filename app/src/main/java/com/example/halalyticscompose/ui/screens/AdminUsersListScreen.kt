@@ -105,9 +105,10 @@ fun UserAdminItem(user: User, onClick: () -> Unit) {
                 modifier = Modifier.size(50.dp).clip(CircleShape),
                 color = MaterialTheme.colorScheme.primary.copy(0.1f)
             ) {
-                if (!user.image.isNullOrBlank()) {
+                val profileUrl = com.example.halalyticscompose.utils.ImageUtils.normalizeUrl(user.image)
+                if (profileUrl != null) {
                     AsyncImage(
-                        model = user.image,
+                        model = profileUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
@@ -127,7 +128,8 @@ fun UserAdminItem(user: User, onClick: () -> Unit) {
                     Badge(containerColor = if (user.role == "admin") Color(0xFF8B5CF6) else Color(0xFF3B82F6)) {
                         Text(user.role.uppercase(), color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 4.dp))
                     }
-                    if (user.active) {
+                    val isActiveUser = user.active
+                    if (isActiveUser) {
                         Badge(containerColor = Color(0xFF10B981)) {
                             Text("ACTIVE", color = Color.White, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 4.dp))
                         }

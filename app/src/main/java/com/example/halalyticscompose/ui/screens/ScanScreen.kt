@@ -228,7 +228,7 @@ fun ScanScreen(
                     fontSize = 14.sp,
                     color = Emerald,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { navController.navigate("manual_input") }
+                    modifier = Modifier.clickable { navController.navigate("manual_barcode") }
                 )
             }
         }
@@ -245,6 +245,11 @@ fun CameraPreview(
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val executor = remember { Executors.newSingleThreadExecutor() }
+    var camera: Camera? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(showFlash) {
+        camera?.cameraControl?.enableTorch(showFlash)
+    }
 
     AndroidView(
         factory = { ctx ->
@@ -291,10 +296,10 @@ fun CameraPreview(
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
                 try {
                     cameraProvider.unbindAll()
-                    val camera = cameraProvider.bindToLifecycle(
+                    camera = cameraProvider.bindToLifecycle(
                         lifecycleOwner, cameraSelector, preview, imageAnalysis
                     )
-                    camera.cameraControl.enableTorch(showFlash)
+                    camera?.cameraControl?.enableTorch(showFlash)
                 } catch (exc: Exception) {
                     android.util.Log.e("CameraPreview", "Binding failed", exc)
                 }

@@ -35,6 +35,12 @@ class HalalyticsApplication : Application(), Configuration.Provider {
         // Capture fatal crashes into local storage for easier diagnosis from app side.
         CrashReporter.install(this)
         
+        try {
+            com.facebook.FacebookSdk.sdkInitialize(applicationContext)
+        } catch (e: Exception) {
+            Log.e("HalalyticsApp", "Failed to initialize Facebook SDK: ${e.message}", e)
+        }
+        
         // Delay scheduling to ensure WorkManager uses our custom configuration
         // WorkManager.getInstance(this) will now use workManagerConfiguration
         try {

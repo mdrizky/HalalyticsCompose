@@ -269,9 +269,9 @@ data class WeeklyStatItem(
 )
 
 data class RecommendationsResponse(
-    val response_code: Int,
-    val message: String,
-    val content: List<ProductInfo>
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("data") val data: List<ProductInfo>? = null,
+    @SerializedName("message") val message: String? = null
 )
 
 

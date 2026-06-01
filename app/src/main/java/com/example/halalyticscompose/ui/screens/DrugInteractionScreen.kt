@@ -30,138 +30,98 @@ fun DrugInteractionScreen(
     navController: NavController,
     viewModel: HealthAiViewModel = hiltViewModel()
 ) {
-    var drugA by remember { mutableStateOf("") }
-    var drugB by remember { mutableStateOf("") }
-    
     val interactionResult by viewModel.interactionResult.collectAsState()
     val interactionSource by viewModel.interactionSource.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    var drugA by remember { mutableStateOf("") }
+    var drugB by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.drug_interaction_title), fontWeight = FontWeight.Bold) },
+                title = { Text("Drug Interaction Checker", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = Color.White,
+                    titleContentColor = Color(0xFF1B6B5A)
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFF8FBFB)
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header Illustration/Icon
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Medication,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Icon(
-                        Icons.Default.SyncAlt,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp).padding(horizontal = 8.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(0.4f)
-                    )
-                    Icon(
-                        Icons.Default.Medication,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
+            // 2. Ilustrasi Dua Botol Obat
+            DrugIllustration()
 
+            // Judul
             Text(
                 text = "Periksa Interaksi Obat",
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF1B6B5A),
                 textAlign = TextAlign.Center
             )
-            
+
+            // Deskripsi
             Text(
                 text = "Pastikan obat yang Anda konsumsi aman untuk diminum bersamaan menggunakan analisis AI.",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 24.dp),
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            // Input Fields
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 3. TextField Obat 1
+            DrugTextField(
                 value = drugA,
                 onValueChange = { drugA = it },
-                label = { Text("Nama Obat Pertama") },
-                placeholder = { Text("Contoh: Paracetamol") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                label = "Nama Obat Pertama"
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
+            // 3. TextField Obat 2
+            DrugTextField(
                 value = drugB,
                 onValueChange = { drugB = it },
-                label = { Text("Nama Obat Kedua") },
-                placeholder = { Text("Contoh: Ibuprofen") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                label = "Nama Obat Kedua"
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
+            // 4. Button Cek Interaksi
+            CheckInteractionButton(
                 onClick = { viewModel.checkInteraction(drugAName = drugA, drugBName = drugB) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                enabled = drugA.isNotBlank() && drugB.isNotBlank() && !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                } else {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Cek Interaksi Sekarang", fontWeight = FontWeight.Bold)
-                }
-            }
+                isLoading = isLoading,
+                enabled = drugA.isNotBlank() && drugB.isNotBlank()
+            )
 
+            // 5. Error Message
             error?.let {
                 Text(
                     text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = Color(0xFFD32F2F),
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Result Area
+            // Tampilkan hasil jika ada
             AnimatedVisibility(
                 visible = interactionResult != null,
                 enter = expandVertically() + fadeIn(),
@@ -171,7 +131,126 @@ fun DrugInteractionScreen(
                     InteractionResultCard(result, interactionSource)
                 }
             }
-            Spacer(modifier = Modifier.height(120.dp))
+            
+            Spacer(modifier = Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+fun DrugIllustration() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Botol 1 (filled/dark)
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF1B6B5A)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Medication,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+
+        Icon(
+            imageVector = Icons.Default.CompareArrows,
+            contentDescription = null,
+            tint = Color(0xFF1B6B5A),
+            modifier = Modifier.size(28.dp)
+        )
+
+        // Botol 2 (outlined/light)
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFFD0EFE8)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Medication,
+                contentDescription = null,
+                tint = Color(0xFF1B6B5A),
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun DrugTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF1B6B5A),
+            focusedLabelColor = Color(0xFF1B6B5A),
+            cursorColor = Color(0xFF1B6B5A)
+        )
+    )
+}
+
+@Composable
+fun CheckInteractionButton(
+    onClick: () -> Unit,
+    isLoading: Boolean,
+    enabled: Boolean
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .height(56.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF1B6B5A)
+        ),
+        enabled = !isLoading && enabled
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = Color.White
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                "Cek Interaksi Sekarang",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
         }
     }
 }
@@ -182,30 +261,24 @@ fun InteractionResultCard(
     source: String? = null
 ) {
     val severityColor = when (data.severity.lowercase()) {
-        "contraindicated" -> MaterialTheme.colorScheme.error
-        "major" -> MaterialTheme.colorScheme.error
-        "moderate" -> MushboohYellow // Custom theme color
-        "minor" -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.primary
+        "contraindicated", "major" -> Color(0xFFD32F2F)
+        "moderate" -> Color(0xFFF59E0B)
+        else -> Color(0xFF1B6B5A)
     }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, severityColor.copy(alpha = 0.2f))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(severityColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -215,118 +288,67 @@ fun InteractionResultCard(
                         tint = severityColor
                     )
                 }
-                
-                Spacer(modifier = Modifier.width(12.dp))
-                
+                Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = if (data.hasInteraction) "Interaksi Terdeteksi" else "Aman untuk Diminum Bersama",
+                        text = if (data.hasInteraction) "Interaksi Terdeteksi" else "Aman Dikonsumsi Bersama",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = Color(0xFF1B6B5A)
                     )
                     Text(
-                        text = "Tingkat Keparahan: ${data.severity.uppercase()}",
+                        text = "Tingkat: ${data.severity.uppercase()}",
                         fontSize = 12.sp,
                         color = severityColor,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold
                     )
-                    if (!source.isNullOrBlank()) {
-                        Text(
-                            text = "Sumber: $source",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
-                        )
-                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(0.05f))
-            
+            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Analisis AI:",
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface.copy(0.7f),
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = Color.DarkGray
             )
-            
             Text(
                 text = data.description,
-                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
-                lineHeight = 22.sp,
+                color = Color.Black,
+                lineHeight = 20.sp,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            if (!data.recommendation.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.onSurface.copy(0.05f))
-                        .padding(16.dp)
-                ) {
-                    Column {
-                        Text(
-                            text = "Rekomendasi Medis:",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = data.recommendation,
-                            color = MaterialTheme.colorScheme.onSurface.copy(0.7f),
-                            fontSize = 13.sp,
-                            lineHeight = 20.sp,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }
-            
-            if (!data.scientificBasis.isNullOrBlank()) {
+            data.recommendation?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Dasar Ilmiah:",
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(0.4f),
-                    lineHeight = 16.sp
+                    text = "Rekomendasi:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray
                 )
                 Text(
-                    text = data.scientificBasis,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(0.4f),
-                    lineHeight = 16.sp,
-                    modifier = Modifier.padding(top = 2.dp)
+                    text = it,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
-            if (!data.sources.isNullOrEmpty() || !data.disclaimer.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(14.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(0.08f))
-                Spacer(modifier = Modifier.height(10.dp))
-                if (!data.sources.isNullOrEmpty()) {
-                    Text(
-                        text = "Data source: ${data.sources.joinToString(", ")}",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(0.55f)
-                    )
-                }
-                if (!data.disclaimer.isNullOrBlank()) {
-                    Text(
-                        text = data.disclaimer ?: "",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(0.55f),
-                        lineHeight = 16.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
+            if (!source.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Sumber data: $source",
+                    fontSize = 10.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

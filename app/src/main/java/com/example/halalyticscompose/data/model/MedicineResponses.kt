@@ -115,6 +115,13 @@ data class RecommendedMedicineDetail(
     @SerializedName("side_effects") val side_effects: List<String> = emptyList()
 )
 
+// Medicine Detail Response
+data class MedicineDetailResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("data") val data: com.example.halalyticscompose.data.model.MedicineData? = null,
+    @SerializedName("message") val message: String? = null
+)
+
 // Medicine Responses
 data class MedicineSearchResponse(
     @SerializedName("success") val success: Boolean,

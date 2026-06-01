@@ -253,6 +253,7 @@
     <string name="login_placeholder_email_username">Masukkan email atau username</string>
     <string name="login_label_password">Password</string>
     <string name="login_placeholder_password">Masukkan password</string>
+    <string name="login_error_empty_fields">Email/Username dan Password tidak boleh kosong</string>
     <string name="login_demo_label">Demo akun:</string>
     <string name="login_demo_admin">Admin</string>
     <string name="login_demo_pengguna">Pengguna</string>

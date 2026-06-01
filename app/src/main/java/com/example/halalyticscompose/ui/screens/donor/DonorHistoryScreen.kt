@@ -12,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.DonorViewModel
 
+import com.example.halalyticscompose.ui.components.UnderDevelopmentPlaceholder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonorHistoryScreen(navController: NavController, viewModel: DonorViewModel, token: String) {
@@ -29,13 +31,20 @@ fun DonorHistoryScreen(navController: NavController, viewModel: DonorViewModel, 
             )
         }
     ) { padding ->
-        LazyColumn(contentPadding = padding) {
-            items(history) { appointment ->
-                ListItem(
-                    headlineContent = { Text(appointment.event?.title ?: "Unknown Event") },
-                    supportingContent = { Text(appointment.status) },
-                    trailingContent = { Text(appointment.appointmentDate) }
-                )
+        if (history.isEmpty()) {
+            UnderDevelopmentPlaceholder(
+                title = "Riwayat Donor",
+                modifier = Modifier.padding(padding)
+            )
+        } else {
+            LazyColumn(contentPadding = padding) {
+                items(history) { appointment ->
+                    ListItem(
+                        headlineContent = { Text(appointment.event?.title ?: "Unknown Event") },
+                        supportingContent = { Text(appointment.status) },
+                        trailingContent = { Text(appointment.appointmentDate) }
+                    )
+                }
             }
         }
     }

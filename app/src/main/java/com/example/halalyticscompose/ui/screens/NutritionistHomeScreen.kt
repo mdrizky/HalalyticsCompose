@@ -2,12 +2,14 @@ package com.example.halalyticscompose.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Science
@@ -143,7 +145,7 @@ fun NutritionistHomeScreen(
                         )
                         
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().clickable { navController.navigate("nutri_tab_verify") },
                             shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
                             border = BorderStroke(1.dp, Emerald.copy(alpha = 0.2f))
@@ -155,14 +157,7 @@ fun NutritionistHomeScreen(
                                     Text("Analisis Menunggu Verifikasi", fontWeight = FontWeight.Bold, color = Slate900)
                                     Text("Tinjau hasil AI untuk akurasi medis.", fontSize = 12.sp, color = Slate600)
                                 }
-                                Button(
-                                    onClick = { /* Navigate to Verification List */ },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Emerald),
-                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text("Tinjau", fontSize = 12.sp)
-                                }
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = Emerald, modifier = Modifier.size(20.dp))
                             }
                         }
 

@@ -193,8 +193,29 @@ class MainViewModel @Inject constructor(
                 if (response.success) {
                     onSuccess()
                 } else {
-                    onError("Failed to send reset email. Please try again.")
+                    onError(response.message ?: "Failed to send reset email.")
                 }
+            } catch (e: retrofit2.HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                val parsedMessage = try {
+                    if (!errorBody.isNullOrEmpty()) {
+                        val json = org.json.JSONObject(errorBody)
+                        var msg = json.optString("message", "Email tidak terdaftar atau tidak valid.")
+                        if (json.has("errors")) {
+                            val errors = json.getJSONObject("errors")
+                            if (errors.keys().hasNext()) {
+                                val firstKey = errors.keys().next()
+                                msg = errors.getJSONArray(firstKey).getString(0)
+                            }
+                        }
+                        msg
+                    } else {
+                        "Terjadi kesalahan. Silakan coba lagi."
+                    }
+                } catch (ex: Exception) {
+                    "Terjadi kesalahan. Silakan coba lagi."
+                }
+                onError(parsedMessage)
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Reset password error", e)
                 onError(e.message ?: "Network error")

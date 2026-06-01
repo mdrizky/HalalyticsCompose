@@ -7,6 +7,7 @@ import com.example.halalyticscompose.data.model.Product
 import com.example.halalyticscompose.data.api.ApiService
 import com.example.halalyticscompose.data.network.ApiErrorHandler
 import com.example.halalyticscompose.utils.SessionManager
+import com.example.halalyticscompose.data.model.MedicineData
 import com.example.halalyticscompose.data.model.SymptomsAnalysisResponse
 import com.example.halalyticscompose.data.model.MedicineSearchResponse
 import com.example.halalyticscompose.data.model.MedicationReminderResponse
@@ -369,7 +370,7 @@ class MedicineViewModel @Inject constructor(
                 val token = sessionManager.getBearerToken() ?: sessionManager.getAuthToken()?.let { "Bearer $it" } ?: ""
                 val response = apiService.getMedicineDetail(token, id)
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _selectedMedicine.value = response.body()?.data?.firstOrNull()
+                    _selectedMedicine.value = response.body()?.data
                     Log.i("MedicineVM", "Selected medicine: ${_selectedMedicine.value?.name}")
                 } else {
                     val apiMsg = parseApiErrorMessage(response.errorBody()?.string())

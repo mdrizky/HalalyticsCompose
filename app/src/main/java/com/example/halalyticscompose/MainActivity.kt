@@ -182,14 +182,19 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Global crash handling via CrashReporter - Install as early as possible
+        com.example.halalyticscompose.utils.CrashReporter.install(this)
+        
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         
-        Log.d("HALALYTICS_FLOW", "MainActivity: onCreate Started")
-        Log.d("HALALYTICS_DEBUG", "MainActivity Started")
-
-        // Global crash handling via CrashReporter
-        com.example.halalyticscompose.utils.CrashReporter.install(this)
+        try {
+            com.facebook.FacebookSdk.sdkInitialize(applicationContext)
+        } catch (e: Exception) {
+            android.util.Log.e("HalalyticsApp", "Failed to initialize Facebook SDK: ${e.message}", e)
+        }
+        
+        Log.i("HALALYTICS_FLOW", "MainActivity: onCreate Started")
         
         // Show previous crash log if exists
         val lastCrash = com.example.halalyticscompose.utils.CrashReporter.getLastCrash(this)
@@ -199,20 +204,22 @@ class MainActivity : FragmentActivity() {
         }
 
         setContent {
-            Log.d("HALALYTICS_FLOW", "MainActivity: setContent block started")
+            Log.i("HALALYTICS_FLOW", "MainActivity: setContent block started")
+            
             val mainViewModel: MainViewModel = hiltViewModel()
             val authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = hiltViewModel()
             
             // Keep system splash screen until we have the first frame of Compose and initial session state
             var isReady by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
+            LaunchedEffect(key1 = Unit) {
                 Log.d("HALALYTICS_FLOW", "MainActivity: Initializing isReady delay")
                 // Short delay to allow Compose to settle
-                kotlinx.coroutines.delay(200)
+                kotlinx.coroutines.delay(timeMillis = 200)
                 isReady = true
-                Log.d("HALALYTICS_FLOW", "MainActivity: isReady = true")
+                Log.i("HALALYTICS_FLOW", "MainActivity: isReady = true")
             }
             splashScreen.setKeepOnScreenCondition { !isReady }
+
             val historyViewModel: com.example.halalyticscompose.ui.viewmodel.HistoryViewModel = hiltViewModel()
             val healthViewModel: com.example.halalyticscompose.ui.viewmodel.HealthViewModel = hiltViewModel()
             
@@ -246,12 +253,8 @@ class MainActivity : FragmentActivity() {
                 Log.d("HALALYTICS_FLOW", "MainActivity: Intent navigation to $navigateTo")
                 // Wait for NavHost to be ready
                 kotlinx.coroutines.delay(1000)
-                try {
-                    navController.navigate(navigateTo)
-                    intentNavigated = true
-                } catch (e: Exception) {
-                    Log.e("HALALYTICS_FLOW", "MainActivity: Intent navigation failed", e)
-                }
+                navController.navigate(navigateTo)
+                intentNavigated = true
             }
         }
                     
@@ -394,55 +397,32 @@ class MainActivity : FragmentActivity() {
                         ) + fadeOut(animationSpec = tween(200))
                     }
                 ) {
-                    // Splash Screen
                     composable("splash") {
-                        SplashScreen(
-                            onNavigateToOnboarding = {
-                                Log.d("HALALYTICS_FLOW", "Navigate Onboarding")
-                                try {
-                                    navController.navigate("onboarding") { popUpTo("splash") { inclusive = true } }
-                                } catch (e: Exception) {
-                                    Log.e("HALALYTICS_FLOW", "Navigation to Onboarding failed", e)
-                                }
-                            },
-                            onNavigateToLogin = {
-                                Log.d("HALALYTICS_FLOW", "Navigate Login")
-                                try {
-                                    navController.navigate("login") { popUpTo("splash") { inclusive = true } }
-                                } catch (e: Exception) {
-                                    Log.e("HALALYTICS_FLOW", "Navigation to Login failed", e)
-                                }
-                            },
-                            onNavigateToUserHome = {
-                                Log.d("HALALYTICS_FLOW", "Navigate Home")
-                                try {
-                                    navController.navigate("home") { popUpTo("splash") { inclusive = true } }
-                                } catch (e: Exception) {
-                                    Log.e("HALALYTICS_FLOW", "Navigation to Home failed", e)
-                                }
-                            },
-                            onNavigateToAdminDashboard = {
-                                Log.d("HALALYTICS_FLOW", "Navigate Admin")
-                                try {
-                                    navController.navigate("home") { popUpTo("splash") { inclusive = true } }
-                                } catch (e: Exception) {
-                                    Log.e("HALALYTICS_FLOW", "Navigation to Admin failed", e)
-                                }
-                            },
-                            onNavigateToNutritionistHome = {
-                                Log.d("HALALYTICS_FLOW", "Navigate Nutritionist")
-                                try {
-                                    navController.navigate("nutritionist_home") { popUpTo("splash") { inclusive = true } }
-                                } catch (e: Exception) {
-                                    Log.e("HALALYTICS_FLOW", "Navigation to Nutritionist failed", e)
-                                }
+                        SplashScreen(navController = navController)
+                    }
+
+                    // --- PRIMARY ROUTES ---
+                    composable("home") {
+                        MainLayout(
+                            navController = navController,
+                            showBottomNav = !isNutritionist,
+                            isAdmin = isAdmin,
+                            isNutritionist = isNutritionist
+                        ) { paddingValues ->
+                            when {
+                                isAdmin -> AdminPanelScreen(navController = navController)
+                                isNutritionist -> NutritionistMainScreen(navController = navController)
+                                else -> HomeScreen(
+                                    navController = navController,
+                                    paddingValues = paddingValues
+                                )
                             }
-                        )
+                        }
                     }
 
                     // Login — jangan pernah sertakan password di deep link / savedState.
                     composable(
-                        "login?reg_user={reg_user}&reg_success={reg_success}",
+                        "login?reg_user={reg_user}&reg_success={reg_success}&expired={expired}",
                         arguments = listOf(
                             androidx.navigation.navArgument("reg_user") {
                                 type = androidx.navigation.NavType.StringType
@@ -451,16 +431,22 @@ class MainActivity : FragmentActivity() {
                             androidx.navigation.navArgument("reg_success") {
                                 type = androidx.navigation.NavType.StringType
                                 defaultValue = ""
+                            },
+                            androidx.navigation.navArgument("expired") {
+                                type = androidx.navigation.NavType.StringType
+                                defaultValue = "0"
                             }
                         )
                     ) { backStackEntry ->
                         val regUser = backStackEntry.arguments?.getString("reg_user") ?: ""
                         val regSuccess = backStackEntry.arguments?.getString("reg_success") == "1"
+                        val isExpired = backStackEntry.arguments?.getString("expired") == "1"
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             LoginScreen(
                                 navController = navController,
                                 prefillUsername = regUser,
-                                showRegisterSuccess = regSuccess
+                                showRegisterSuccess = regSuccess,
+                                isSessionExpired = isExpired
                             )
                         }
                     }
@@ -481,32 +467,20 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     }
-                    
-                    // Home Screen
-                    composable("home") {
-                        MainLayout(
-                            navController = navController,
-                            showBottomNav = !isNutritionist,
-                            isAdmin = isAdmin,
-                            isNutritionist = isNutritionist
-                        ) { paddingValues ->
-                            when {
-                                isAdmin -> AdminPanelScreen(navController = navController)
-                                isNutritionist -> NutritionistMainScreen(navController = navController)
-                                else -> HomeScreen(
-                                    navController = navController,
-                                    paddingValues = paddingValues
-                                )
-                            }
-                        }
-                    }
 
                     composable("nutritionist_home") {
                         if (isNutritionist) {
                             NutritionistMainScreen(navController = navController)
                         } else {
                             LaunchedEffect(Unit) {
-                                navController.popBackStack()
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -566,6 +540,12 @@ class MainActivity : FragmentActivity() {
                     composable("scan_hub") {
                         MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
                             ScanHubScreen(navController = navController)
+                        }
+                    }
+
+                    composable("pill_scanner") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            PillScannerScreen(navController = navController)
                         }
                     }
 
@@ -748,6 +728,13 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                     
+                    // Manual Barcode Input
+                    composable("manual_barcode") {
+                        MainLayout(navController = navController, isAdmin = isAdmin) { paddingValues ->
+                            ManualBarcodeScreen(navController = navController)
+                        }
+                    }
+
                     // Manual Input Screen
                     composable(
                         "manual_input?category={category}",
@@ -808,7 +795,14 @@ class MainActivity : FragmentActivity() {
                             }
                         } else {
                             LaunchedEffect(Unit) {
-                                navController.popBackStack()
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -1267,7 +1261,14 @@ class MainActivity : FragmentActivity() {
                             }
                         } else {
                             LaunchedEffect(Unit) {
-                                navController.popBackStack()
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -1281,7 +1282,14 @@ class MainActivity : FragmentActivity() {
                             }
                         } else {
                             LaunchedEffect(Unit) {
-                                navController.popBackStack()
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -1294,7 +1302,14 @@ class MainActivity : FragmentActivity() {
                             }
                         } else {
                             LaunchedEffect(Unit) {
-                                navController.popBackStack()
+                                if (navController.previousBackStackEntry != null) {
+                                    navController.popBackStack()
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -1492,7 +1507,6 @@ class MainActivity : FragmentActivity() {
                             val token = sessionManager.getAuthToken() ?: ""
                             com.example.halalyticscompose.ui.screens.donor.DonorHomeScreen(
                                 navController = navController,
-                                viewModel = donorViewModel,
                                 token = token
                             )
                         }

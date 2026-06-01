@@ -1,6 +1,7 @@
 package com.example.halalyticscompose.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -93,7 +94,7 @@ fun ProfileScreen(
                             .clip(CircleShape)
                             .border(3.dp, Gold, CircleShape)
                             .padding(4.dp)
-                            .border(2.dp, Color.White, CircleShape)
+                            .background(Color.White, CircleShape)
                             .clip(CircleShape)
                     ) {
                         val imageUrl = ImageUtils.normalizeUrl(userData?.image)
@@ -106,9 +107,9 @@ fun ProfileScreen(
                             )
                         } else {
                             androidx.compose.foundation.Image(
-                                painter = painterResource(id = R.drawable.logo_halalytics_official),
+                                painter = painterResource(id = R.drawable.logo_halalytics_new),
                                 contentDescription = stringResource(R.string.account_profile_image),
-                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                modifier = Modifier.fillMaxSize().padding(12.dp),
                                 contentScale = ContentScale.Fit
                             )
                         }
@@ -117,7 +118,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = userData?.fullName ?: stringResource(R.string.home_default_user),
+                        text = userData?.username ?: stringResource(R.string.home_default_user),
                         color = Color.White,
                         fontWeight = FontWeight.Black,
                         fontSize = 22.sp,
@@ -128,6 +129,22 @@ fun ProfileScreen(
                         color = Color.White.copy(alpha = 0.8f),
                         fontSize = 14.sp
                     )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Role Badge
+                    Surface(
+                        color = if (userData?.role?.lowercase() == "admin") Color(0xFFF97316) else EmeraldLight.copy(alpha = 0.8f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = (userData?.role ?: "User").uppercase(),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -161,23 +178,33 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Logout Button
-            TextButton(
-                onClick = {
-                    viewModel.logout(onComplete = {
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    })
-                },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = Error)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .clickable {
+                        viewModel.logout(onComplete = {
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        })
+                    },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Error.copy(alpha = 0.1f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Error.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.AutoMirrored.Filled.Logout, null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.profile_logout_confirm), fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, null, tint = Error)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(R.string.profile_logout_confirm), fontWeight = FontWeight.Bold, color = Error)
+                }
             }
             
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(100.dp)) // Extra padding for bottom navigation bar
         }
     }
 }

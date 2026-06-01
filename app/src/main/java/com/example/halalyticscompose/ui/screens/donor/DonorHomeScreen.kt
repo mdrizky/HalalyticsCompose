@@ -38,16 +38,22 @@ private val DonorBackground = Color(0xFFFDF2F2)
 @Composable
 fun DonorHomeScreen(
     navController: NavController,
-    viewModel: DonorViewModel,
+    viewModel: DonorViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+    authViewModel: com.example.halalyticscompose.ui.viewmodel.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
     token: String
 ) {
     val bloodEvents by viewModel.bloodEvents.collectAsState()
     val bloodStock by viewModel.bloodStock.collectAsState()
     val donorCard by viewModel.donorCard.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val userData by authViewModel.userData.collectAsState()
+    
+    val displayName = userData?.username ?: "Active Donor"
 
-    LaunchedEffect(Unit) {
-        viewModel.loadDonorDashboard(token)
+    LaunchedEffect(token) {
+        if (token.isNotEmpty()) {
+            viewModel.loadDonorDashboard(token)
+        }
     }
 
     Scaffold(
@@ -76,12 +82,22 @@ fun DonorHomeScreen(
         ) {
             // 1. Donor Card Section
             item {
-                DonorCardWidget(
-                    name = "Active Donor",
-                    bloodType = donorCard?.bloodType ?: "-",
-                    donations = donorCard?.totalDonations ?: 0,
-                    nextDate = donorCard?.nextEligibleDate ?: "Ready to Donate"
-                )
+                donorCard?.let { card ->
+                    DonorCardWidget(
+                        name = displayName,
+                        bloodType = card.bloodType ?: "-",
+                        donations = card.totalDonations ?: 0,
+                        nextDate = card.nextEligibleDate ?: "Ready to Donate"
+                    )
+                } ?: run {
+                    // Fallback or empty state while loading
+                    DonorCardWidget(
+                        name = displayName,
+                        bloodType = "-",
+                        donations = 0,
+                        nextDate = if (isLoading) "Loading..." else "Ready to Donate"
+                    )
+                }
             }
 
             // 2. Voluntary Status Toggle
@@ -123,12 +139,12 @@ fun DonorHomeScreen(
             // 4. Emergency Requests
             item {
                 val emergencies by viewModel.activeEmergencies.collectAsState()
-                if (emergencies.isNotEmpty()) {
-                    val first = emergencies.first()
+                val firstEmergency = emergencies.firstOrNull()
+                if (firstEmergency != null) {
                     EmergencyCard(
-                        hospital = first.hospital,
-                        bloodType = first.bloodType,
-                        reason = first.reason ?: "Butuh Darah Cepat",
+                        hospital = firstEmergency.hospital,
+                        bloodType = firstEmergency.bloodType,
+                        reason = firstEmergency.reason ?: "Butuh Darah Cepat",
                         onDonate = { navController.navigate("emergency_request") }
                     )
                 } else {

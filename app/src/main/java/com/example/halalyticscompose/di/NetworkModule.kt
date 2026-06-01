@@ -164,8 +164,22 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @javax.inject.Named("CleanOkHttpClient")
+    fun provideCleanOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @javax.inject.Named("OpenFoodFactsRetrofit")
-    fun provideOpenFoodFactsRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideOpenFoodFactsRetrofit(@javax.inject.Named("CleanOkHttpClient") okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://world.openfoodfacts.org/")
             .client(okHttpClient)
@@ -182,7 +196,7 @@ object NetworkModule {
     @Provides
     @Singleton
     @javax.inject.Named("OpenBeautyFactsRetrofit")
-    fun provideOpenBeautyFactsRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideOpenBeautyFactsRetrofit(@javax.inject.Named("CleanOkHttpClient") okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://world.openbeautyfacts.org/")
             .client(okHttpClient)

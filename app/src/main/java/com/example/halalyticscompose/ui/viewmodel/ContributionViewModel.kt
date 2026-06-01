@@ -86,7 +86,7 @@ class ContributionViewModel @Inject constructor(
                     image = imagePart,
                     productName = namePart,
                     barcode = barcodePart,
-                    ingredients = complaintPart
+                    complaint = complaintPart
                 )
                 
                 if (response.success) {

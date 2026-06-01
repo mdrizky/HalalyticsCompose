@@ -58,10 +58,13 @@ data class User(
     val bio: String? = "",
     
     @SerializedName("allergies")
-    val allergies: String? = "",
+    val allergies: List<String>? = emptyList(),
     
     @SerializedName("allergy")
     val allergy: String? = "",
+    
+    @SerializedName("dietary_preferences")
+    val dietaryPreferences: List<String>? = emptyList(),
     
     @SerializedName("medical_history")
     val medicalHistory: String? = "",
@@ -70,7 +73,7 @@ data class User(
     val bloodType: String? = "-",
     
     @SerializedName("has_diabetes")
-    val hasDiabetes: Boolean = false,
+    val hasDiabetes: Int = 0,
     
     @SerializedName("total_scans")
     val totalScans: Int = 0,
@@ -115,10 +118,10 @@ data class User(
     val bmi: Double? = 0.0,
     
     @SerializedName("notif_enabled")
-    val notifEnabled: Boolean = true,
+    val notifEnabled: Int = 1,
     
     @SerializedName("dark_mode")
-    val darkMode: Boolean = false,
+    val darkMode: Int = 0,
     
     @SerializedName("emergency_contact")
     val emergencyContact: String? = "",

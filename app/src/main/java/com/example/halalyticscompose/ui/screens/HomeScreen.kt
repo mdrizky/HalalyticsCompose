@@ -77,9 +77,11 @@ fun HomeScreen(
     }
 
     val defaultUserName = stringResource(R.string.home_default_user)
-    val rawName = userData?.fullName?.takeIf { it.isNotBlank() } ?: userData?.username?.takeIf { it.isNotBlank() } ?: defaultUserName
+    val rawName = (userData?.fullName?.takeIf { it.isNotBlank() } ?: userData?.username)?.takeIf { it.isNotBlank() } ?: defaultUserName
     // Format name to Title Case if it's not the default user name
-    val name = if (rawName != defaultUserName) rawName.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } } else rawName
+    val name = if (rawName != defaultUserName) {
+        rawName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+    } else rawName
     
     val bmiState by healthViewModel.bmi.collectAsState()
     val userBmi = userData?.bmi
@@ -93,21 +95,71 @@ fun HomeScreen(
     val recommendedProducts by historyViewModel.recommendedProducts.collectAsState()
     
     var showAllFeaturesSheet by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            val locationText = userData?.address?.substringBefore(",")?.takeIf { it.isNotBlank() } ?: "Batam, Indonesia"
-            PremiumHomeHeader(
-                name = name,
-                imageUrl = userData?.image,
-                unreadCount = unreadCount,
-                location = locationText,
-                onProfileClick = { navController.navigate("profile") },
-                onNotificationClick = { navController.navigate("notifications") }
-            )
+            val locationText = userData?.address?.takeIf { it.isNotBlank() } ?: ""
+            Column {
+                PremiumHomeHeader(
+                    name = name,
+                    imageUrl = userData?.image,
+                    role = userData?.role,
+                    unreadCount = unreadCount,
+                    location = locationText,
+                    onProfileClick = { navController.navigate("profile") },
+                    onNotificationClick = { navController.navigate("notifications") }
+                )
+                // Search Bar Section
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .offset(y = (-20).dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(8.dp, RoundedCornerShape(16.dp)),
+                        placeholder = { Text("Cari produk (Nama atau Barcode)...", fontSize = 14.sp, color = Slate400) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Emerald) },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Clear", tint = Slate400)
+                                }
+                            } else {
+                                IconButton(onClick = { navController.navigate("scan") }) {
+                                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan", tint = Emerald)
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedBorderColor = Emerald.copy(alpha = 0.5f)
+                        ),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Search
+                        ),
+                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                            onSearch = {
+                                if (searchQuery.isNotBlank()) {
+                                    navController.navigate("search_external?q=${searchQuery}")
+                                }
+                            }
+                        )
+                    )
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -130,7 +182,8 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                // Remove redundant spacer since we use offset on search bar
+                // Spacer(modifier = Modifier.height(8.dp))
                 // Premium Health Ring + Summary
                 PremiumHealthRingCard(
                     bmi = bmi,
@@ -223,6 +276,7 @@ fun HomeScreen(
 fun PremiumHomeHeader(
     name: String,
     imageUrl: String?,
+    role: String?,
     unreadCount: Int,
     location: String? = "Indonesia",
     onProfileClick: () -> Unit,
@@ -275,9 +329,9 @@ fun PremiumHomeHeader(
                             )
                         } else {
                             androidx.compose.foundation.Image(
-                                painter = painterResource(id = R.drawable.logo_halalytics_official),
+                                painter = painterResource(id = R.drawable.logo_halalytics_new),
                                 contentDescription = stringResource(R.string.profile),
-                                modifier = Modifier.fillMaxSize().padding(8.dp),
+                                modifier = Modifier.fillMaxSize().padding(4.dp).clip(CircleShape),
                                 contentScale = ContentScale.Fit
                             )
                         }
@@ -291,9 +345,9 @@ fun PremiumHomeHeader(
                             fontWeight = FontWeight.Medium
                         )
                         val greetingText = if (name != stringResource(R.string.home_default_user)) {
-                            stringResource(R.string.home_greeting_user, name) + " 👋"
+                            "$name 👋"
                         } else {
-                            name
+                            "Halal Friend 👋"
                         }
                         Text(
                             text = greetingText,
@@ -304,6 +358,21 @@ fun PremiumHomeHeader(
                             overflow = TextOverflow.Ellipsis,
                             letterSpacing = (-0.5).sp
                         )
+                        if (!role.isNullOrBlank()) {
+                            Surface(
+                                color = if (role.lowercase() == "admin") Color(0xFFF97316) else EmeraldLight.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Text(
+                                    text = role.uppercase(),
+                                    color = Color.White,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -312,18 +381,20 @@ fun PremiumHomeHeader(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Glassmorphism Location Card
-                    Surface(
-                        color = Color.White.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    if (!location.isNullOrBlank()) {
+                        Surface(
+                            color = Color.White.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
                         ) {
-                            Icon(Icons.Default.LocationOn, null, tint = Gold, modifier = Modifier.size(14.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(location ?: "Indonesia", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.LocationOn, null, tint = Gold, modifier = Modifier.size(14.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(location, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
 
@@ -544,14 +615,23 @@ fun PremiumCategorySection(categories: List<com.example.halalyticscompose.data.m
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        val icon = when(category.icon) {
-                            "kitchen" -> Icons.Default.Restaurant
-                            "herb" -> Icons.Default.Grass
-                            "medication" -> Icons.Default.Medication
-                            "spa" -> Icons.Default.Spa
-                            else -> Icons.Default.Category
+                        if (category.icon.contains("/") || category.icon.contains(".") || category.icon.startsWith("http")) {
+                            AsyncImage(
+                                model = ImageUtils.normalizeUrl(category.icon),
+                                contentDescription = category.name,
+                                modifier = Modifier.size(36.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            val icon = when(category.icon) {
+                                "kitchen" -> Icons.Default.Restaurant
+                                "herb" -> Icons.Default.Grass
+                                "medication" -> Icons.Default.Medication
+                                "spa" -> Icons.Default.Spa
+                                else -> Icons.Default.Category
+                            }
+                            Icon(icon, contentDescription = category.name, tint = Emerald, modifier = Modifier.size(32.dp))
                         }
-                        Icon(icon, contentDescription = category.name, tint = Emerald, modifier = Modifier.size(32.dp))
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = category.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Slate700)
@@ -664,31 +744,61 @@ fun PremiumRecommendationSection(
             Text(text = stringResource(R.string.home_see_all), color = Emerald, fontSize = 13.sp, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onViewAll() })
         }
         Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(products) { product ->
-                Card(
-                    modifier = Modifier
-                        .width(170.dp)
-                        .clickable { onProductClick(product) }
-                        .shadow(12.dp, RoundedCornerShape(20.dp)),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+        if (products.isEmpty()) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .clickable { onViewAll() },
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = EmeraldLight.copy(alpha = 0.2f)),
+                border = BorderStroke(1.dp, EmeraldLight.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Box(modifier = Modifier.fillMaxWidth().height(130.dp).background(Slate100)) {
-                            AsyncImage(
-                                model = ImageUtils.normalizeUrl(product.image) ?: "https://ui-avatars.com/api/?name=${product.name}&background=random",
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(text = product.name ?: "Produk", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(text = product.brand ?: "Local Brand", fontSize = 12.sp, color = Slate500)
+                    Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Emerald.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Search, contentDescription = null, tint = Emerald)
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Temukan Produk", fontWeight = FontWeight.Bold, color = Slate900)
+                        Text("Cari dan temukan rekomendasi produk Halal terbaik", fontSize = 12.sp, color = Slate600)
+                    }
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Emerald)
+                }
+            }
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(products) { product ->
+                    Card(
+                        modifier = Modifier
+                            .width(170.dp)
+                            .clickable { onProductClick(product) }
+                            .shadow(12.dp, RoundedCornerShape(20.dp)),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column {
+                            Box(modifier = Modifier.fillMaxWidth().height(130.dp).background(Slate100)) {
+                                val productImageUrl = com.example.halalyticscompose.utils.ImageUtils.normalizeUrl(product.image)
+                                AsyncImage(
+                                    model = productImageUrl ?: "https://ui-avatars.com/api/?name=${product.name}&background=2D6A4F&color=fff",
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(id = R.drawable.logo_halalytics_new),
+                                    placeholder = painterResource(id = R.drawable.logo_halalytics_new)
+                                )
+                            }
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(text = product.name ?: "Produk", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(text = product.brand ?: "Local Brand", fontSize = 12.sp, color = Slate500)
+                            }
                         }
                     }
                 }

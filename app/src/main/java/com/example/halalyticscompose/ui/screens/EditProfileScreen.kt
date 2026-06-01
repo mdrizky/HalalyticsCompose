@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -55,8 +56,11 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val userData by viewModel.userData.collectAsState()
     val isLoadingVM by viewModel.isLoading.collectAsState()
-    val errorMessageVM by viewModel.errorMessage.collectAsState()
+    val apiErrorMessageVM by viewModel.errorMessage.collectAsState()
+    var localError by remember { mutableStateOf<String?>(null) }
     
+    val displayError = apiErrorMessageVM ?: localError
+
     // Form States
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -123,8 +127,10 @@ fun EditProfileScreen(
     }
 
     fun handleSave() {
+        viewModel.clearError()
+        localError = null
         if (fullName.isBlank()) {
-            Toast.makeText(context, context.getString(R.string.edit_profile_name_empty), Toast.LENGTH_SHORT).show()
+            localError = context.getString(R.string.edit_profile_name_empty)
             return
         }
 
@@ -174,12 +180,14 @@ fun EditProfileScreen(
         return
     }
 
-    if (userData == null && !isInitialized && errorMessageVM != null) {
+    if (userData == null && !isInitialized && displayError != null) {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(errorMessageVM ?: context.getString(R.string.error_general), color = MaterialTheme.colorScheme.error)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                Icon(Icons.Default.ErrorOutline, null, tint = Error, modifier = Modifier.size(64.dp))
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { viewModel.loadUserProfile() }) {
+                Text(displayError ?: context.getString(R.string.error_general), color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = { viewModel.loadUserProfile() }, colors = ButtonDefaults.buttonColors(containerColor = Emerald)) {
                     Text(context.getString(R.string.error_retry))
                 }
             }
@@ -222,13 +230,31 @@ fun EditProfileScreen(
                 .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            // --- HEADER & PHOTO ---
+            // --- PHOTO HEADER ---
             item {
                 ProfilePhotoHeader(
                     userData = userData,
                     selectedUri = selectedImageUri,
                     onPickPhoto = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
                 )
+            }
+
+            // --- ERROR MESSAGE ---
+            if (displayError != null) {
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+                        color = Error.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Error.copy(alpha = 0.2f))
+                    ) {
+                        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Error, null, tint = Error, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(displayError!!, color = Error, fontSize = 13.sp)
+                        }
+                    }
+                }
             }
 
             // --- PERSONAL INFO SECTION ---

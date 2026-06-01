@@ -90,8 +90,8 @@ class HistoryViewModel @Inject constructor(
             try {
                 // Fetch for a default category, or general
                 val response = apiService.getRecommendations("Bearer $token", "food")
-                if (response.response_code == 200) {
-                    _recommendedProducts.value = response.content
+                if (response.success) {
+                    _recommendedProducts.value = response.data ?: emptyList()
                 }
             } catch (e: Exception) {
                 Log.e("HistoryViewModel", "Fetch recommendations error", e)

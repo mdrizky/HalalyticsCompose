@@ -31,8 +31,8 @@ import com.example.halalyticscompose.ui.theme.*
 fun ScanHubScreen(navController: NavController) {
     val scanOptions = listOf(
         ScanOption("Scan Barcode", "Cek kehalalan produk", Icons.Default.QrCodeScanner, "scan", EmeraldLight),
-        ScanOption("Foto Makanan", "AI deteksi gizi", Icons.Default.CameraAlt, "meal_scan", Color(0xFFFFF3E0)),
-        ScanOption("Scan Tabel Gizi", "Ekstrak data gizi", Icons.Default.Description, "ocr_scan", Color(0xFFE3F2FD)),
+        ScanOption("Foto Makanan", "AI deteksi gizi", Icons.Default.CameraAlt, "food_scan", Color(0xFFFFF3E0)),
+        ScanOption("Scan Tabel Gizi", "Ekstrak data gizi", Icons.Default.Description, "enhanced_ocr", Color(0xFFE3F2FD)),
         ScanOption("Menu Restoran", "Rekomendasi sehat", Icons.Default.RestaurantMenu, "ai_analysis", Color(0xFFF3E5F5)),
         ScanOption("Cek Obat", "Identifikasi interaksi", Icons.Default.Medication, "pill_scanner", Color(0xFFFFEBEE)),
         ScanOption("Voice Log", "Catat dengan suara", Icons.Default.Mic, "voice_logging", Color(0xFFF1F8E9))

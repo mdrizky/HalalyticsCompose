@@ -74,8 +74,9 @@ class ScanViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Compress and encode
-                val bytes = imageFile.readBytes()
+                // Compress image to prevent OOM
+                val compressedFile = com.example.halalyticscompose.utils.ImageUtils.reduceFileImage(imageFile)
+                val bytes = compressedFile.readBytes()
                 val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
 
                 val request = MealAnalysisRequest(image = base64)

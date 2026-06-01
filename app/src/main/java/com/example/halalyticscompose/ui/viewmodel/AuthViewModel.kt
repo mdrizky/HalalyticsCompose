@@ -118,7 +118,15 @@ class AuthViewModel @Inject constructor(
             val parsedMessage = try {
                 if (!errorBodyString.isNullOrEmpty()) {
                     val json = org.json.JSONObject(errorBodyString)
-                    json.optString("message", json.optString("error", "Autentikasi gagal."))
+                    var msg = json.optString("message", json.optString("error", "Autentikasi gagal."))
+                    if (json.has("errors")) {
+                        val errors = json.getJSONObject("errors")
+                        if (errors.keys().hasNext()) {
+                            val firstKey = errors.keys().next()
+                            msg = errors.getJSONArray(firstKey).getString(0)
+                        }
+                    }
+                    msg
                 } else {
                     "Autentikasi gagal."
                 }
@@ -177,8 +185,8 @@ class AuthViewModel @Inject constructor(
 
         // Save preferences
         sessionManager.savePreferences(
-            darkMode = user.dark_mode ?: false,
-            notifEnabled = user.notif_enabled ?: true,
+            darkMode = if (user.dark_mode == 1) true else false,
+            notifEnabled = if ((user.notif_enabled ?: 1) == 1) true else false,
             language = user.language ?: "id"
         )
         
@@ -458,5 +466,9 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() {
         _errorMessage.value = null
+    }
+
+    fun setErrorMessage(message: String) {
+        _errorMessage.value = message
     }
 }

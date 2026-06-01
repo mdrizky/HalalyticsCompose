@@ -1,18 +1,17 @@
 package com.example.halalyticscompose.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import com.example.halalyticscompose.data.local.HalalyticsDatabase
 import com.example.halalyticscompose.data.database.ProductHistoryDao
 import com.example.halalyticscompose.data.database.ProductRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
 @Module
@@ -24,13 +23,13 @@ object DatabaseModule {
     fun provideHalalyticsDatabase(
         @ApplicationContext context: Context
     ): HalalyticsDatabase {
-        // Required by SQLCipher before using SupportFactory/Room.
-        SQLiteDatabase.loadLibs(context)
-
         // 🔒 SECURITY: Encrypt the local database with SQLCipher
         // Generates a deterministic passphrase so data persists across app restarts
         val passphrase = generatePassphrase(context)
-        val factory = SupportFactory(passphrase)
+
+        // Modern sqlcipher-android uses SupportOpenHelperFactory (no loadLibs needed)
+        System.loadLibrary("sqlcipher")
+        val factory = SupportOpenHelperFactory(passphrase)
 
         return try {
             val db = buildEncryptedDatabase(context, factory)
@@ -38,6 +37,7 @@ object DatabaseModule {
             db.openHelper.writableDatabase
             db
         } catch (e: Exception) {
+            Log.e("DatabaseModule", "Database open failed, rebuilding: ${e.message}", e)
             // Recovery path for passphrase mismatch / legacy plain DB state.
             context.deleteDatabase("halalytics_database")
             val rebuilt = buildEncryptedDatabase(context, factory)
@@ -79,12 +79,12 @@ object DatabaseModule {
      */
     private fun generatePassphrase(context: Context): ByteArray {
         val seed = "Halalytics_DB_Key_${context.packageName}_v1"
-        return SQLiteDatabase.getBytes(seed.toCharArray())
+        return seed.toByteArray(Charsets.UTF_8)
     }
 
     private fun buildEncryptedDatabase(
         context: Context,
-        factory: SupportFactory
+        factory: SupportOpenHelperFactory
     ): HalalyticsDatabase {
         return Room.databaseBuilder(
             context,

@@ -11,32 +11,39 @@ import javax.inject.Singleton
 class ProductRepository @Inject constructor(
     private val apiService: ApiService,
     private val externalApiService: ExternalApiService,
+    private val openFoodFactsApiService: com.example.halalyticscompose.data.api.OpenFoodFactsApiService,
     private val cachedDao: CachedScanResultDao
 ) {
     suspend fun getProductWithHalalInfo(barcode: String, token: String? = null): Result<Product> {
-        println("🔍 getProductWithHalalInfo called for barcode: $barcode")
+        val cleanBarcode = barcode.trim()
+        println("🔍 getProductWithHalalInfo called for barcode: [$cleanBarcode]")
+        
         try {
             // 1. Try Unified Scan if token is available
             if (token != null) {
-                println("🚀 Trying Unified Scan for barcode: $barcode")
+                println("🚀 Trying Unified Scan for barcode: $cleanBarcode")
                 val bearerToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
-                val unifiedResponse = apiService.scanUnified(bearerToken, barcode)
-                if (unifiedResponse.isSuccessful && unifiedResponse.body()?.success == true) {
-                    val data = unifiedResponse.body()!!.data
-                    if (data != null) {
-                        return Result.success(mapUnifiedToProduct(data))
+                try {
+                    val unifiedResponse = apiService.scanUnified(bearerToken, cleanBarcode)
+                    if (unifiedResponse.isSuccessful) {
+                        val body = unifiedResponse.body()
+                        if (body?.success == true && body.data != null) {
+                            return Result.success(mapUnifiedToProduct(body.data))
+                        }
                     }
+                } catch (e: Exception) {
+                    println("⚠️ Unified Scan Exception: ${e.message}")
                 }
             }
 
             // 2. Try Halalytics External API (Public Endpoint)
-            println("🌐 Trying Halalytics External API for barcode: $barcode")
+            println("🌐 Trying Halalytics External API for barcode: $cleanBarcode")
             try {
-                val externalResponse = externalApiService.getProductDetail(barcode)
-                if (externalResponse.isSuccessful && externalResponse.body()?.responseCode == 200) {
-                    val productItem = externalResponse.body()?.content
-                    if (productItem != null) {
-                        return Result.success(mapProductItemToProduct(productItem))
+                val externalResponse = externalApiService.getProductDetail(cleanBarcode)
+                if (externalResponse.isSuccessful) {
+                    val body = externalResponse.body()
+                    if (body?.responseCode == 200 && body.content != null) {
+                        return Result.success(mapProductItemToProduct(body.content))
                     }
                 }
             } catch (e: Exception) {
@@ -44,60 +51,71 @@ class ProductRepository @Inject constructor(
             }
 
             // 3. Fallback to Open Food Facts API directly (Raw Data)
-            println("📡 Trying Raw Open Food Facts for barcode: $barcode")
+            println("📡 Trying Raw Open Food Facts for barcode: $cleanBarcode")
             try {
-                val offResponse = apiService.getOpenFoodFactsProduct(barcode)
-                if (offResponse.isSuccessful && offResponse.body()?.status == 1) {
-                    val offProduct = offResponse.body()?.product
-                    if (offProduct != null) {
-                        return Result.success(mapOpenFoodFactsToProduct(offProduct, barcode))
+                val offResponse = openFoodFactsApiService.getProductDetail(cleanBarcode)
+                if (offResponse.isSuccessful) {
+                    val body = offResponse.body()
+                    // OFF returns status 1 for found, but we check product existence too
+                    if (body?.product != null) {
+                        println("✅ Open Food Facts success for barcode: $cleanBarcode")
+                        return Result.success(mapProductItemToProduct(body.product))
+                    } else {
+                        println("⚠️ Open Food Facts body was successful but product was null for $cleanBarcode")
                     }
+                } else {
+                    println("❌ Open Food Facts API error: ${offResponse.code()} ${offResponse.message()}")
                 }
             } catch (e: Exception) {
                 println("❌ Open Food Facts Exception: ${e.message}")
+                e.printStackTrace()
             }
 
             // 4. Fallback to Legacy local API
-            println("🔌 Trying legacy API for barcode: $barcode")
-            val response = apiService.getProduct(barcode)
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                println("✅ Halalytics API success for barcode: $barcode")
-                val responseData = response.body()!!.data
-                if (responseData != null) {
-                    val productInfo = responseData.product
-                    val product = Product(
-                        id = productInfo.id,
-                        barcode = productInfo.barcode,
-                        name = productInfo.name,
-                        brand = productInfo.brand ?: "Unknown",
-                        category = productInfo.category ?: "Unknown",
-                        image = productInfo.image,
-                        halalInfo = HalalInfo(
-                            halalStatus = HalalStatus.fromString(responseData.halal_info.halal_status),
-                            certificateNumber = responseData.halal_info.halal_certificate_number,
-                            certificationBody = responseData.halal_info.certification_body,
-                            validUntil = responseData.halal_info.certificate_valid_until,
-                            lastChecked = responseData.halal_info.last_checked_at,
-                            source = responseData.halal_source
+            println("🔌 Trying legacy API for barcode: $cleanBarcode")
+            try {
+                val response = apiService.getProduct(cleanBarcode)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.success == true && body.data != null) {
+                        println("✅ Halalytics API success for barcode: $cleanBarcode")
+                        val responseData = body.data
+                        val productInfo = responseData.product
+                        val product = Product(
+                            id = productInfo.id,
+                            barcode = productInfo.barcode,
+                            name = productInfo.name,
+                            brand = productInfo.brand ?: "Unknown",
+                            category = productInfo.category ?: "Unknown",
+                            image = productInfo.image,
+                            halalInfo = HalalInfo(
+                                halalStatus = HalalStatus.fromString(responseData.halal_info.halal_status),
+                                certificateNumber = responseData.halal_info.halal_certificate_number,
+                                certificationBody = responseData.halal_info.certification_body,
+                                validUntil = responseData.halal_info.certificate_valid_until,
+                                lastChecked = responseData.halal_info.last_checked_at,
+                                source = responseData.halal_source
+                            )
                         )
-                    )
-                    return Result.success(product)
+                        return Result.success(product)
+                    }
                 }
-            } 
+            } catch (e: Exception) {
+                println("⚠️ Legacy API Exception: ${e.message}")
+            }
 
             // 5. Fallback to local cache
-            val cached = cachedDao.getByBarcode(barcode)
+            val cached = cachedDao.getByBarcode(cleanBarcode)
             if (cached != null) {
-                println("📦 Found cached result for barcode: $barcode")
+                println("📦 Found cached result for barcode: $cleanBarcode")
                 return Result.success(mapCachedToProduct(cached))
             }
 
-            return Result.failure(Exception("Product not found anywhere"))
+            return Result.failure(Exception("Product not found anywhere\nBarcode: $cleanBarcode"))
 
         } catch (e: Exception) {
             println("❌ General Error: ${e.message}")
-            val cached = cachedDao.getByBarcode(barcode)
+            val cached = cachedDao.getByBarcode(cleanBarcode)
             return if (cached != null) {
                 Result.success(mapCachedToProduct(cached))
             } else {
@@ -182,8 +200,15 @@ class ProductRepository @Inject constructor(
     }
 
     private fun mapProductItemToProduct(item: ProductItem): Product {
+        // Safe conversion for Any? fields from OFF
+        val novaInt = when (val nova = item.novaGroup) {
+            is Number -> nova.toInt()
+            is String -> nova.toIntOrNull()
+            else -> null
+        }
+        
         return Product(
-            id = item.id?.hashCode() ?: 0,
+            id = item.id?.hashCode() ?: item.code?.hashCode() ?: 0,
             barcode = item.code ?: "",
             name = item.getDisplayName(),
             brand = item.brands ?: "Unknown Brand",
@@ -205,7 +230,7 @@ class ProductRepository @Inject constructor(
             brandsTags = item.brandsTags,
             categoriesTags = item.categoriesTags,
             labelsTags = item.labelsTags,
-            novaGroup = item.novaGroup,
+            novaGroup = novaInt,
             halalNotes = item.halalAnalysis?.recommendation
         )
     }

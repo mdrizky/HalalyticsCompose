@@ -1,6 +1,7 @@
 package com.example.halalyticscompose.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,8 +16,7 @@ import com.example.halalyticscompose.data.local.Entities.HaramIngredientEntity
 import com.example.halalyticscompose.data.local.Entities.UserHealthProfileEntity
 import com.example.halalyticscompose.data.database.ProductHistoryDao
 import com.example.halalyticscompose.data.database.ProductHistoryEntity
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [
@@ -45,11 +45,15 @@ abstract class HalalyticsDatabase : RoomDatabase() {
         fun getDatabase(context: Context): HalalyticsDatabase {
             return INSTANCE ?: synchronized(this) {
                 val appContext = context.applicationContext
-                SQLiteDatabase.loadLibs(appContext)
-                val passphrase = SQLiteDatabase.getBytes(
-                    "Halalytics_DB_Key_${appContext.packageName}_v1".toCharArray()
-                )
-                val factory = SupportFactory(passphrase)
+                // Modern sqlcipher-android: no loadLibs needed, use System.loadLibrary
+                try {
+                    System.loadLibrary("sqlcipher")
+                } catch (e: UnsatisfiedLinkError) {
+                    Log.e("HalalyticsDB", "Failed to load sqlcipher native library", e)
+                }
+                val passphrase = "Halalytics_DB_Key_${appContext.packageName}_v1"
+                    .toByteArray(Charsets.UTF_8)
+                val factory = SupportOpenHelperFactory(passphrase)
                 val instance = try {
                     val db = Room.databaseBuilder(
                         appContext,
@@ -63,6 +67,7 @@ abstract class HalalyticsDatabase : RoomDatabase() {
                     db.openHelper.writableDatabase
                     db
                 } catch (e: Exception) {
+                    Log.e("HalalyticsDB", "Database open failed, rebuilding", e)
                     // Recovery path for legacy plain/encrypted DB mismatch.
                     appContext.deleteDatabase("halalytics_database")
                     val rebuilt = Room.databaseBuilder(

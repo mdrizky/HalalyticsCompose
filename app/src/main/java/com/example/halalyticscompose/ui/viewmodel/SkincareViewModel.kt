@@ -120,7 +120,9 @@ class SkincareViewModel @Inject constructor(
                         }
                         break
                     }
-                    val products = response.body()!!.products
+                    val body = response.body()
+                    if (body == null) break
+                    val products = body.products
                     if (products.isEmpty()) break
                     merged += products
                     if (products.size < 100) break

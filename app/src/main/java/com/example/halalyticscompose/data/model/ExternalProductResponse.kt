@@ -100,10 +100,10 @@ data class ProductItem(
     val nutriscoreGrade: String?,
     
     @SerializedName("nutriscore_score")
-    val nutriscoreScore: Int?,
+    val nutriscoreScore: Any?,
     
     @SerializedName("nova_group")
-    val novaGroup: Int?,
+    val novaGroup: Any?,
     
     @SerializedName("ingredients_text")
     val ingredientsText: String?,

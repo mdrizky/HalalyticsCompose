@@ -268,7 +268,7 @@ interface ApiService {
     ): Response<GenericResponse>
 
     @FormUrlEncoded
-    @POST("medicine/analyze-symptoms")
+    @POST("medicines/analyze-symptoms")
     suspend fun analyzeSymptoms(
         @Header("Authorization") bearer: String,
         @Field("symptoms") symptoms: String,
@@ -276,7 +276,7 @@ interface ApiService {
         @Field("family_id") familyId: Int? = null
     ): Response<SymptomsAnalysisResponse>
 
-    @GET("medicine/search")
+    @GET("medicines/search")
     suspend fun searchMedicine(
         @Header("Authorization") bearer: String,
         @Query("query") query: String,
@@ -284,7 +284,7 @@ interface ApiService {
     ): Response<MedicineSearchResponse>
 
     @FormUrlEncoded
-    @POST("medicine/reminders")
+    @POST("medicines/reminders")
     suspend fun createMedicineReminder(
         @Header("Authorization") bearer: String,
         @Field("user_id") userId: String,
@@ -297,23 +297,26 @@ interface ApiService {
         @Field("family_id") familyId: Int? = null
     ): Response<MedicationReminderResponse>
 
-    @GET("medicine/next-dose")
+    @GET("medicines/next-dose")
     suspend fun getNextDose(@Header("Authorization") bearer: String): Response<NextDoseResponse>
 
-    @DELETE("medicine/reminders/{id}")
+    @DELETE("medicines/reminders/{id}")
     suspend fun deleteAdvancedReminder(@Header("Authorization") bearer: String, @Path("id") id: Int): Response<GenericResponse>
 
-    @GET("medicine/{id}")
-    suspend fun getMedicineDetail(@Header("Authorization") bearer: String, @Path("id") id: Int): Response<MedicineSearchResponse>
+    @GET("medicines/{id}")
+    suspend fun getMedicineDetail(
+        @Header("Authorization") bearer: String,
+        @Path("id") id: Int
+    ): Response<MedicineDetailResponse>
 
-    @POST("medicine/safe-schedule")
+    @POST("medicines/safe-schedule")
     suspend fun generateSafeSchedule(@Header("Authorization") bearer: String, @Body body: Map<String, @JvmSuppressWildcards Any>): Response<SafeScheduleResponse>
 
-    @GET("medicine/personal-risk")
+    @GET("medicines/personal-risk")
     suspend fun getPersonalRiskScore(@Header("Authorization") bearer: String, @Query("date") date: String? = null): PersonalRiskScoreResponse
 
     @FormUrlEncoded
-    @POST("medicine/drug-food-conflict")
+    @POST("medicines/drug-food-conflict")
     suspend fun checkDrugFoodConflict(
         @Header("Authorization") bearer: String,
         @Field("medicine_name") medicineName: String? = null,
@@ -323,7 +326,7 @@ interface ApiService {
 
     // ==================== HEALTH AI ====================
     @FormUrlEncoded
-    @POST("health/drug-interaction")
+    @POST("ai/interactions")
     suspend fun checkDrugInteraction(
         @Header("Authorization") bearer: String,
         @Field("drug_a_id") drugAId: Int? = null,
@@ -331,7 +334,7 @@ interface ApiService {
         @Field("drug_a_name") drugAName: String? = null,
         @Field("drug_b_name") drugBName: String? = null,
         @Field("family_id") familyId: Int? = null
-    ): DrugInteractionResponse
+    ): Response<DrugInteractionResponse>
 
     @Multipart
     @POST("health/pill-identify")
@@ -479,17 +482,17 @@ interface ApiService {
     suspend fun getHealthEncyclopediaById(@Path("id") id: Int): Response<HealthEncyclopediaDetailResponse>
 
     // ==================== HEALTH ARTICLES ====================
-    @GET("health/articles")
+    @GET("articles")
     suspend fun getHealthArticles(
-        @Query("query") query: String? = null,
+        @Query("q") query: String? = null,
         @Query("limit") limit: Int? = null,
         @Query("include_external") includeExternal: Boolean? = null
     ): ApiResponse<List<HealthArticleItem>>
 
-    @GET("health/articles/{idOrSlug}")
+    @GET("articles/{idOrSlug}")
     suspend fun getHealthArticleDetail(@Path("idOrSlug") idOrSlug: String): ApiResponse<HealthArticleItem>
 
-    @GET("health/articles/recommended")
+    @GET("articles/recommended")
     suspend fun getRecommendedArticles(
         @Header("Authorization") bearer: String,
         @Query("limit") limit: Int? = null
@@ -561,12 +564,12 @@ interface ApiService {
 
     // ==================== CONTRIBUTION ====================
     @Multipart
-    @POST("contributions")
+    @POST("contributions/submit")
     suspend fun submitContribution(
         @Header("Authorization") bearer: String,
         @Part("product_name") productName: RequestBody,
         @Part("barcode") barcode: RequestBody? = null,
-        @Part("ingredients") ingredients: RequestBody? = null,
+        @Part("complaint") complaint: RequestBody? = null,
         @Part image: MultipartBody.Part? = null
     ): ContributionResponse
 
@@ -596,7 +599,7 @@ interface ApiService {
 
     // ==================== PRODUCT REQUEST ====================
     @Multipart
-    @POST("products/request")
+    @POST("products/request-verification")
     suspend fun uploadProductRequest(
         @Header("Authorization") bearer: String,
         @Part imageFront: MultipartBody.Part,

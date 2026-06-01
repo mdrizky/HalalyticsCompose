@@ -42,12 +42,29 @@ class DonorViewModel @Inject constructor(
             try {
                 val bearer = if (token.startsWith("Bearer ")) token else "Bearer $token"
                 
-                // Parallel fetching
-                launch { _bloodEvents.value = apiService.getBloodEvents().data ?: emptyList() }
-                launch { _bloodStock.value = apiService.getBloodStockSummary().data ?: emptyList() }
-                launch { _donorCard.value = apiService.getDonorCard(bearer).data }
-                launch { _donorHistory.value = apiService.getMyAppointments(bearer).data ?: emptyList() }
-                launch { _activeEmergencies.value = apiService.getActiveEmergencies().data ?: emptyList() }
+                // Parallel fetching with supervisorScope so one failure doesn't crash the others
+                kotlinx.coroutines.supervisorScope {
+                    launch { 
+                        try { _bloodEvents.value = apiService.getBloodEvents().data ?: emptyList() }
+                        catch (e: Exception) { android.util.Log.e("DonorViewModel", "Error fetching events", e) }
+                    }
+                    launch { 
+                        try { _bloodStock.value = apiService.getBloodStockSummary().data ?: emptyList() }
+                        catch (e: Exception) { android.util.Log.e("DonorViewModel", "Error fetching stock", e) }
+                    }
+                    launch { 
+                        try { _donorCard.value = apiService.getDonorCard(bearer).data }
+                        catch (e: Exception) { android.util.Log.e("DonorViewModel", "Error fetching donor card", e) }
+                    }
+                    launch { 
+                        try { _donorHistory.value = apiService.getMyAppointments(bearer).data ?: emptyList() }
+                        catch (e: Exception) { android.util.Log.e("DonorViewModel", "Error fetching appointments", e) }
+                    }
+                    launch { 
+                        try { _activeEmergencies.value = apiService.getActiveEmergencies().data ?: emptyList() }
+                        catch (e: Exception) { android.util.Log.e("DonorViewModel", "Error fetching emergencies", e) }
+                    }
+                }
                 
                 _error.value = null
             } catch (e: Exception) {

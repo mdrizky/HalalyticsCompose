@@ -51,10 +51,17 @@ class ProductRequestViewModel @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     _uploadStatus.value = Result.success("Permintaan berhasil dikirim! Admin akan memverifikasi data Anda.")
                 } else {
-                    _uploadStatus.value = Result.failure(Exception(response.body()?.message ?: "Gagal mengirim permintaan"))
+                    val errorBody = response.errorBody()?.string()
+                    val errorMsg = try {
+                        val json = org.json.JSONObject(errorBody ?: "")
+                        json.optString("message", "Gagal mengirim permintaan")
+                    } catch (e: Exception) {
+                        response.body()?.message ?: "Gagal mengirim permintaan"
+                    }
+                    _uploadStatus.value = Result.failure(Exception(errorMsg))
                 }
             } catch (e: Exception) {
-                _uploadStatus.value = Result.failure(e)
+                _uploadStatus.value = Result.failure(Exception("Koneksi bermasalah: ${e.message}"))
             } finally {
                 _isLoading.value = false
             }

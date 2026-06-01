@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.halalyticscompose.ui.viewmodel.DonorViewModel
 
+import com.example.halalyticscompose.ui.components.UnderDevelopmentPlaceholder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelfScreeningScreen(navController: NavController, viewModel: DonorViewModel, token: String, eventId: Int) {
@@ -26,18 +28,9 @@ fun SelfScreeningScreen(navController: NavController, viewModel: DonorViewModel,
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            Text("Please complete the questionnaire below.", fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { 
-                viewModel.registerForEvent(token, eventId) {
-                    navController.navigate("donor_history") {
-                        popUpTo("donor_home")
-                    }
-                }
-            }) {
-                Text("Submit Screening")
-            }
-        }
+        UnderDevelopmentPlaceholder(
+            title = "Self Screening Donor",
+            modifier = Modifier.padding(padding)
+        )
     }
 }

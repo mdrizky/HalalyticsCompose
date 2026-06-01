@@ -20,13 +20,11 @@ data class BloodStock(
 
 data class DonorCard(
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("blood_type") val bloodType: String,
-    @SerializedName("total_donations") val totalDonations: Int,
-    @SerializedName("last_donation_date") val lastDonationDate: String?,
+    @SerializedName("blood_type") val bloodType: String?,
+    @SerializedName("total_donations") val totalDonations: Int?,
+    @SerializedName("is_voluntary_donor") val isVoluntaryDonor: Boolean = false,
     @SerializedName("next_eligible_date") val nextEligibleDate: String?,
-    @SerializedName("donor_badge") val donorBadge: String?,
-    @SerializedName("qr_token") val qrToken: String?,
-    @SerializedName("is_voluntary_donor") val isVoluntaryDonor: Boolean = false
+    @SerializedName("last_donation_date") val lastDonationDate: String?
 )
 
 data class DonorAppointment(

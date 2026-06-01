@@ -33,6 +33,7 @@ import com.example.halalyticscompose.ui.theme.*
 @Composable
 fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel = hiltViewModel()) {
     val isLoading by viewModel.isLoading.collectAsState()
+    val apiErrorMessage by viewModel.errorMessage.collectAsState()
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -42,15 +43,17 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
     var allergy by remember { mutableStateOf("") }
     var medicalHistory by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var localErrorMessage by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(EmeraldLight, Color.White)))) {
+    val displayErrorMessage = apiErrorMessage ?: localErrorMessage
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
             IconButton(onClick = { navController.navigateUp() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) }
             
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 androidx.compose.foundation.Image(
-                    painter = painterResource(R.drawable.logo_halalytics_official),
+                    painter = painterResource(R.drawable.logo_halalytics_transparent),
                     contentDescription = "Halalytics Logo",
                     modifier = Modifier.size(100.dp)
                 )
@@ -93,7 +96,7 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = { Text(stringResource(R.string.register_medical_history_label)) }, modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(16.dp))
                     
-                    if (errorMessage.isNotEmpty()) Text(errorMessage, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                    if (displayErrorMessage.isNotEmpty()) Text(displayErrorMessage, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
@@ -101,10 +104,14 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                     val errorPasswordMismatch = stringResource(R.string.register_error_password_mismatch)
                     Button(
                         onClick = {
+                            viewModel.clearError()
+                            localErrorMessage = ""
                             if (fullName.isBlank() || username.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() || bloodType.isBlank()) {
-                                errorMessage = errorEmptyFields
+                                localErrorMessage = errorEmptyFields
+                            } else if (password.length < 8) {
+                                localErrorMessage = "Password minimal 8 karakter"
                             } else if (password != confirmPassword) {
-                                errorMessage = errorPasswordMismatch
+                                localErrorMessage = errorPasswordMismatch
                             } else {
                                 viewModel.register(
                                     RegisterRequest(
@@ -118,6 +125,7 @@ fun SimpleRegisterScreen(navController: NavController, viewModel: AuthViewModel 
                                         medicalHistory = medicalHistory
                                     ),
                                     onSuccess = {
+                                        viewModel.clearError() // Clear any residual errors
                                         navController.navigate("login?reg_user=$username&reg_success=1") {
                                             popUpTo("register") { inclusive = true }
                                         }

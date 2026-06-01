@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+import com.example.halalyticscompose.ui.components.UnderDevelopmentPlaceholder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchlistEditorScreen(navController: NavController) {
@@ -37,33 +39,10 @@ fun WatchlistEditorScreen(navController: NavController) {
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.NotificationsActive,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Fitur pengaturan watchlist sedang disiapkan.",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp)
-            )
-            Text(
-                text = "Route sekarang sudah aktif supaya menu Settings tidak crash.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        UnderDevelopmentPlaceholder(
+            title = "Watchlist Editor",
+            modifier = Modifier.padding(paddingValues)
+        )
     }
 }
 

@@ -14,7 +14,7 @@ import java.util.Properties
 // Java & Kotlin compatibility
 android {
     namespace = "com.example.halalyticscompose"
-    compileSdk = 36
+    compileSdk = 34
 
     // 🔒 SECURE: Load API keys from local.properties
     val localProperties = Properties().apply {
@@ -27,7 +27,7 @@ android {
     defaultConfig {
         applicationId = "com.example.halalyticscompose"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -53,6 +53,7 @@ android {
         
         // Default AI Keys (will be overridden in buildTypes)
         buildConfigField("String", "GEMINI_API_KEY", "\"YOUR_DEV_KEY\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"YOUR_DEV_KEY\"")
         buildConfigField("String", "NEWSDATA_API_KEY", "\"YOUR_DEV_KEY\"")
         buildConfigField("String", "ANTHROPIC_API_KEY", "\"YOUR_DEV_KEY\"")
         buildConfigField("String", "UNSPLASH_API_KEY", "\"YOUR_DEV_KEY\"")
@@ -66,12 +67,14 @@ android {
             
             // Development API keys from localProperties
             val geminiApiKey = (localProperties.getProperty("GEMINI_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
+            val groqApiKey = (localProperties.getProperty("GROQ_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             val newsDataApiKey = (localProperties.getProperty("NEWSDATA_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             val anthropicApiKey = (localProperties.getProperty("ANTHROPIC_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             val unsplashApiKey = (localProperties.getProperty("UNSPLASH_API_KEY") ?: "YOUR_DEV_KEY").replace("\"", "\\\"")
             
             // Override build config fields for debug
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+            buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
             buildConfigField("String", "NEWSDATA_API_KEY", "\"$newsDataApiKey\"")
             buildConfigField("String", "ANTHROPIC_API_KEY", "\"$anthropicApiKey\"")
             buildConfigField("String", "UNSPLASH_API_KEY", "\"$unsplashApiKey\"")
@@ -87,6 +90,7 @@ android {
             
             // Production: Empty API keys (fetch from backend)
             buildConfigField("String", "GEMINI_API_KEY", "\"\"")
+            buildConfigField("String", "GROQ_API_KEY", "\"\"")
             buildConfigField("String", "NEWSDATA_API_KEY", "\"\"")
             buildConfigField("String", "ANTHROPIC_API_KEY", "\"\"")
             buildConfigField("String", "UNSPLASH_API_KEY", "\"\"")
@@ -114,6 +118,9 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }
@@ -210,7 +217,7 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
 
     // 🔹 SQLCipher (Database Encryption)
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("net.zetetic:sqlcipher-android:4.6.1@aar")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 
     // 🔹 DataStore

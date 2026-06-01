@@ -50,6 +50,7 @@ fun LoginScreen(
     navController: NavController,
     prefillUsername: String = "",
     showRegisterSuccess: Boolean = false,
+    isSessionExpired: Boolean = false,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var username by remember { mutableStateOf(prefillUsername) }
@@ -58,6 +59,19 @@ fun LoginScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
+    val sm = remember { SessionManager.getInstance(context) }
+
+    var successMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Check if session just expired
+    LaunchedEffect(Unit) {
+        if (isSessionExpired) {
+            viewModel.setErrorMessage("Sesi kamu telah berakhir, silakan login kembali")
+        } else if (showRegisterSuccess) {
+            viewModel.clearError()
+            successMessage = "Registrasi berhasil! Silakan login."
+        }
+    }
 
     val navigateAfterLogin: (LoginResponse) -> Unit = { response ->
         val sm = SessionManager.getInstance(context)
@@ -72,8 +86,18 @@ fun LoginScreen(
             override fun onCancel() { Log.d("LoginScreen", "Facebook cancelled") }
             override fun onError(error: FacebookException) { Log.e("LoginScreen", "Facebook error", error) }
         }
-        LoginManager.getInstance().registerCallback(facebookCallbackManager, fbCallback)
-        onDispose { LoginManager.getInstance().unregisterCallback(facebookCallbackManager) }
+        try {
+            LoginManager.getInstance().registerCallback(facebookCallbackManager, fbCallback)
+        } catch (e: Exception) {
+            Log.e("LoginScreen", "Failed to register Facebook callback: ${e.message}")
+        }
+        onDispose { 
+            try {
+                LoginManager.getInstance().unregisterCallback(facebookCallbackManager)
+            } catch (e: Exception) {
+                Log.e("LoginScreen", "Failed to unregister Facebook callback: ${e.message}")
+            }
+        }
     }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
@@ -86,13 +110,10 @@ fun LoginScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(EmeraldLight, TealLight, Color.White)))) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(60.dp))
-            androidx.compose.foundation.Image(painter = painterResource(R.drawable.logo_halalytics_official), contentDescription = stringResource(R.string.app_name), modifier = Modifier.size(140.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(stringResource(R.string.login_title), fontSize = 32.sp, fontWeight = FontWeight.Black, color = Emerald)
-            Text(stringResource(R.string.login_subtitle), fontSize = 14.sp, color = Slate600)
+            androidx.compose.foundation.Image(painter = painterResource(R.drawable.logo_halalytics_transparent), contentDescription = stringResource(R.string.app_name), modifier = Modifier.size(160.dp))
             Spacer(modifier = Modifier.height(32.dp))
 
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(32.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)), elevation = CardDefaults.cardElevation(16.dp)) {
@@ -103,8 +124,32 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text(stringResource(R.string.login_label_password)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) { Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null) } })
                     if (!errorMessage.isNullOrEmpty()) Text(errorMessage!!, color = Error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                    if (!successMessage.isNullOrEmpty()) Text(successMessage!!, color = Emerald, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = { viewModel.login(LoginRequest(email = username, password = password), onSuccess = { response -> navigateAfterLogin(response) }) }, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(28.dp), colors = ButtonDefaults.buttonColors(containerColor = Emerald)) { Text(stringResource(R.string.login_button), color = Color.White, fontWeight = FontWeight.Bold) }
+                    Button(
+                        onClick = {
+                            if (username.isBlank() || password.isBlank()) {
+                                viewModel.setErrorMessage(context.getString(R.string.login_error_empty_fields))
+                            } else {
+                                viewModel.login(
+                                    LoginRequest(email = username, password = password),
+                                    onSuccess = { response -> navigateAfterLogin(response) }
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Emerald),
+                        enabled = !isLoading
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                        } else {
+                            Text(stringResource(R.string.login_button), color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
                     Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         TextButton(onClick = { navController.navigate("forgot_password") }) { Text(stringResource(R.string.login_forgot_password), color = Teal) }
                         TextButton(onClick = { navController.navigate("register") }) { Text(stringResource(R.string.login_register), color = Emerald) }
@@ -114,13 +159,13 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Text(stringResource(R.string.login_or_continue_with), fontSize = 12.sp, color = Slate500)
             Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                SocialLoginButton(iconRes = R.drawable.ic_google, text = stringResource(R.string.login_google), onClick = {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                SocialLoginButton(iconRes = R.drawable.ic_google, text = stringResource(R.string.login_google), modifier = Modifier.weight(1f), onClick = {
                     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(BuildConfig.GOOGLE_CLIENT_ID).requestEmail().build()
                     val client = GoogleSignIn.getClient(context, gso)
                     googleSignInLauncher.launch(client.signInIntent)
                 })
-                SocialLoginButton(icon = Icons.Default.Facebook, text = stringResource(R.string.login_facebook), onClick = {
+                SocialLoginButton(icon = Icons.Default.Facebook, text = stringResource(R.string.login_facebook), modifier = Modifier.weight(1f), onClick = {
                     (context as? FragmentActivity)?.let { LoginManager.getInstance().logInWithReadPermissions(it, listOf("email", "public_profile")) }
                 })
             }
@@ -130,8 +175,8 @@ fun LoginScreen(
 }
 
 @Composable
-fun SocialLoginButton(iconRes: Int? = null, icon: androidx.compose.ui.graphics.vector.ImageVector? = null, text: String, onClick: () -> Unit) {
-    Button(onClick = onClick, modifier = Modifier.height(48.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White), elevation = ButtonDefaults.buttonElevation(4.dp)) {
+fun SocialLoginButton(modifier: Modifier = Modifier, iconRes: Int? = null, icon: androidx.compose.ui.graphics.vector.ImageVector? = null, text: String, onClick: () -> Unit) {
+    Button(onClick = onClick, modifier = modifier.height(48.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White), elevation = ButtonDefaults.buttonElevation(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (iconRes != null) androidx.compose.foundation.Image(painter = painterResource(iconRes), contentDescription = null, modifier = Modifier.size(20.dp))
             else if (icon != null) Icon(icon, null, tint = Emerald, modifier = Modifier.size(20.dp))
